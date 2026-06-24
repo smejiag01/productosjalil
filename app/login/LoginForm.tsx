@@ -1,11 +1,10 @@
 "use client";
 
 import { signIn } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { FormEvent, useState } from "react";
 
 export default function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [correo, setCorreo] = useState("");
   const [password, setPassword] = useState("");
@@ -13,24 +12,32 @@ export default function LoginForm() {
   const [error, setError] = useState("");
   const [cargando, setCargando] = useState(false);
 
-  const callbackUrl = searchParams.get("callbackUrl") || "/pedidos";
+  const rawCallback = searchParams.get("callbackUrl") || "/pedidos";
+  const callbackUrl = rawCallback.startsWith("http")
+    ? new URL(rawCallback).pathname
+    : rawCallback;
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
     setCargando(true);
 
-    const resultado = await signIn("credentials", {
-      correo,
-      password,
-      redirect: false,
-    });
+    try {
+      const resultado = await signIn("credentials", {
+        correo,
+        password,
+        redirect: false,
+      });
 
-    if (resultado?.error) {
-      setError("Correo o contraseña incorrectos");
+      if (resultado?.error) {
+        setError("Correo o contraseña incorrectos");
+        setCargando(false);
+      } else {
+        window.location.href = callbackUrl;
+      }
+    } catch {
+      setError("Error de conexión. Intenta de nuevo.");
       setCargando(false);
-    } else {
-      router.push(callbackUrl);
     }
   }
 

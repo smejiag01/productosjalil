@@ -12,3 +12,14 @@ export function formatearFecha(fecha: Date | string): string {
     day: "numeric",
   });
 }
+
+export function formatearFechaCorta(fecha: Date | string): string {
+  const d = typeof fecha === "string" ? new Date(fecha) : fecha;
+  return d.toLocaleDateString("es-CO", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
