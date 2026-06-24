@@ -11,6 +11,16 @@ const config: Config = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        sidebar: {
+          DEFAULT: "#1E1E2D",
+          hover: "#2A2A3C",
+          active: "#2E2E40",
+        },
+        brand: {
+          DEFAULT: "#8B1A1A",
+          light: "#A52828",
+          dark: "#6B1414",
+        },
       },
     },
   },

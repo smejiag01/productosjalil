@@ -1,0 +1,156 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model usuarios {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nombre        String   @db.VarChar(120)
+  correo        String   @unique @db.VarChar(160)
+  password_hash String   @db.VarChar(255)
+  rol           String   @default("admin") @db.VarChar(40)
+  activo        Boolean  @default(true)
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+}
+
+model empleados {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nombre     String   @db.VarChar(120)
+  cargo      String?  @db.VarChar(80)
+  telefono   String?  @db.VarChar(40)
+  activo     Boolean  @default(true)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+  rutas      rutas[]
+}
+
+model rutas {
+  id          String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nombre      String     @db.VarChar(100)
+  descripcion String?
+  dia_semana  Int?       @db.SmallInt
+  empleado_id String?    @db.Uuid
+  activa      Boolean    @default(true)
+  created_at  DateTime   @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime   @default(now()) @updatedAt @db.Timestamptz(6)
+  clientes    clientes[]
+  pedidos     pedidos[]
+  empleado    empleados? @relation(fields: [empleado_id], references: [id], onUpdate: NoAction)
+}
+
+model clientes {
+  id              String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nombre          String               @db.VarChar(160)
+  telefono        String               @unique @db.VarChar(40)
+  direccion       String?
+  ruta_id         String?              @db.Uuid
+  activo          Boolean              @default(true)
+  notas           String?
+  created_at      DateTime             @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime             @default(now()) @updatedAt @db.Timestamptz(6)
+  codigo_mekano   String?              @unique @db.VarChar(40)
+  ruta            rutas?               @relation(fields: [ruta_id], references: [id], onUpdate: NoAction)
+  conversaciones  conversaciones_wpp[]
+  pedidos         pedidos[]
+  precios_cliente precios_cliente[]
+
+  @@index([codigo_mekano], map: "idx_clientes_codigo_mek")
+  @@index([ruta_id], map: "idx_clientes_ruta")
+  @@index([telefono], map: "idx_clientes_telefono")
+}
+
+model productos {
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nombre          String            @db.VarChar(140)
+  descripcion     String?
+  imagen_url      String?
+  unidad          String            @default("unidad") @db.VarChar(30)
+  precio_base     Decimal           @default(0) @db.Decimal(12, 2)
+  activo          Boolean           @default(true)
+  orden           Int               @default(0)
+  created_at      DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime          @default(now()) @updatedAt @db.Timestamptz(6)
+  inventario      inventario?
+  pedido_items    pedido_items[]
+  precios_cliente precios_cliente[]
+}
+
+model precios_cliente {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cliente_id  String    @db.Uuid
+  producto_id String    @db.Uuid
+  precio      Decimal   @db.Decimal(12, 2)
+  created_at  DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+  cliente     clientes  @relation(fields: [cliente_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  producto    productos @relation(fields: [producto_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([cliente_id, producto_id])
+  @@index([cliente_id], map: "idx_precios_cliente_cli")
+  @@index([producto_id], map: "idx_precios_cliente_prod")
+}
+
+model pedidos {
+  id             String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cliente_id     String               @db.Uuid
+  ruta_id        String?              @db.Uuid
+  estado         String               @default("pendiente") @db.VarChar(30)
+  total          Decimal              @default(0) @db.Decimal(12, 2)
+  fecha_pedido   DateTime             @default(dbgenerated("CURRENT_DATE")) @db.Date
+  confirmado_at  DateTime?            @db.Timestamptz(6)
+  notas          String?
+  created_at     DateTime             @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime             @default(now()) @updatedAt @db.Timestamptz(6)
+  conversaciones conversaciones_wpp[]
+  items          pedido_items[]
+  cliente        clientes             @relation(fields: [cliente_id], references: [id], onUpdate: NoAction)
+  ruta           rutas?               @relation(fields: [ruta_id], references: [id], onUpdate: NoAction)
+
+  @@index([cliente_id], map: "idx_pedidos_cliente")
+  @@index([estado], map: "idx_pedidos_estado")
+  @@index([fecha_pedido], map: "idx_pedidos_fecha")
+}
+
+model pedido_items {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  pedido_id       String    @db.Uuid
+  producto_id     String    @db.Uuid
+  producto_nombre String    @db.VarChar(140)
+  cantidad        Decimal   @db.Decimal(12, 2)
+  precio_unitario Decimal   @db.Decimal(12, 2)
+  subtotal        Decimal   @db.Decimal(12, 2)
+  created_at      DateTime  @default(now()) @db.Timestamptz(6)
+  pedido          pedidos   @relation(fields: [pedido_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  producto        productos @relation(fields: [producto_id], references: [id], onUpdate: NoAction)
+
+  @@index([pedido_id], map: "idx_pedido_items_pedido")
+}
+
+model inventario {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  producto_id  String    @unique @db.Uuid
+  stock_actual Decimal   @default(0) @db.Decimal(12, 2)
+  stock_minimo Decimal   @default(0) @db.Decimal(12, 2)
+  updated_at   DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+  producto     productos @relation(fields: [producto_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model conversaciones_wpp {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cliente_id        String?   @db.Uuid
+  telefono          String    @db.VarChar(40)
+  estado_flujo      String    @default("inicio") @db.VarChar(50)
+  carrito           Json?     @default("[]")
+  pedido_id         String?   @db.Uuid
+  ultimo_mensaje_at DateTime  @default(now()) @db.Timestamptz(6)
+  created_at        DateTime  @default(now()) @db.Timestamptz(6)
+  cliente           clientes? @relation(fields: [cliente_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  pedido            pedidos?  @relation(fields: [pedido_id], references: [id], onUpdate: NoAction)
+
+  @@index([telefono], map: "idx_conv_telefono")
+}
