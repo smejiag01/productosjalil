@@ -92,9 +92,8 @@ export default function Sidebar() {
         .toUpperCase()
     : "AD";
 
-  const contenidoSidebar = (
+  const navContent = (
     <>
-      {/* Logo */}
       <div className="px-5 py-6 flex items-center gap-3">
         <div className="w-9 h-9 bg-brand rounded-lg flex items-center justify-center text-white font-bold text-sm">
           PJ
@@ -107,7 +106,6 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* Navegación */}
       <nav className="flex-1 px-3 mt-2 overflow-y-auto">
         {menuItems.map((item) => {
           const activo =
@@ -129,7 +127,6 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* Configuración */}
       <div className="px-3 mb-2">
         <Link
           href="/configuracion"
@@ -147,7 +144,6 @@ export default function Sidebar() {
         </Link>
       </div>
 
-      {/* Usuario */}
       <div className="px-3 pb-4 border-t border-gray-700/50 pt-4">
         <div className="flex items-center gap-3 px-3 mb-3">
           <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center text-white text-xs font-medium">
@@ -179,11 +175,11 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Header móvil */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-sidebar z-40 flex items-center px-4 gap-3">
+      {/* Mobile/tablet header — visible below lg */}
+      <header className="fixed top-0 left-0 right-0 h-14 bg-sidebar z-40 flex items-center px-4 gap-3 lg:hidden">
         <button
           onClick={() => setAbierto(true)}
-          className="p-1.5 text-white hover:bg-sidebar-hover rounded-lg"
+          className="p-2 -ml-2 text-white hover:bg-sidebar-hover rounded-lg"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="3" y1="12" x2="21" y2="12" />
@@ -195,17 +191,19 @@ export default function Sidebar() {
           PJ
         </div>
         <span className="text-white font-semibold text-sm">Productos Jalil</span>
-      </div>
+      </header>
 
-      {/* Sidebar escritorio */}
-      <aside className="hidden lg:flex fixed left-0 top-0 h-screen w-60 bg-sidebar flex-col z-50">
-        {contenidoSidebar}
+      {/* Desktop sidebar — fixed, visible at lg+ */}
+      <aside className="fixed left-0 top-0 h-screen w-[240px] bg-sidebar flex-col z-50 hidden lg:flex">
+        {navContent}
       </aside>
 
-      {/* Drawer móvil con animación */}
+      {/* Mobile/tablet drawer overlay — always rendered, visibility via opacity+pointer-events */}
       <div
-        className={`lg:hidden fixed inset-0 z-50 transition-opacity duration-200 ${
-          abierto ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        className={`fixed inset-0 z-50 lg:hidden transition-opacity duration-300 ${
+          abierto
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
         }`}
       >
         <div
@@ -213,11 +211,11 @@ export default function Sidebar() {
           onClick={() => setAbierto(false)}
         />
         <aside
-          className={`absolute left-0 top-0 h-full w-64 bg-sidebar flex flex-col transition-transform duration-200 ease-out ${
+          className={`absolute left-0 top-0 h-full w-[280px] bg-sidebar flex flex-col transition-transform duration-300 ease-out ${
             abierto ? "translate-x-0" : "-translate-x-full"
           }`}
         >
-          {contenidoSidebar}
+          {navContent}
         </aside>
       </div>
     </>
