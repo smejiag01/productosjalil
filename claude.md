@@ -69,7 +69,7 @@ Las tablas ya existen en Neon (ver `modelo_db.sql`). Usar `prisma db pull` para 
 Tablas:
 - **usuarios** — login del dashboard (password con bcrypt, rol, activo)
 - **empleados** — personal del negocio
-- **rutas** — rutas de entrega (día de semana, repartidor asignado)
+- **rutas** — rutas de entrega (`dias_semana` es un array de días SMALLINT[], `frecuencia` puede ser 'semanal' o 'quincenal', repartidor asignado). Algunas rutas salen más de un día a la semana (ej: Pereira sale martes y viernes)
 - **clientes** — nombre, teléfono WhatsApp (único), dirección, ruta asignada, `codigo_mekano` (identificador del cliente para exportar a Mekano)
 - **productos** — catálogo (nombre, imagen_url, unidad, precio_base, orden)
 - **precios_cliente** — precio propio por cliente y producto (UNIQUE cliente+producto)
@@ -77,6 +77,7 @@ Tablas:
 - **pedido_items** — detalle (guarda nombre y precio al momento del pedido)
 - **inventario** — stock por producto (stock_actual, stock_minimo)
 - **conversaciones_wpp** — estado del flujo de WhatsApp por cliente (estado_flujo, carrito JSONB)
+- **configuracion** — parámetros generales del negocio (un solo registro siempre). Incluye: datos del negocio (nombre, NIT, dirección, teléfono), configuración de mensajes WhatsApp (hora_recordatorio, horas_espera_followup, mensaje_recordatorio, mensaje_followup)
 
 Estados de pedido: `pendiente`, `en_proceso`, `confirmado`, `cancelado`, `entregado`
 
@@ -91,6 +92,7 @@ Estados de pedido: `pendiente`, `en_proceso`, `confirmado`, `cancelado`, `entreg
 5. **Módulo de rutas** — crear/editar rutas, asignar clientes y día.
 6. **Módulo de empleados** — CRUD del personal.
 7. **Exportación Mekano** — botón para exportar facturas diarias en Excel/CSV compatible con Mekano. (El formato exacto de columnas está pendiente de confirmar con el cliente.)
+8. **Módulo de configuración** — parámetros generales del negocio editables por el cliente: datos del negocio, textos y horarios de mensajes WhatsApp, cambio de contraseña del admin. Las credenciales sensibles (tokens Meta, API keys) van SOLO en variables de entorno, nunca en este módulo.
 
 ---
 
