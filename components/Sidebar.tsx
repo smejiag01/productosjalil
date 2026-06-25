@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
@@ -76,6 +77,11 @@ const menuItems = [
 export default function Sidebar() {
   const pathname = usePathname();
   const { data: session } = useSession();
+  const [abierto, setAbierto] = useState(false);
+
+  useEffect(() => {
+    setAbierto(false);
+  }, [pathname]);
 
   const inicialNombre = session?.user?.name
     ? session.user.name
@@ -86,8 +92,8 @@ export default function Sidebar() {
         .toUpperCase()
     : "AD";
 
-  return (
-    <aside className="fixed left-0 top-0 h-screen w-60 bg-sidebar flex flex-col z-50">
+  const contenidoSidebar = (
+    <>
       {/* Logo */}
       <div className="px-5 py-6 flex items-center gap-3">
         <div className="w-9 h-9 bg-brand rounded-lg flex items-center justify-center text-white font-bold text-sm">
@@ -102,7 +108,7 @@ export default function Sidebar() {
       </div>
 
       {/* Navegación */}
-      <nav className="flex-1 px-3 mt-2">
+      <nav className="flex-1 px-3 mt-2 overflow-y-auto">
         {menuItems.map((item) => {
           const activo =
             pathname === item.href || pathname.startsWith(item.href + "/");
@@ -168,6 +174,46 @@ export default function Sidebar() {
           Cerrar sesión
         </button>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Header móvil */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-sidebar z-40 flex items-center px-4 gap-3">
+        <button
+          onClick={() => setAbierto(true)}
+          className="p-1.5 text-white hover:bg-sidebar-hover rounded-lg"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+          </svg>
+        </button>
+        <div className="w-7 h-7 bg-brand rounded-md flex items-center justify-center text-white font-bold text-xs">
+          PJ
+        </div>
+        <span className="text-white font-semibold text-sm">Productos Jalil</span>
+      </div>
+
+      {/* Sidebar escritorio */}
+      <aside className="hidden lg:flex fixed left-0 top-0 h-screen w-60 bg-sidebar flex-col z-50">
+        {contenidoSidebar}
+      </aside>
+
+      {/* Drawer móvil */}
+      {abierto && (
+        <div className="lg:hidden fixed inset-0 z-50">
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={() => setAbierto(false)}
+          />
+          <aside className="absolute left-0 top-0 h-full w-60 bg-sidebar flex flex-col">
+            {contenidoSidebar}
+          </aside>
+        </div>
+      )}
+    </>
   );
 }

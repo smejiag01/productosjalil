@@ -60,10 +60,10 @@ export default function TablaClientes({
   return (
     <div>
       {/* Encabezado */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-3">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-gray-900">Clientes</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Clientes</h1>
             <span className="text-sm text-gray-400 font-medium">
               {contadores.todos} clientes
             </span>
@@ -85,8 +85,8 @@ export default function TablaClientes({
       </div>
 
       {/* Filtros + buscador */}
-      <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
-        <div className="flex items-center gap-2 flex-wrap">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-3">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1">
           {FILTROS_ESTADO.map((f) => {
             const count = contadores[f.key as keyof typeof contadores] ?? 0;
             const activo = filtroEstado === f.key;
@@ -138,13 +138,41 @@ export default function TablaClientes({
             placeholder="Buscar por nombre, código o tel..."
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
-            className="pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm w-72 outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+            className="pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm w-full sm:w-72 outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
           />
         </div>
       </div>
 
       {/* Tabla */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      {/* Cards móvil */}
+      <div className="md:hidden space-y-3">
+        {clientesFiltrados.length === 0 ? (
+          <div className="bg-white rounded-xl border border-gray-200 py-16 text-center text-gray-400">
+            <p className="text-sm">{busqueda ? "No se encontraron clientes" : "No hay clientes registrados"}</p>
+          </div>
+        ) : (
+          clientesFiltrados.map((c) => (
+            <Link key={c.id} href={`/clientes/${c.id}`} className="block bg-white rounded-xl border border-gray-200 p-4 hover:shadow-sm transition-shadow">
+              <div className="flex items-start justify-between mb-2">
+                <div>
+                  <p className="text-sm font-medium text-gray-900">{c.nombre}</p>
+                  <p className="text-xs text-gray-400">{c.codigo_mekano || "Sin código"} · {c.rutaNombre || "Sin ruta"}</p>
+                </div>
+                <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium border ${c.activo ? "bg-green-50 border-green-200 text-green-800" : "bg-red-50 border-red-200 text-red-800"}`}>
+                  {c.activo ? "Activo" : "Inactivo"}
+                </span>
+              </div>
+              <div className="flex items-center gap-4 text-xs text-gray-500 mt-2">
+                <span>{c.telefono}</span>
+                {c.direccion && <span className="truncate">{c.direccion}</span>}
+              </div>
+            </Link>
+          ))
+        )}
+      </div>
+
+      {/* Tabla escritorio */}
+      <div className="hidden md:block bg-white rounded-xl border border-gray-200 overflow-hidden">
         <table className="w-full">
           <thead>
             <tr className="border-b border-gray-100">

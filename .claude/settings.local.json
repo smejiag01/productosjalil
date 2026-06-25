@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(npm install prisma @prisma/client --save-dev 2>$null)",
+      "PowerShell(npm install @prisma/client 2>$null)",
+      "PowerShell(npx prisma init)",
+      "PowerShell(npm install dotenv @prisma/client 2>$null)",
+      "PowerShell(Remove-Item \"C:\\\\Users\\\\Sebastian\\\\Documents\\\\Antigravity\\\\productosjalil\\\\prisma.config.ts\" -Confirm:$false)",
+      "PowerShell(npx prisma db pull)"
+    ]
+  }
+}

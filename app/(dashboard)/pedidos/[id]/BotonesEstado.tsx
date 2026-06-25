@@ -91,7 +91,7 @@ export default function BotonesEstado({
   const positivas = transiciones.filter((t) => t !== "cancelado");
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
       {error && (
         <span className="text-red-500 text-xs mr-2">{error}</span>
       )}

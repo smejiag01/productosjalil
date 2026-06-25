@@ -68,10 +68,10 @@ export default function ListaProductos({
   return (
     <div>
       {/* Encabezado */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-3">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-gray-900">Productos</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Productos</h1>
             <span className="text-sm text-gray-400 font-medium">
               {contadores.todos} productos
             </span>
@@ -93,7 +93,7 @@ export default function ListaProductos({
       </div>
 
       {/* Filtros + toggle vista */}
-      <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-3">
         <div className="flex items-center gap-2 flex-wrap">
           {(["todos", "activos", "inactivos"] as const).map((f) => {
             const labels = { todos: "Todos", activos: "Activos", inactivos: "Inactivos" };
@@ -132,7 +132,7 @@ export default function ListaProductos({
               placeholder="Buscar producto..."
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
-              className="pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm w-56 outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+              className="pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm w-full sm:w-56 outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
             />
           </div>
           {/* Toggle vista */}
@@ -191,7 +191,7 @@ export default function ListaProductos({
           </div>
         </div>
       ) : vista === "grilla" ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {productosFiltrados.map((p) => (
             <Link
               key={p.id}

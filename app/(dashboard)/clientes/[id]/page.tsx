@@ -67,9 +67,9 @@ export default async function DetalleClientePage({
       </Link>
 
       {/* Encabezado */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-3">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 bg-brand/10 rounded-full flex items-center justify-center text-brand font-bold text-lg">
+          <div className="w-12 sm:w-14 h-12 sm:h-14 bg-brand/10 rounded-full flex items-center justify-center text-brand font-bold text-base sm:text-lg flex-shrink-0">
             {cliente.nombre
               .split(" ")
               .map((p) => p[0])
@@ -120,7 +120,7 @@ export default async function DetalleClientePage({
       </div>
 
       {/* Info del cliente */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
         <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
           <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider">
             Contacto

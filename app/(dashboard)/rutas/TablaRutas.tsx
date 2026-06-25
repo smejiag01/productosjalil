@@ -30,10 +30,10 @@ export default function TablaRutas({ rutas, empleados }: Props) {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-3">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-gray-900">Rutas</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Rutas</h1>
             <span className="text-sm text-gray-400 font-medium">{rutas.length} rutas</span>
           </div>
           <p className="text-gray-500 text-sm mt-1">Gestión de rutas de entrega y asignación de clientes</p>
@@ -49,7 +49,38 @@ export default function TablaRutas({ rutas, empleados }: Props) {
         </button>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      {/* Cards móvil */}
+      <div className="md:hidden space-y-3">
+        {rutas.length === 0 ? (
+          <div className="bg-white rounded-xl border border-gray-200 py-16 text-center text-gray-400">
+            <p className="text-sm">No hay rutas creadas</p>
+          </div>
+        ) : (
+          rutas.map((r) => (
+            <div key={r.id} className="bg-white rounded-xl border border-gray-200 p-4">
+              <div className="flex items-start justify-between mb-2">
+                <div>
+                  <p className="text-sm font-medium text-gray-900">{r.nombre}</p>
+                  <p className="text-xs text-gray-400">{r.dias_semana.length > 0 ? r.dias_semana.map((d) => DIAS_SEMANA[d]).join(", ") : "Sin día"}</p>
+                </div>
+                <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium border ${r.activa ? "bg-green-50 border-green-200 text-green-800" : "bg-red-50 border-red-200 text-red-800"}`}>
+                  {r.activa ? "Activa" : "Inactiva"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs text-gray-500 mt-3 pt-3 border-t border-gray-50">
+                <span>{r.empleado?.nombre || "Sin repartidor"}</span>
+                <div className="flex items-center gap-3">
+                  <span>{r.num_clientes} clientes</span>
+                  <button onClick={() => { setEditando(r); setModalAbierto(true); }} className="text-brand font-medium">Editar</button>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Tabla escritorio */}
+      <div className="hidden md:block bg-white rounded-xl border border-gray-200 overflow-hidden">
         <table className="w-full">
           <thead>
             <tr className="border-b border-gray-100">

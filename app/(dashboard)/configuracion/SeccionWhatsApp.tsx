@@ -65,7 +65,7 @@ export default function SeccionWhatsApp({ config, onGuardado }: Props) {
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-6 max-w-3xl">
+    <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6 max-w-3xl">
       <h2 className="text-lg font-semibold text-gray-900 mb-1">
         Mensajes de WhatsApp
       </h2>
@@ -86,7 +86,7 @@ export default function SeccionWhatsApp({ config, onGuardado }: Props) {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Horarios */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Hora de envío del recordatorio
