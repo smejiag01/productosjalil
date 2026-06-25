@@ -68,7 +68,7 @@ export default function ListaProductos({
   return (
     <div>
       {/* Encabezado */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-3">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 gap-3">
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Productos</h1>
@@ -93,8 +93,8 @@ export default function ListaProductos({
       </div>
 
       {/* Filtros + toggle vista */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-3">
-        <div className="flex items-center gap-2 flex-wrap">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 gap-3">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1">
           {(["todos", "activos", "inactivos"] as const).map((f) => {
             const labels = { todos: "Todos", activos: "Activos", inactivos: "Inactivos" };
             const count = contadores[f];
@@ -103,7 +103,7 @@ export default function ListaProductos({
               <button
                 key={f}
                 onClick={() => setFiltroEstado(f)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-1.5 ${
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap flex-shrink-0 ${
                   activo
                     ? "bg-brand text-white"
                     : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"

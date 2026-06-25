@@ -44,7 +44,7 @@ export default async function PedidosPage() {
   return (
     <div>
       {/* Encabezado */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-3">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 gap-3">
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
@@ -58,7 +58,7 @@ export default async function PedidosPage() {
             {formatearFecha(hoy)}
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 self-end lg:self-auto">
           <span className="text-sm text-gray-500 hidden sm:inline">
             Total estimado:{" "}
             <span className="font-semibold text-gray-900">

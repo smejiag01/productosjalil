@@ -22,7 +22,7 @@ export default function TablaEmpleados({ empleados }: { empleados: Empleado[] })
 
   return (
     <div>
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-3">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 gap-3">
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Empleados</h1>
