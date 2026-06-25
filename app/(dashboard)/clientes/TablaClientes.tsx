@@ -60,13 +60,11 @@ export default function TablaClientes({
   return (
     <div>
       {/* Encabezado */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 gap-3">
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Clientes</h1>
-            <span className="text-sm text-gray-400 font-medium">
-              {contadores.todos} clientes
-            </span>
+      <div className="flex items-start justify-between mb-6 gap-3">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Clientes</h1>
+            <span className="text-sm text-gray-400">{contadores.todos} clientes</span>
           </div>
           <p className="text-gray-500 text-sm mt-1">
             Gestión de clientes y precios personalizados
@@ -74,7 +72,7 @@ export default function TablaClientes({
         </div>
         <button
           onClick={() => setModalAbierto(true)}
-          className="px-4 py-2 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-light transition-colors flex items-center gap-2"
+          className="h-11 px-3 lg:px-4 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-light transition-colors flex items-center gap-2 flex-shrink-0"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="12" y1="5" x2="12" y2="19" />
@@ -144,35 +142,43 @@ export default function TablaClientes({
       </div>
 
       {/* Tabla */}
-      {/* Cards móvil */}
-      <div className="md:hidden space-y-3">
+      {/* Cards móvil y tablet */}
+      <div className="lg:hidden space-y-3">
         {clientesFiltrados.length === 0 ? (
           <div className="bg-white rounded-xl border border-gray-200 py-16 text-center text-gray-400">
             <p className="text-sm">{busqueda ? "No se encontraron clientes" : "No hay clientes registrados"}</p>
           </div>
         ) : (
           clientesFiltrados.map((c) => (
-            <Link key={c.id} href={`/clientes/${c.id}`} className="block bg-white rounded-xl border border-gray-200 p-4 hover:shadow-sm transition-shadow">
+            <div key={c.id} className="bg-white rounded-xl border border-gray-200 p-4">
               <div className="flex items-start justify-between mb-2">
-                <div>
-                  <p className="text-sm font-medium text-gray-900">{c.nombre}</p>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-gray-900 truncate">{c.nombre}</p>
                   <p className="text-xs text-gray-400">{c.codigo_mekano || "Sin código"} · {c.rutaNombre || "Sin ruta"}</p>
                 </div>
-                <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium border ${c.activo ? "bg-green-50 border-green-200 text-green-800" : "bg-red-50 border-red-200 text-red-800"}`}>
+                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border flex-shrink-0 ml-2 ${c.activo ? "bg-green-50 border-green-200 text-green-800" : "bg-red-50 border-red-200 text-red-800"}`}>
                   {c.activo ? "Activo" : "Inactivo"}
                 </span>
               </div>
-              <div className="flex items-center gap-4 text-xs text-gray-500 mt-2">
+              <div className="flex items-center gap-2 text-xs text-gray-500 mt-2">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5 text-green-600 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
+                </svg>
                 <span>{c.telefono}</span>
-                {c.direccion && <span className="truncate">{c.direccion}</span>}
               </div>
-            </Link>
+              <Link
+                href={`/clientes/${c.id}`}
+                className="mt-3 h-10 w-full bg-gray-50 border border-gray-200 rounded-lg text-sm font-medium text-brand hover:bg-gray-100 transition-colors flex items-center justify-center"
+              >
+                Ver detalle
+              </Link>
+            </div>
           ))
         )}
       </div>
 
-      {/* Tabla escritorio */}
-      <div className="hidden md:block bg-white rounded-xl border border-gray-200 overflow-hidden">
+      {/* Tabla desktop */}
+      <div className="hidden lg:block bg-white rounded-xl border border-gray-200 overflow-hidden">
         <table className="w-full">
           <thead>
             <tr className="border-b border-gray-100">

@@ -202,18 +202,24 @@ export default function Sidebar() {
         {contenidoSidebar}
       </aside>
 
-      {/* Drawer móvil */}
-      {abierto && (
-        <div className="lg:hidden fixed inset-0 z-50">
-          <div
-            className="absolute inset-0 bg-black/50"
-            onClick={() => setAbierto(false)}
-          />
-          <aside className="absolute left-0 top-0 h-full w-60 bg-sidebar flex flex-col">
-            {contenidoSidebar}
-          </aside>
-        </div>
-      )}
+      {/* Drawer móvil con animación */}
+      <div
+        className={`lg:hidden fixed inset-0 z-50 transition-opacity duration-200 ${
+          abierto ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+      >
+        <div
+          className="absolute inset-0 bg-black/50"
+          onClick={() => setAbierto(false)}
+        />
+        <aside
+          className={`absolute left-0 top-0 h-full w-64 bg-sidebar flex flex-col transition-transform duration-200 ease-out ${
+            abierto ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
+          {contenidoSidebar}
+        </aside>
+      </div>
     </>
   );
 }

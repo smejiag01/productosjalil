@@ -68,13 +68,11 @@ export default function ListaProductos({
   return (
     <div>
       {/* Encabezado */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 gap-3">
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Productos</h1>
-            <span className="text-sm text-gray-400 font-medium">
-              {contadores.todos} productos
-            </span>
+      <div className="flex items-start justify-between mb-6 gap-3">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Productos</h1>
+            <span className="text-sm text-gray-400">{contadores.todos} productos</span>
           </div>
           <p className="text-gray-500 text-sm mt-1">
             Catálogo de productos y precios base
@@ -82,7 +80,7 @@ export default function ListaProductos({
         </div>
         <Link
           href="/productos/nuevo"
-          className="px-4 py-2 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-light transition-colors flex items-center gap-2"
+          className="h-11 px-3 lg:px-4 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-light transition-colors flex items-center gap-2 flex-shrink-0"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="12" y1="5" x2="12" y2="19" />
@@ -191,7 +189,7 @@ export default function ListaProductos({
           </div>
         </div>
       ) : vista === "grilla" ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {productosFiltrados.map((p) => (
             <Link
               key={p.id}

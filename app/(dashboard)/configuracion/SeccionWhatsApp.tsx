@@ -16,7 +16,7 @@ interface Props {
 function PreviewMensaje({ texto }: { texto: string }) {
   const interpolado = texto.replace(/\{nombre\}/g, "Cliente de prueba");
   return (
-    <div className="bg-[#DCF8C6] rounded-lg rounded-tl-none px-3 py-2 text-sm text-gray-800 max-w-xs shadow-sm">
+    <div className="bg-[#DCF8C6] rounded-lg rounded-tl-none px-3 py-2 text-sm text-gray-800 max-w-[280px] shadow-sm mx-auto">
       {interpolado}
       <div className="text-[10px] text-gray-500 text-right mt-1">
         {new Date().toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })}
@@ -114,7 +114,7 @@ export default function SeccionWhatsApp({ config, onGuardado }: Props) {
           </label>
           <textarea value={mensajeRecordatorio} onChange={(e) => setMensajeRecordatorio(e.target.value)}
             rows={3}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand resize-none"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand resize-y min-h-[120px]"
             placeholder="Usa {nombre} para insertar el nombre del cliente" />
           <div className="flex items-center justify-between mt-1">
             <p className="text-xs text-gray-400">
@@ -135,7 +135,7 @@ export default function SeccionWhatsApp({ config, onGuardado }: Props) {
           </label>
           <textarea value={mensajeFollowup} onChange={(e) => setMensajeFollowup(e.target.value)}
             rows={3}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand resize-none"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand resize-y min-h-[120px]"
             placeholder="Usa {nombre} para insertar el nombre del cliente" />
           <div className="flex items-center justify-between mt-1">
             <p className="text-xs text-gray-400">

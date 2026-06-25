@@ -91,15 +91,15 @@ export default function BotonesEstado({
   const positivas = transiciones.filter((t) => t !== "cancelado");
 
   return (
-    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
       {error && (
-        <span className="text-red-500 text-xs mr-2">{error}</span>
+        <span className="text-red-500 text-xs">{error}</span>
       )}
       {cancelar && (
         <button
           onClick={() => cambiarEstado("cancelado")}
           disabled={cargando !== null}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 disabled:opacity-50 ${ESTILOS_BOTON.cancelado.clase}`}
+          className={`h-11 px-4 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50 ${ESTILOS_BOTON.cancelado.clase}`}
         >
           {cargando === "cancelado" ? (
             <div className="w-4 h-4 border-2 border-red-300 border-t-red-600 rounded-full animate-spin" />
@@ -124,7 +124,7 @@ export default function BotonesEstado({
             key={t}
             onClick={() => cambiarEstado(t)}
             disabled={cargando !== null}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 disabled:opacity-50 ${estilo.clase}`}
+            className={`h-11 px-4 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50 ${estilo.clase}`}
           >
             {cargando === t ? (
               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

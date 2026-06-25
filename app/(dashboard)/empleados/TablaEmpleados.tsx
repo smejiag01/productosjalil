@@ -22,22 +22,23 @@ export default function TablaEmpleados({ empleados }: { empleados: Empleado[] })
 
   return (
     <div>
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 gap-3">
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Empleados</h1>
+      <div className="flex items-start justify-between mb-6 gap-3">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Empleados</h1>
             <span className="text-sm text-gray-400 font-medium">{empleados.length} empleados</span>
           </div>
           <p className="text-gray-500 text-sm mt-1">Gestión del personal del negocio</p>
         </div>
         <button
           onClick={() => { setEditando(null); setModalAbierto(true); }}
-          className="px-4 py-2 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-light transition-colors flex items-center gap-2"
+          className="h-11 px-3 lg:px-4 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-light transition-colors flex items-center gap-2 flex-shrink-0"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
           </svg>
-          Agregar empleado
+          <span className="hidden sm:inline">Agregar empleado</span>
+          <span className="sm:hidden">Agregar</span>
         </button>
       </div>
 
@@ -56,8 +57,8 @@ export default function TablaEmpleados({ empleados }: { empleados: Empleado[] })
         </div>
       </div>
 
-      {/* Cards móvil */}
-      <div className="md:hidden space-y-3">
+      {/* Cards móvil y tablet */}
+      <div className="lg:hidden space-y-3">
         {filtrados.length === 0 ? (
           <div className="bg-white rounded-xl border border-gray-200 py-16 text-center text-gray-400">
             <p className="text-sm">{busqueda ? "No se encontraron empleados" : "No hay empleados registrados"}</p>
@@ -65,25 +66,30 @@ export default function TablaEmpleados({ empleados }: { empleados: Empleado[] })
         ) : (
           filtrados.map((e) => (
             <div key={e.id} className="bg-white rounded-xl border border-gray-200 p-4">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-900">{e.nombre}</p>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-sm font-semibold text-gray-600 flex-shrink-0">
+                  {e.nombre.charAt(0).toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm font-semibold text-gray-900 truncate">{e.nombre}</p>
+                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border flex-shrink-0 ${e.activo ? "bg-green-50 border-green-200 text-green-800" : "bg-red-50 border-red-200 text-red-800"}`}>
+                      {e.activo ? "Activo" : "Inactivo"}
+                    </span>
+                  </div>
                   <p className="text-xs text-gray-400 mt-0.5">{e.cargo || "Sin cargo"}{e.telefono ? ` · ${e.telefono}` : ""}</p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${e.activo ? "bg-green-50 border-green-200 text-green-800" : "bg-red-50 border-red-200 text-red-800"}`}>
-                    {e.activo ? "Activo" : "Inactivo"}
-                  </span>
-                  <button onClick={() => { setEditando(e); setModalAbierto(true); }} className="text-xs text-brand font-medium">Editar</button>
-                </div>
+              </div>
+              <div className="flex justify-end mt-3 pt-3 border-t border-gray-100">
+                <button onClick={() => { setEditando(e); setModalAbierto(true); }} className="h-9 px-4 bg-gray-50 border border-gray-200 rounded-lg text-xs font-medium text-brand hover:bg-gray-100 transition-colors">Editar</button>
               </div>
             </div>
           ))
         )}
       </div>
 
-      {/* Tabla escritorio */}
-      <div className="hidden md:block bg-white rounded-xl border border-gray-200 overflow-hidden">
+      {/* Tabla desktop */}
+      <div className="hidden lg:block bg-white rounded-xl border border-gray-200 overflow-hidden">
         <table className="w-full">
           <thead>
             <tr className="border-b border-gray-100">
