@@ -9,5 +9,6 @@ export const config = {
     "/clientes/:path*",
     "/rutas/:path*",
     "/empleados/:path*",
+    "/configuracion/:path*",
   ],
 };

@@ -33,11 +33,12 @@ model rutas {
   id          String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   nombre      String     @db.VarChar(100)
   descripcion String?
-  dia_semana  Int?       @db.SmallInt
   empleado_id String?    @db.Uuid
   activa      Boolean    @default(true)
   created_at  DateTime   @default(now()) @db.Timestamptz(6)
   updated_at  DateTime   @default(now()) @updatedAt @db.Timestamptz(6)
+  dias_semana Int[]      @default([]) @db.SmallInt
+  frecuencia  String     @default("semanal") @db.VarChar(20)
   clientes    clientes[]
   pedidos     pedidos[]
   empleado    empleados? @relation(fields: [empleado_id], references: [id], onUpdate: NoAction)
@@ -153,4 +154,17 @@ model conversaciones_wpp {
   pedido            pedidos?  @relation(fields: [pedido_id], references: [id], onUpdate: NoAction)
 
   @@index([telefono], map: "idx_conv_telefono")
+}
+
+model configuracion {
+  id                    String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nombre_negocio        String   @default("Productos Jalil") @db.VarChar(160)
+  nit                   String?  @db.VarChar(40)
+  direccion             String?
+  telefono              String?  @db.VarChar(40)
+  hora_recordatorio     DateTime @default(dbgenerated("'07:00:00'::time without time zone")) @db.Time(6)
+  horas_espera_followup Int      @default(3) @db.SmallInt
+  mensaje_recordatorio  String   @default("¡Hola! 👋 Es momento de hacer tu pedido para mañana. ¿Deseas realizar tu pedido hoy?")
+  mensaje_followup      String   @default("🔔 Recordatorio: aún no hemos recibido tu pedido. ¿Deseas realizarlo ahora?")
+  updated_at            DateTime @default(now()) @db.Timestamptz(6)
 }

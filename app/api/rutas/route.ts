@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 const esquemaRuta = z.object({
   nombre: z.string().min(2, "El nombre debe tener al menos 2 caracteres").max(100),
   descripcion: z.string().optional().nullable(),
-  dia_semana: z.number().int().min(0).max(6, "Día inválido"),
+  dias_semana: z.array(z.number().int().min(0).max(6)).min(1, "Selecciona al menos un día"),
   empleado_id: z.string().uuid().optional().nullable(),
   activa: z.boolean().optional(),
 });
@@ -24,7 +24,7 @@ export async function GET() {
       id: r.id,
       nombre: r.nombre,
       descripcion: r.descripcion,
-      dia_semana: r.dia_semana,
+      dias_semana: r.dias_semana,
       empleado: r.empleado,
       activa: r.activa,
       num_clientes: r._count.clientes,
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
       data: {
         nombre: datos.nombre,
         descripcion: datos.descripcion ?? null,
-        dia_semana: datos.dia_semana,
+        dias_semana: datos.dias_semana,
         empleado_id: datos.empleado_id ?? null,
         activa: datos.activa ?? true,
       },

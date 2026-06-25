@@ -7,7 +7,7 @@ async function main() {
     data: {
       nombre: "Ruta Centro",
       descripcion: "Zona centro de la ciudad",
-      dia_semana: new Date().getDay(),
+      dias_semana: [new Date().getDay()],
       activa: true,
     },
   });

@@ -23,7 +23,7 @@ export default async function RutasPage() {
     id: r.id,
     nombre: r.nombre,
     descripcion: r.descripcion,
-    dia_semana: r.dia_semana,
+    dias_semana: r.dias_semana,
     empleado: r.empleado,
     activa: r.activa,
     num_clientes: r._count.clientes,

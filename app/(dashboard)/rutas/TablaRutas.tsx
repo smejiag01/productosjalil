@@ -8,7 +8,7 @@ interface Ruta {
   id: string;
   nombre: string;
   descripcion: string | null;
-  dia_semana: number | null;
+  dias_semana: number[];
   empleado: { id: string; nombre: string } | null;
   activa: boolean;
   num_clientes: number;
@@ -84,7 +84,7 @@ export default function TablaRutas({ rutas, empleados }: Props) {
                     </div>
                   </td>
                   <td className="py-3 px-4 text-sm text-gray-600">
-                    {r.dia_semana !== null ? DIAS_SEMANA[r.dia_semana] : "Sin asignar"}
+                    {r.dias_semana.length > 0 ? r.dias_semana.map((d) => DIAS_SEMANA[d]).join(", ") : "Sin asignar"}
                   </td>
                   <td className="py-3 px-4 text-sm text-gray-600">
                     {r.empleado?.nombre || "Sin repartidor"}

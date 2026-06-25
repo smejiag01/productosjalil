@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
         activo: true,
         ruta: {
           activa: true,
-          dia_semana: diaSemana,
+          dias_semana: { has: diaSemana },
         },
       },
       include: {

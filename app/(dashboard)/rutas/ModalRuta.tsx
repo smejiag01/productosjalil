@@ -14,7 +14,7 @@ interface Props {
     id: string;
     nombre: string;
     descripcion: string | null;
-    dia_semana: number | null;
+    dias_semana: number[];
     empleado: { id: string; nombre: string } | null;
     activa: boolean;
   } | null;
@@ -28,19 +28,27 @@ export default function ModalRuta({ rutaInicial, empleados, onCerrar }: Props) {
 
   const [nombre, setNombre] = useState(rutaInicial?.nombre ?? "");
   const [descripcion, setDescripcion] = useState(rutaInicial?.descripcion ?? "");
-  const [diaSemana, setDiaSemana] = useState(rutaInicial?.dia_semana?.toString() ?? "");
+  const [diasSeleccionados, setDiasSeleccionados] = useState<number[]>(
+    rutaInicial?.dias_semana ?? []
+  );
   const [empleadoId, setEmpleadoId] = useState(rutaInicial?.empleado?.id ?? "");
   const [activa, setActiva] = useState(rutaInicial?.activa ?? true);
   const [errorGeneral, setErrorGeneral] = useState("");
   const [cargando, setCargando] = useState(false);
+
+  function toggleDia(dia: number) {
+    setDiasSeleccionados((prev) =>
+      prev.includes(dia) ? prev.filter((d) => d !== dia) : [...prev, dia].sort()
+    );
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setErrorGeneral("");
     setCargando(true);
 
-    if (!diaSemana) {
-      setErrorGeneral("Selecciona un día de la semana");
+    if (diasSeleccionados.length === 0) {
+      setErrorGeneral("Selecciona al menos un día de la semana");
       setCargando(false);
       return;
     }
@@ -48,7 +56,7 @@ export default function ModalRuta({ rutaInicial, empleados, onCerrar }: Props) {
     const body = {
       nombre,
       descripcion: descripcion || null,
-      dia_semana: parseInt(diaSemana),
+      dias_semana: diasSeleccionados,
       empleado_id: empleadoId || null,
       activa,
     };
@@ -106,14 +114,26 @@ export default function ModalRuta({ rutaInicial, empleados, onCerrar }: Props) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Día de la semana <span className="text-red-500">*</span></label>
-            <select value={diaSemana} onChange={(e) => setDiaSemana(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand">
-              <option value="">Seleccionar día...</option>
-              {DIAS_OPCIONES.map((d) => (
-                <option key={d.valor} value={d.valor}>{d.label}</option>
-              ))}
-            </select>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Días de la semana <span className="text-red-500">*</span></label>
+            <div className="flex flex-wrap gap-2">
+              {DIAS_OPCIONES.map((d) => {
+                const seleccionado = diasSeleccionados.includes(d.valor);
+                return (
+                  <button
+                    key={d.valor}
+                    type="button"
+                    onClick={() => toggleDia(d.valor)}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border ${
+                      seleccionado
+                        ? "bg-brand text-white border-brand"
+                        : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+                    }`}
+                  >
+                    {d.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           <div>
