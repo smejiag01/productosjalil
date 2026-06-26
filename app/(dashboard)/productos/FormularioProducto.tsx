@@ -13,13 +13,21 @@ interface DatosProducto {
   activo?: boolean;
   orden?: number;
   imagen_url?: string | null;
+  categoria_id?: string | null;
+}
+
+interface CategoriaOption {
+  id: string;
+  nombre: string;
+  emoji: string | null;
 }
 
 interface Props {
   productoInicial?: DatosProducto;
+  categorias?: CategoriaOption[];
 }
 
-export default function FormularioProducto({ productoInicial }: Props) {
+export default function FormularioProducto({ productoInicial, categorias = [] }: Props) {
   const router = useRouter();
   const esEdicion = !!productoInicial?.id;
   const inputArchivoRef = useRef<HTMLInputElement>(null);
@@ -35,6 +43,9 @@ export default function FormularioProducto({ productoInicial }: Props) {
   const [activo, setActivo] = useState(productoInicial?.activo ?? true);
   const [orden, setOrden] = useState(
     productoInicial?.orden?.toString() ?? "0"
+  );
+  const [categoriaId, setCategoriaId] = useState(
+    productoInicial?.categoria_id ?? ""
   );
   const [imagenUrl] = useState(
     productoInicial?.imagen_url ?? null
@@ -118,6 +129,7 @@ export default function FormularioProducto({ productoInicial }: Props) {
       precio_base: precio,
       activo,
       orden: parseInt(orden) || 0,
+      categoria_id: categoriaId || null,
     };
 
     try {
@@ -250,6 +262,26 @@ export default function FormularioProducto({ productoInicial }: Props) {
               placeholder="Descripción opcional"
             />
           </div>
+
+          {categorias.length > 0 && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Categoría
+              </label>
+              <select
+                value={categoriaId}
+                onChange={(e) => setCategoriaId(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+              >
+                <option value="">Sin categoría</option>
+                {categorias.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.emoji ? `${c.emoji} ` : ""}{c.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-3">
             <div>

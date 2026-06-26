@@ -10,9 +10,14 @@ export default async function EditarProductoPage({
 }: {
   params: { id: string };
 }) {
-  const producto = await prisma.productos.findUnique({
-    where: { id: params.id },
-  });
+  const [producto, categorias] = await Promise.all([
+    prisma.productos.findUnique({ where: { id: params.id } }),
+    prisma.categorias.findMany({
+      where: { activa: true },
+      orderBy: { orden: "asc" },
+      select: { id: true, nombre: true, emoji: true },
+    }),
+  ]);
 
   if (!producto) notFound();
 
@@ -43,7 +48,9 @@ export default async function EditarProductoPage({
             activo: producto.activo,
             orden: producto.orden,
             imagen_url: producto.imagen_url,
+            categoria_id: producto.categoria_id,
           }}
+          categorias={categorias}
         />
       </div>
     </div>

@@ -1,7 +1,16 @@
 import Link from "next/link";
+import { prisma } from "@/lib/prisma";
 import FormularioProducto from "../FormularioProducto";
 
-export default function NuevoProductoPage() {
+export const dynamic = "force-dynamic";
+
+export default async function NuevoProductoPage() {
+  const categorias = await prisma.categorias.findMany({
+    where: { activa: true },
+    orderBy: { orden: "asc" },
+    select: { id: true, nombre: true, emoji: true },
+  });
+
   return (
     <div>
       <Link
@@ -19,7 +28,7 @@ export default function NuevoProductoPage() {
       </h1>
 
       <div className="bg-white rounded-xl border border-gray-200 p-6">
-        <FormularioProducto />
+        <FormularioProducto categorias={categorias} />
       </div>
     </div>
   );

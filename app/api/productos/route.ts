@@ -94,6 +94,7 @@ export async function POST(request: NextRequest) {
         precio_base: datos.precio_base,
         activo: datos.activo ?? true,
         orden: datos.orden ?? (maxOrden._max.orden ?? 0) + 1,
+        categoria_id: datos.categoria_id ?? null,
       },
     });
 

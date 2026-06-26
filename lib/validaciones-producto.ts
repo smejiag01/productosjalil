@@ -16,6 +16,7 @@ export const esquemaProducto = z.object({
     .positive("El precio debe ser mayor a 0"),
   activo: z.boolean().optional(),
   orden: z.number().int().min(0).optional(),
+  categoria_id: z.string().uuid().optional().nullable(),
 });
 
 export const esquemaOrden = z.array(
