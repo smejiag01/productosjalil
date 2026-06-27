@@ -13,6 +13,8 @@ interface PedidoFila {
   numProductos: number;
   total: string;
   estado: EstadoPedido;
+  fechaPedido?: string;
+  creadoEn?: string;
 }
 
 const FILTROS: { key: string; label: string }[] = [
@@ -27,13 +29,17 @@ const FILTROS: { key: string; label: string }[] = [
 export default function TablaPedidos({
   pedidos,
   contadores,
+  vistaActual,
 }: {
   pedidos: PedidoFila[];
   contadores: Record<string, number>;
+  vistaActual: string;
 }) {
   const [filtro, setFiltro] = useState("todos");
   const pedidosFiltrados =
     filtro === "todos" ? pedidos : pedidos.filter((p) => p.estado === filtro);
+
+  const mostrarFecha = vistaActual === "todos";
 
   const estadoVacio = (
     <div className="py-16 text-center text-gray-400">
@@ -42,7 +48,7 @@ export default function TablaPedidos({
       </svg>
       <p className="text-sm">
         {filtro === "todos"
-          ? "No hay pedidos para hoy"
+          ? "No hay pedidos"
           : `No hay pedidos "${ESTADOS[filtro as EstadoPedido]?.label}"`}
       </p>
       <p className="text-xs text-gray-300 mt-1">Los pedidos aparecerán aquí cuando los clientes los realicen por WhatsApp</p>
@@ -51,7 +57,7 @@ export default function TablaPedidos({
 
   return (
     <>
-      {/* Filtros con scroll horizontal */}
+      {/* Filtros por estado */}
       <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-none">
         {FILTROS.map((f) => {
           const count = contadores[f.key] ?? 0;
@@ -75,7 +81,7 @@ export default function TablaPedidos({
         })}
       </div>
 
-      {/* Cards para móvil y tablet */}
+      {/* Cards móvil/tablet */}
       <div className="lg:hidden space-y-3">
         {pedidosFiltrados.length === 0 ? (
           <div className="bg-white rounded-xl border border-gray-200">{estadoVacio}</div>
@@ -89,7 +95,10 @@ export default function TablaPedidos({
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-gray-900 truncate">{p.clienteNombre}</p>
-                    <p className="text-xs text-gray-400">{p.rutaNombre} · {p.numProductos} productos</p>
+                    <p className="text-xs text-gray-400">
+                      {p.rutaNombre} · {p.numProductos} productos
+                      {mostrarFecha && p.fechaPedido && <span> · {p.fechaPedido}</span>}
+                    </p>
                   </div>
                 </div>
                 <BadgeEstado estado={p.estado} />
@@ -108,7 +117,7 @@ export default function TablaPedidos({
         )}
       </div>
 
-      {/* Tabla para desktop */}
+      {/* Tabla desktop */}
       <div className="hidden lg:block bg-white rounded-xl border border-gray-200 overflow-hidden">
         <table className="w-full">
           <thead>
@@ -118,12 +127,15 @@ export default function TablaPedidos({
               <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Productos</th>
               <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
               <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+              {mostrarFecha && (
+                <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+              )}
               <th className="text-right py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Acción</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
             {pedidosFiltrados.length === 0 ? (
-              <tr><td colSpan={6}>{estadoVacio}</td></tr>
+              <tr><td colSpan={mostrarFecha ? 7 : 6}>{estadoVacio}</td></tr>
             ) : (
               pedidosFiltrados.map((p) => (
                 <tr key={p.id} className="hover:bg-gray-50/50 transition-colors">
@@ -142,6 +154,9 @@ export default function TablaPedidos({
                   <td className="py-3 px-4 text-sm text-gray-600">{p.numProductos} productos</td>
                   <td className="py-3 px-4 text-sm font-medium text-gray-900">{p.total}</td>
                   <td className="py-3 px-4"><BadgeEstado estado={p.estado} /></td>
+                  {mostrarFecha && (
+                    <td className="py-3 px-4 text-sm text-gray-500">{p.creadoEn}</td>
+                  )}
                   <td className="py-3 px-4 text-right">
                     <Link href={`/pedidos/${p.id}`} className="text-sm text-brand hover:text-brand-light font-medium">Ver detalle</Link>
                   </td>
