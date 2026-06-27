@@ -6,11 +6,13 @@ import TablaPedidos from "./TablaPedidos";
 export const dynamic = "force-dynamic";
 
 export default async function PedidosPage() {
-  const hoy = new Date();
-  const fechaStr = hoy.toISOString().split("T")[0];
+  const hoy = new Date(
+    new Date().toLocaleString("en-US", { timeZone: "America/Bogota" })
+  );
+  const fechaStr = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}-${String(hoy.getDate()).padStart(2, "0")}`;
 
   const pedidos = await prisma.pedidos.findMany({
-    where: { fecha_pedido: new Date(fechaStr) },
+    where: { fecha_pedido: new Date(fechaStr + "T00:00:00.000Z") },
     include: { cliente: true, ruta: true, items: true },
     orderBy: { created_at: "desc" },
   });

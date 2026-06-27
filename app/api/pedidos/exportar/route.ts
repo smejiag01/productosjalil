@@ -7,11 +7,15 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const fechaParam = searchParams.get("fecha");
-    const fecha = fechaParam || new Date().toISOString().split("T")[0];
+    let fecha = fechaParam;
+    if (!fecha) {
+      const bogota = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Bogota" }));
+      fecha = `${bogota.getFullYear()}-${String(bogota.getMonth() + 1).padStart(2, "0")}-${String(bogota.getDate()).padStart(2, "0")}`;
+    }
 
     const pedidos = await prisma.pedidos.findMany({
       where: {
-        fecha_pedido: new Date(fecha),
+        fecha_pedido: new Date(fecha + "T00:00:00.000Z"),
       },
       include: {
         cliente: true,
