@@ -14,6 +14,7 @@ interface PedidoFila {
   total: string;
   estado: EstadoPedido;
   fechaPedido?: string;
+  fechaEntrega?: string;
   creadoEn?: string;
 }
 
@@ -97,8 +98,13 @@ export default function TablaPedidos({
                     <p className="text-sm font-semibold text-gray-900 truncate">{p.clienteNombre}</p>
                     <p className="text-xs text-gray-400">
                       {p.rutaNombre} · {p.numProductos} productos
-                      {mostrarFecha && p.fechaPedido && <span> · {p.fechaPedido}</span>}
                     </p>
+                    {p.fechaEntrega && (
+                      <p className="text-xs text-gray-400 mt-0.5">
+                        Entrega: <span className="capitalize">{p.fechaEntrega}</span>
+                        {mostrarFecha && p.creadoEn && <span> · Creado: {p.creadoEn}</span>}
+                      </p>
+                    )}
                   </div>
                 </div>
                 <BadgeEstado estado={p.estado} />
@@ -127,15 +133,16 @@ export default function TablaPedidos({
               <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Productos</th>
               <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
               <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+              <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Entrega</th>
               {mostrarFecha && (
-                <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+                <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Creado</th>
               )}
               <th className="text-right py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Acción</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
             {pedidosFiltrados.length === 0 ? (
-              <tr><td colSpan={mostrarFecha ? 7 : 6}>{estadoVacio}</td></tr>
+              <tr><td colSpan={mostrarFecha ? 8 : 7}>{estadoVacio}</td></tr>
             ) : (
               pedidosFiltrados.map((p) => (
                 <tr key={p.id} className="hover:bg-gray-50/50 transition-colors">
@@ -154,6 +161,7 @@ export default function TablaPedidos({
                   <td className="py-3 px-4 text-sm text-gray-600">{p.numProductos} productos</td>
                   <td className="py-3 px-4 text-sm font-medium text-gray-900">{p.total}</td>
                   <td className="py-3 px-4"><BadgeEstado estado={p.estado} /></td>
+                  <td className="py-3 px-4 text-sm text-gray-500 capitalize">{p.fechaEntrega}</td>
                   {mostrarFecha && (
                     <td className="py-3 px-4 text-sm text-gray-500">{p.creadoEn}</td>
                   )}

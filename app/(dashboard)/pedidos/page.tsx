@@ -85,6 +85,7 @@ export default async function PedidosPage({
     totalNum: Number(p.total),
     estado: p.estado as EstadoPedido,
     fechaPedido: formatDateStr(p.fecha_pedido),
+    fechaEntrega: p.fecha_pedido.toLocaleDateString("es-CO", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" }),
     creadoEn: p.created_at.toLocaleString("es-CO", { timeZone: "America/Bogota", dateStyle: "short", timeStyle: "short" }),
   }));
 

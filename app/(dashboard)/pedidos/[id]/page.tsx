@@ -86,7 +86,13 @@ export default async function DetallePedidoPage({
         <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6">
           <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-4">Datos del pedido</h3>
           <div className="space-y-3">
-            <div className="flex justify-between text-sm"><span className="text-gray-500">Fecha</span><span className="text-gray-900 font-medium">{formatearFechaCorta(pedido.created_at)}</span></div>
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-500">Entrega</span>
+              <span className="text-gray-900 font-semibold capitalize">
+                {pedido.fecha_pedido.toLocaleDateString("es-CO", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" })}
+              </span>
+            </div>
+            <div className="flex justify-between text-sm"><span className="text-gray-500">Creado</span><span className="text-gray-900 font-medium">{formatearFechaCorta(pedido.created_at)}</span></div>
             <div className="flex justify-between text-sm"><span className="text-gray-500">Ruta</span><span className="text-gray-900 font-medium">{pedido.ruta?.nombre ?? "Sin ruta"}</span></div>
             <div className="flex justify-between text-sm items-center"><span className="text-gray-500">Estado</span><BadgeEstado estado={estado} /></div>
             {pedido.confirmado_at && <div className="flex justify-between text-sm"><span className="text-gray-500">Confirmado</span><span className="text-gray-900 font-medium">{formatearFechaCorta(pedido.confirmado_at)}</span></div>}
