@@ -14,8 +14,9 @@ model usuarios {
   password_hash String   @db.VarChar(255)
   rol           String   @default("admin") @db.VarChar(40)
   activo        Boolean  @default(true)
-  created_at    DateTime @default(now()) @db.Timestamptz(6)
-  updated_at    DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+  created_at              DateTime                 @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime                 @default(now()) @updatedAt @db.Timestamptz(6)
+  movimientos_inventario  inventario_movimientos[]
 }
 
 model empleados {
@@ -93,6 +94,7 @@ model productos {
   updated_at      DateTime        @default(now()) @updatedAt @db.Timestamptz(6)
   categoria       categorias?     @relation(fields: [categoria_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
   inventario      inventario?
+  inventario_item inventario_items?
   pedido_items    pedido_items[]
   precios_cliente precios_cliente[]
 
@@ -185,4 +187,69 @@ model configuracion {
   mensaje_recordatorio  String   @default("¡Hola! 👋 Es momento de hacer tu pedido para mañana. ¿Deseas realizar tu pedido hoy?")
   mensaje_followup      String   @default("🔔 Recordatorio: aún no hemos recibido tu pedido. ¿Deseas realizarlo ahora?")
   updated_at            DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model inventario_items {
+  id                     String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  nombre                 String    @db.VarChar(160)
+
+  /// "insumo" | "materia_prima" | "producto_terminado"
+  tipo                   String    @db.VarChar(30)
+
+  unidad                 String    @default("kg") @db.VarChar(30)
+  stock_actual           Decimal   @default(0) @db.Decimal(12, 2)
+  stock_minimo           Decimal   @default(0) @db.Decimal(12, 2)
+  costo_unitario         Decimal   @default(0) @db.Decimal(12, 2)
+
+  // Solo insumos
+  proveedor              String?   @db.VarChar(120)
+
+  // Solo materias primas
+  tipo_animal            String?   @db.VarChar(60)
+  requiere_refrigeracion Boolean   @default(false)
+
+  // Materias primas + producto terminado
+  fecha_vencimiento      DateTime? @db.Date
+
+  // Solo producto terminado — vínculo opcional con catálogo
+  producto_id            String?   @unique @db.Uuid
+
+  activo                 Boolean   @default(true)
+  created_at             DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+
+  producto               productos?              @relation(fields: [producto_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  movimientos            inventario_movimientos[]
+
+  @@index([tipo],       map: "idx_inv_items_tipo")
+  @@index([activo],     map: "idx_inv_items_activo")
+  @@index([producto_id],map: "idx_inv_items_prod")
+}
+
+model inventario_movimientos {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  item_id           String   @db.Uuid
+
+  /// "entrada" | "salida" | "ajuste"
+  tipo              String   @db.VarChar(20)
+
+  /// "compra" | "venta" | "merma" | "produccion" | "ajuste_manual"
+  motivo            String   @default("ajuste_manual") @db.VarChar(30)
+
+  cantidad          Decimal  @db.Decimal(12, 2)
+  cantidad_anterior Decimal  @db.Decimal(12, 2)
+  cantidad_nueva    Decimal  @db.Decimal(12, 2)
+  notas             String?
+  usuario_id        String?  @db.Uuid
+  created_at        DateTime @default(now()) @db.Timestamptz(6)
+
+  item              inventario_items @relation(fields: [item_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  usuario           usuarios?        @relation(fields: [usuario_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
+
+  @@index([item_id],    map: "idx_inv_mov_item")
+  @@index([tipo],       map: "idx_inv_mov_tipo")
+  @@index([created_at], map: "idx_inv_mov_fecha")
+  @@index([usuario_id], map: "idx_inv_mov_usuario")
 }
