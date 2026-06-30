@@ -373,7 +373,7 @@ export default async function AnaliticasPage({
                 label: ESTADOS_LABELS[est],
               }))}
               altura={240}
-              formatearTooltip={(v) => String(v)}
+              formato="numero"
             />
           </div>
         </div>
