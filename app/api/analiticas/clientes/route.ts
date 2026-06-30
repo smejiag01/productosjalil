@@ -50,7 +50,7 @@ export async function GET(req: NextRequest) {
         LEFT JOIN pedidos p ON p.cliente_id = c.id
         WHERE c.activo = true
         GROUP BY c.id, c.nombre
-        HAVING MAX(p.fecha_pedido) < NOW() - make_interval(days => ${DIAS_INACTIVIDAD})
+        HAVING MAX(p.fecha_pedido) < NOW() - make_interval(days => CAST(${DIAS_INACTIVIDAD} AS INT))
             OR MAX(p.fecha_pedido) IS NULL
         ORDER BY dias DESC NULLS LAST
         LIMIT 10
