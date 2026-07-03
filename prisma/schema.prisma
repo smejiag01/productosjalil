@@ -18,6 +18,9 @@ model usuarios {
   updated_at             DateTime                 @default(now()) @updatedAt @db.Timestamptz(6)
   movimientos_inventario inventario_movimientos[]
   reconteos              inventario_reconteos[]
+  pedidos_devueltos      pedidos[]                @relation("pedidos_devuelto_porTousuarios")
+  pedidos_entregados     pedidos[]                @relation("pedidos_entregado_porTousuarios")
+  rutas_asignadas        rutas[]
 }
 
 model empleados {
@@ -32,19 +35,23 @@ model empleados {
 }
 
 model rutas {
-  id          String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  nombre      String     @db.VarChar(100)
-  descripcion String?
-  empleado_id String?    @db.Uuid
-  activa      Boolean    @default(true)
-  created_at  DateTime   @default(now()) @db.Timestamptz(6)
-  updated_at  DateTime   @default(now()) @updatedAt @db.Timestamptz(6)
-  dias_semana Int[]      @default([]) @db.SmallInt
-  frecuencia  String     @default("semanal") @db.VarChar(20)
-  fecha_base  DateTime?  @db.Date
-  clientes    clientes[]
-  pedidos     pedidos[]
-  empleado    empleados? @relation(fields: [empleado_id], references: [id], onUpdate: NoAction)
+  id            String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nombre        String     @db.VarChar(100)
+  descripcion   String?
+  empleado_id   String?    @db.Uuid
+  activa        Boolean    @default(true)
+  created_at    DateTime   @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime   @default(now()) @updatedAt @db.Timestamptz(6)
+  dias_semana   Int[]      @default([]) @db.SmallInt
+  frecuencia    String     @default("semanal") @db.VarChar(20)
+  fecha_base    DateTime?  @db.Date
+  repartidor_id String?    @db.Uuid
+  clientes      clientes[]
+  pedidos       pedidos[]
+  empleado      empleados? @relation(fields: [empleado_id], references: [id], onUpdate: NoAction)
+  repartidor    usuarios?  @relation(fields: [repartidor_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([repartidor_id], map: "idx_rutas_repartidor")
 }
 
 model clientes {
@@ -58,11 +65,13 @@ model clientes {
   created_at      DateTime             @default(now()) @db.Timestamptz(6)
   updated_at      DateTime             @default(now()) @updatedAt @db.Timestamptz(6)
   codigo_mekano   String?              @unique @db.VarChar(40)
+  orden_ruta      Int?
   ruta            rutas?               @relation(fields: [ruta_id], references: [id], onUpdate: NoAction)
   conversaciones  conversaciones_wpp[]
   pedidos         pedidos[]
-  precios_cliente precios_cliente[]
   pqrs            Pqr[]
+  precios_cliente precios_cliente[]
+  sedes           sedes[]
 
   @@index([codigo_mekano], map: "idx_clientes_codigo_mek")
   @@index([ruta_id], map: "idx_clientes_ruta")
@@ -122,24 +131,34 @@ model precios_cliente {
 }
 
 model pedidos {
-  id             String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  cliente_id     String               @db.Uuid
-  ruta_id        String?              @db.Uuid
-  estado         String               @default("pendiente") @db.VarChar(30)
-  total          Decimal              @default(0) @db.Decimal(12, 2)
-  fecha_pedido   DateTime             @default(dbgenerated("CURRENT_DATE")) @db.Date
-  confirmado_at  DateTime?            @db.Timestamptz(6)
-  notas          String?
-  created_at     DateTime             @default(now()) @db.Timestamptz(6)
-  updated_at     DateTime             @default(now()) @updatedAt @db.Timestamptz(6)
-  conversaciones conversaciones_wpp[]
-  items          pedido_items[]
-  cliente        clientes             @relation(fields: [cliente_id], references: [id], onUpdate: NoAction)
-  ruta           rutas?               @relation(fields: [ruta_id], references: [id], onUpdate: NoAction)
+  id                    String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cliente_id            String               @db.Uuid
+  ruta_id               String?              @db.Uuid
+  estado                String               @default("pendiente") @db.VarChar(30)
+  total                 Decimal              @default(0) @db.Decimal(12, 2)
+  fecha_pedido          DateTime             @default(dbgenerated("CURRENT_DATE")) @db.Date
+  confirmado_at         DateTime?            @db.Timestamptz(6)
+  notas                 String?
+  created_at            DateTime             @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime             @default(now()) @updatedAt @db.Timestamptz(6)
+  entregado_at          DateTime?            @db.Timestamptz(6)
+  entregado_por         String?              @db.Uuid
+  devolucion_motivo     String?
+  devuelto_at           DateTime?            @db.Timestamptz(6)
+  devuelto_por          String?              @db.Uuid
+  sede_id               String?              @db.Uuid
+  conversaciones        conversaciones_wpp[]
+  items                 pedido_items[]
+  cliente               clientes             @relation(fields: [cliente_id], references: [id], onUpdate: NoAction)
+  devuelto_por_usuario  usuarios?            @relation("pedidos_devuelto_porTousuarios", fields: [devuelto_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  entregado_por_usuario usuarios?            @relation("pedidos_entregado_porTousuarios", fields: [entregado_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ruta                  rutas?               @relation(fields: [ruta_id], references: [id], onUpdate: NoAction)
+  sede                  sedes?               @relation(fields: [sede_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([cliente_id], map: "idx_pedidos_cliente")
   @@index([estado], map: "idx_pedidos_estado")
   @@index([fecha_pedido], map: "idx_pedidos_fecha")
+  @@index([sede_id], map: "idx_pedidos_sede")
 }
 
 model pedido_items {
@@ -178,6 +197,8 @@ model conversaciones_wpp {
   ultimo_mensaje_id  String?   @db.VarChar(100)
   producto_pendiente String?   @db.Uuid
   fecha_entrega      DateTime? @db.Date
+  pqr_texto          String?
+  pqr_adjuntos       Json?     @default("[]")
   cliente            clientes? @relation(fields: [cliente_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   pedido             pedidos?  @relation(fields: [pedido_id], references: [id], onUpdate: NoAction)
 
@@ -305,6 +326,41 @@ model mensajes_procesados_wpp {
   @@index([created_at], map: "idx_mensajes_procesados_created")
 }
 
+model Pqr {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clienteId     String?   @map("cliente_id") @db.Uuid
+  telefono      String    @db.VarChar(20)
+  clienteNombre String?   @map("cliente_nombre") @db.VarChar(140)
+  texto         String?
+  adjuntos      Json?     @default("[]")
+  estado        String    @default("pendiente") @db.VarChar(30)
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @default(now()) @map("updated_at") @db.Timestamptz(6)
+  cliente       clientes? @relation(fields: [clienteId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([clienteId], map: "idx_pqrs_cliente")
+  @@index([createdAt(sort: Desc)], map: "idx_pqrs_created_at")
+  @@index([estado], map: "idx_pqrs_estado")
+  @@map("pqrs")
+}
+
+model sedes {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cliente_id   String    @db.Uuid
+  nombre_sede  String    @db.VarChar(120)
+  direccion    String?
+  latitud      Float?
+  longitud     Float?
+  es_principal Boolean   @default(false)
+  activa       Boolean   @default(true)
+  created_at   DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+  pedidos      pedidos[]
+  cliente      clientes  @relation(fields: [cliente_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([cliente_id], map: "idx_sedes_cliente")
+}
+
 enum motivo_movimiento {
   compra
   venta
@@ -324,23 +380,4 @@ enum tipo_movimiento {
   entrada
   salida
   ajuste
-}
-
-model Pqr {
-  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  clienteId     String?  @map("cliente_id") @db.Uuid
-  telefono      String   @db.VarChar(20)
-  clienteNombre String?  @map("cliente_nombre") @db.VarChar(140)
-  texto         String?
-  adjuntos      Json     @default("[]")
-  estado        String   @default("pendiente") @db.VarChar(30)
-  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt     DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
-
-  cliente clientes? @relation(fields: [clienteId], references: [id])
-
-  @@index([estado])
-  @@index([clienteId])
-  @@index([createdAt(sort: Desc)])
-  @@map("pqrs")
 }

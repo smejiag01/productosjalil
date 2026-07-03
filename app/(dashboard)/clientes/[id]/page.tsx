@@ -5,6 +5,7 @@ import { formatearPrecio, formatearFechaCorta } from "@/lib/formato";
 import BadgeEstado from "@/components/BadgeEstado";
 import TablaPrecios from "./TablaPrecios";
 import AccionesCliente from "./AccionesCliente";
+import SeccionSedes from "./SeccionSedes";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +14,7 @@ export default async function DetalleClientePage({
 }: {
   params: { id: string };
 }) {
-  const [cliente, productos, pedidos, rutas] = await Promise.all([
+  const [cliente, productos, pedidos, rutas, sedes] = await Promise.all([
     prisma.clientes.findUnique({
       where: { id: params.id },
       include: {
@@ -37,9 +38,23 @@ export default async function DetalleClientePage({
       where: { activa: true },
       orderBy: { nombre: "asc" },
     }),
+    prisma.sedes.findMany({
+      where: { cliente_id: params.id },
+      orderBy: [{ es_principal: "desc" }, { nombre_sede: "asc" }],
+    }),
   ]);
 
   if (!cliente) notFound();
+
+  const sedesSerializadas = sedes.map((s) => ({
+    id: s.id,
+    nombre_sede: s.nombre_sede,
+    direccion: s.direccion,
+    latitud: s.latitud,
+    longitud: s.longitud,
+    es_principal: s.es_principal,
+    activa: s.activa,
+  }));
 
   const preciosMap = new Map(
     cliente.precios_cliente.map((pc) => [pc.producto_id, Number(pc.precio)])
@@ -167,6 +182,11 @@ export default async function DetalleClientePage({
             de {productos.length} productos activos
           </p>
         </div>
+      </div>
+
+      {/* Sedes */}
+      <div className="mb-6 sm:mb-8">
+        <SeccionSedes clienteId={cliente.id} sedesIniciales={sedesSerializadas} />
       </div>
 
       {/* Precios personalizados */}

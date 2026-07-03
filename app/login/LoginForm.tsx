@@ -1,6 +1,6 @@
 "use client";
 
-import { signIn } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { FormEvent, useState } from "react";
 
@@ -33,7 +33,9 @@ export default function LoginForm() {
         setError("Correo o contraseña incorrectos");
         setCargando(false);
       } else {
-        window.location.href = callbackUrl;
+        const session = await getSession();
+        const esRepartidor = (session?.user as { rol?: string } | undefined)?.rol === "repartidor";
+        window.location.href = esRepartidor ? "/repartidor" : callbackUrl;
       }
     } catch {
       setError("Error de conexión. Intenta de nuevo.");

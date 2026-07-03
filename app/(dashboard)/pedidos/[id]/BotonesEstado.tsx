@@ -65,7 +65,7 @@ export default function BotonesEstado({
     setError("");
 
     try {
-      const res = await fetch(`/api/pedidos/${pedidoId}`, {
+      const res = await fetch(`/api/pedidos/${pedidoId}/estado`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ estado: nuevoEstado }),
@@ -87,8 +87,12 @@ export default function BotonesEstado({
     }
   }
 
+  // en_reparto/devuelto son transiciones habilitadas para el flujo del
+  // repartidor (ver mini-dashboard); el admin no necesita estos botones aquí.
   const cancelar = transiciones.find((t) => t === "cancelado");
-  const positivas = transiciones.filter((t) => t !== "cancelado");
+  const positivas = transiciones.filter(
+    (t) => t !== "cancelado" && t !== "en_reparto" && t !== "devuelto"
+  );
 
   return (
     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">

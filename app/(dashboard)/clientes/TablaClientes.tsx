@@ -39,13 +39,17 @@ export default function TablaClientes({
 }: Props) {
   const [filtroEstado, setFiltroEstado] = useState("todos");
   const [filtroRuta, setFiltroRuta] = useState("");
+  const [soloSinRuta, setSoloSinRuta] = useState(false);
   const [busqueda, setBusqueda] = useState("");
   const [modalAbierto, setModalAbierto] = useState(false);
+
+  const contadorSinRuta = clientes.filter((c) => !c.ruta_id).length;
 
   const clientesFiltrados = clientes.filter((c) => {
     if (filtroEstado === "activos" && !c.activo) return false;
     if (filtroEstado === "inactivos" && c.activo) return false;
-    if (filtroRuta && c.ruta_id !== filtroRuta) return false;
+    if (soloSinRuta && c.ruta_id) return false;
+    if (!soloSinRuta && filtroRuta && c.ruta_id !== filtroRuta) return false;
     if (busqueda) {
       const q = busqueda.toLowerCase();
       return (
@@ -114,8 +118,9 @@ export default function TablaClientes({
           {rutas.length > 0 && (
             <select
               value={filtroRuta}
+              disabled={soloSinRuta}
               onChange={(e) => setFiltroRuta(e.target.value)}
-              className="px-3 py-2 bg-white border border-gray-200 rounded-full text-sm text-gray-600 outline-none"
+              className="px-3 py-2 bg-white border border-gray-200 rounded-full text-sm text-gray-600 outline-none disabled:opacity-50"
             >
               <option value="">Todas las rutas</option>
               {rutas.map((r) => (
@@ -125,6 +130,23 @@ export default function TablaClientes({
               ))}
             </select>
           )}
+          <button
+            onClick={() => setSoloSinRuta((v) => !v)}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap ${
+              soloSinRuta
+                ? "bg-amber-500 text-white"
+                : "bg-amber-50 border border-amber-200 text-amber-700 hover:bg-amber-100"
+            }`}
+          >
+            Sin ruta asignada
+            <span
+              className={`text-xs px-1.5 py-0.5 rounded-full ${
+                soloSinRuta ? "bg-white/20 text-white" : "bg-amber-100 text-amber-700"
+              }`}
+            >
+              {contadorSinRuta}
+            </span>
+          </button>
         </div>
         <div className="relative">
           <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
