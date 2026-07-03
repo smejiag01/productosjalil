@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { formatearPrecio } from "@/lib/formato";
 import BadgeStock from "./BadgeStock";
 import ModalItem from "./ModalItem";
 import ModalMovimiento from "./ModalMovimiento";
+import ModalProduccion from "./ModalProduccion";
 
 interface Item {
   id: string;
@@ -40,6 +42,7 @@ export default function TablaInventario({ items, tipo, titulo }: Props) {
   const [modalItem, setModalItem] = useState(false);
   const [editando, setEditando] = useState<Item | null>(null);
   const [movimiento, setMovimiento] = useState<Item | null>(null);
+  const [produccion, setProduccion] = useState<Item | null>(null);
 
   const filtrados = items.filter((i) => {
     if (filtro === "alerta" && i.stock_actual > i.stock_minimo) return false;
@@ -105,7 +108,13 @@ export default function TablaInventario({ items, tipo, titulo }: Props) {
               </div>
               <BadgeStock actual={item.stock_actual} minimo={item.stock_minimo} />
             </div>
-            <div className="flex items-center gap-2 pt-3 border-t border-gray-100 justify-end">
+            <div className="flex items-center gap-2 pt-3 border-t border-gray-100 justify-end flex-wrap">
+              {tipo === "producto_terminado" && (
+                <>
+                  <Link href={`/inventarios/producto-terminado/${item.id}`} className="h-9 px-3 bg-gray-50 border border-gray-200 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-100 flex items-center">Receta</Link>
+                  <button onClick={() => setProduccion(item)} className="h-9 px-3 bg-gray-50 border border-gray-200 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-100">Producción</button>
+                </>
+              )}
               <button onClick={() => setMovimiento(item)} className="h-9 px-3 bg-gray-50 border border-gray-200 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-100">Movimiento</button>
               <button onClick={() => { setEditando(item); setModalItem(true); }} className="h-9 px-3 bg-gray-50 border border-gray-200 rounded-lg text-xs font-medium text-brand hover:bg-gray-100">Editar</button>
             </div>
@@ -157,7 +166,13 @@ export default function TablaInventario({ items, tipo, titulo }: Props) {
                 </>}
                 <td className="py-3 px-4"><BadgeStock actual={item.stock_actual} minimo={item.stock_minimo} /></td>
                 <td className="py-3 px-4 text-right">
-                  <div className="flex items-center justify-end gap-2">
+                  <div className="flex items-center justify-end gap-3">
+                    {tipo === "producto_terminado" && (
+                      <>
+                        <Link href={`/inventarios/producto-terminado/${item.id}`} className="text-sm text-gray-600 hover:text-gray-900 font-medium">Receta</Link>
+                        <button onClick={() => setProduccion(item)} className="text-sm text-gray-600 hover:text-gray-900 font-medium">Producción</button>
+                      </>
+                    )}
                     <button onClick={() => setMovimiento(item)} className="text-sm text-gray-600 hover:text-gray-900 font-medium">Movimiento</button>
                     <button onClick={() => { setEditando(item); setModalItem(true); }} className="text-sm text-brand hover:text-brand-light font-medium">Editar</button>
                   </div>
@@ -186,6 +201,13 @@ export default function TablaInventario({ items, tipo, titulo }: Props) {
           itemId={movimiento.id} itemNombre={movimiento.nombre}
           itemUnidad={movimiento.unidad} stockActual={movimiento.stock_actual}
           onCerrar={() => setMovimiento(null)} />
+      )}
+
+      {produccion && (
+        <ModalProduccion
+          itemId={produccion.id} itemNombre={produccion.nombre}
+          itemUnidad={produccion.unidad} stockActual={produccion.stock_actual}
+          onCerrar={() => setProduccion(null)} />
       )}
     </div>
   );

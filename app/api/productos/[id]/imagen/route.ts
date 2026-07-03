@@ -48,14 +48,14 @@ export async function POST(
 
     const imagenOptimizada = await sharp(buffer)
       .resize(800, 800, { fit: "inside", withoutEnlargement: true })
-      .webp({ quality: 80 })
+      .jpeg({ quality: 85 })
       .toBuffer();
 
-    const nombreArchivo = `productos/${params.id}-${Date.now()}.webp`;
+    const nombreArchivo = `productos/${params.id}-${Date.now()}.jpg`;
 
     const blob = await put(nombreArchivo, imagenOptimizada, {
       access: "public",
-      contentType: "image/webp",
+      contentType: "image/jpeg",
     });
 
     await prisma.productos.update({

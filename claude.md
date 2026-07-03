@@ -34,7 +34,7 @@ Respetar el estilo visual, paleta de colores y estructura de esas pantallas al i
 - **ORM:** Prisma
 - **Base de datos:** Neon PostgreSQL (serverless)
 - **Autenticación:** NextAuth / Auth.js (con credenciales contra tabla `usuarios`)
-- **Almacenamiento de imágenes:** Vercel Blob (optimizar a WebP al subir, con sharp)
+- **Almacenamiento de imágenes:** Vercel Blob (optimizar a JPEG al subir, con sharp — WebP no es compatible con mensajes de imagen de WhatsApp Business API)
 - **Deploy:** Vercel
 - **Automatización WhatsApp:** n8n self-hosted (Contabo VPS) — proyecto SEPARADO, no parte de este repo
 - **WhatsApp:** Meta WhatsApp Cloud API (oficial)
@@ -99,7 +99,7 @@ Estados de pedido: `pendiente`, `en_proceso`, `confirmado`, `cancelado`, `entreg
 ## Decisiones de diseño tomadas
 
 - **Precios:** cada cliente tiene su precio propio por producto (tabla `precios_cliente`). Si no existe precio para un cliente+producto, usar `precio_base` del producto como fallback.
-- **Imágenes:** se suben a Vercel Blob, se optimizan a WebP con sharp, se guarda solo la URL.
+- **Imágenes:** se suben a Vercel Blob, se optimizan a JPEG (calidad 85) con sharp, se guarda solo la URL. JPEG en vez de WebP porque la API de WhatsApp Business para mensajes tipo "image" no soporta WebP (reservado para stickers).
 - **Flujo de WhatsApp:** todo por SELECCIÓN de opciones (botones/listas interactivas), nunca texto libre ni audios. Esto reduce errores y mantiene el alcance controlado.
 - **pedido_items** guarda nombre y precio históricos para que los pedidos viejos no cambien si se editan los productos.
 - **Imágenes de producto** se muestran en el catálogo de WhatsApp durante la selección.

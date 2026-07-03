@@ -5,20 +5,25 @@ import { prisma } from "@/lib/prisma";
 const TIPOS_VALIDOS = ["insumo", "materia_prima", "producto_terminado"] as const;
 const UNIDADES_VALIDAS = ["kg", "unidad", "caja", "libra", "arroba", "litro", "gramo"] as const;
 
-const esquemaItem = z.object({
-  nombre: z.string().min(2, "El nombre debe tener al menos 2 caracteres").max(160),
-  tipo: z.enum(TIPOS_VALIDOS, { error: "Tipo inválido" }),
-  unidad: z.enum(UNIDADES_VALIDAS, { error: "Unidad inválida" }),
-  stock_actual: z.number().min(0).optional(),
-  stock_minimo: z.number().min(0).optional(),
-  costo_unitario: z.number().min(0).optional(),
-  proveedor: z.string().max(120).optional().nullable(),
-  tipo_animal: z.string().max(60).optional().nullable(),
-  requiere_refrigeracion: z.boolean().optional(),
-  fecha_vencimiento: z.string().optional().nullable(),
-  producto_id: z.string().uuid().optional().nullable(),
-  activo: z.boolean().optional(),
-});
+const esquemaItem = z
+  .object({
+    nombre: z.string().min(2, "El nombre debe tener al menos 2 caracteres").max(160),
+    tipo: z.enum(TIPOS_VALIDOS, { error: "Tipo inválido" }),
+    unidad: z.enum(UNIDADES_VALIDAS, { error: "Unidad inválida" }),
+    stock_actual: z.number().min(0).optional(),
+    stock_minimo: z.number().min(0).optional(),
+    costo_unitario: z.number().min(0).optional(),
+    proveedor: z.string().max(120).optional().nullable(),
+    tipo_animal: z.string().max(60).optional().nullable(),
+    requiere_refrigeracion: z.boolean().optional(),
+    fecha_vencimiento: z.string().optional().nullable(),
+    producto_id: z.string().uuid().optional().nullable(),
+    activo: z.boolean().optional(),
+  })
+  .refine((d) => d.tipo !== "producto_terminado" || !!d.producto_id, {
+    message: "Selecciona un producto del catálogo",
+    path: ["producto_id"],
+  });
 
 export async function GET(request: NextRequest) {
   try {
@@ -88,6 +93,17 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: item }, { status: 201 });
   } catch (error) {
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      (error as { code?: string }).code === "P2002"
+    ) {
+      return NextResponse.json(
+        { success: false, error: "Ese producto ya tiene un ítem de inventario asociado" },
+        { status: 409 }
+      );
+    }
     console.error("Error al crear ítem:", error);
     return NextResponse.json({ success: false, error: "Error interno del servidor" }, { status: 500 });
   }

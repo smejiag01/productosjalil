@@ -1,11 +1,15 @@
 "use client";
 
-import { useState, FormEvent, useEffect } from "react";
+import { useState, FormEvent, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import SelectorBusqueda from "@/components/SelectorBusqueda";
+import { formatearPrecio } from "@/lib/formato";
 
 interface ProductoOpt {
   id: string;
   nombre: string;
+  unidad: string;
+  precio_base: number;
 }
 
 interface Props {
@@ -43,6 +47,8 @@ export default function ModalItem({ tipo, itemInicial, onCerrar }: Props) {
   const [productoId, setProductoId] = useState(itemInicial?.producto_id ?? "");
   const [activo, setActivo] = useState(itemInicial?.activo ?? true);
   const [productos, setProductos] = useState<ProductoOpt[]>([]);
+  const [productoIdsVinculados, setProductoIdsVinculados] = useState<Set<string>>(new Set());
+  const [mostrarSelectorProducto, setMostrarSelectorProducto] = useState(false);
   const [error, setError] = useState("");
   const [cargando, setCargando] = useState(false);
 
@@ -51,12 +57,55 @@ export default function ModalItem({ tipo, itemInicial, onCerrar }: Props) {
       fetch("/api/productos?activo=true")
         .then((r) => r.json())
         .then((d) => { if (d.success) setProductos(d.data); });
+
+      fetch("/api/inventarios/items?tipo=producto_terminado")
+        .then((r) => r.json())
+        .then((d) => {
+          if (d.success) {
+            const vinculados = (d.data as { id: string; producto_id: string | null }[])
+              .filter((i) => i.producto_id && i.id !== itemInicial?.id)
+              .map((i) => i.producto_id as string);
+            setProductoIdsVinculados(new Set(vinculados));
+          }
+        });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tipo]);
+
+  const productoSeleccionado = useMemo(
+    () => productos.find((p) => p.id === productoId) ?? null,
+    [productos, productoId]
+  );
+
+  const opcionesProducto = useMemo(
+    () =>
+      productos.map((p) => ({
+        id: p.id,
+        titulo: p.nombre,
+        subtitulo: `${p.unidad} · ${formatearPrecio(p.precio_base)}`,
+        deshabilitada: productoIdsVinculados.has(p.id),
+      })),
+    [productos, productoIdsVinculados]
+  );
+
+  function seleccionarProducto(id: string) {
+    const p = productos.find((x) => x.id === id);
+    if (!p) return;
+    setProductoId(p.id);
+    setNombre(p.nombre);
+    setUnidad(p.unidad);
+    setMostrarSelectorProducto(false);
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
+
+    if (tipo === "producto_terminado" && !productoId) {
+      setError("Selecciona un producto del catálogo");
+      return;
+    }
+
     setCargando(true);
 
     const body: Record<string, unknown> = {
@@ -74,7 +123,7 @@ export default function ModalItem({ tipo, itemInicial, onCerrar }: Props) {
       body.requiere_refrigeracion = refrigeracion;
     }
     if (tipo !== "insumo" && fechaVencimiento) body.fecha_vencimiento = fechaVencimiento;
-    if (tipo === "producto_terminado") body.producto_id = productoId || null;
+    if (tipo === "producto_terminado") body.producto_id = productoId;
 
     try {
       const url = esEdicion ? `/api/inventarios/items/${itemInicial!.id}` : "/api/inventarios/items";
@@ -109,19 +158,47 @@ export default function ModalItem({ tipo, itemInicial, onCerrar }: Props) {
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {error && <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">{error}</div>}
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nombre <span className="text-red-500">*</span></label>
-            <input type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand" />
-          </div>
+          {tipo === "producto_terminado" ? (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Producto del catálogo <span className="text-red-500">*</span>
+              </label>
+              <button
+                type="button"
+                onClick={() => setMostrarSelectorProducto(true)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-left outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand hover:bg-gray-50 transition-colors flex items-center justify-between"
+              >
+                <span className={productoSeleccionado ? "text-gray-900" : "text-gray-400"}>
+                  {productoSeleccionado ? productoSeleccionado.nombre : "Selecciona un producto..."}
+                </span>
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-gray-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+              </button>
+              <p className="text-xs text-gray-400 mt-1">
+                El nombre y la unidad se toman del catálogo automáticamente
+              </p>
+            </div>
+          ) : (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Nombre <span className="text-red-500">*</span></label>
+              <input type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} required
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand" />
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Unidad</label>
-              <select value={unidad} onChange={(e) => setUnidad(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand">
-                {UNIDADES.map((u) => <option key={u} value={u}>{u}</option>)}
-              </select>
+              {tipo === "producto_terminado" ? (
+                <input type="text" value={unidad} disabled
+                  className="w-full px-3 py-2 border border-gray-200 bg-gray-50 rounded-lg text-sm text-gray-500" />
+              ) : (
+                <select value={unidad} onChange={(e) => setUnidad(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand">
+                  {UNIDADES.map((u) => <option key={u} value={u}>{u}</option>)}
+                </select>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Costo unitario (COP)</label>
@@ -169,17 +246,6 @@ export default function ModalItem({ tipo, itemInicial, onCerrar }: Props) {
             </div>
           )}
 
-          {tipo === "producto_terminado" && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Producto del catálogo (opcional)</label>
-              <select value={productoId} onChange={(e) => setProductoId(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand">
-                <option value="">Sin vincular</option>
-                {productos.map((p) => <option key={p.id} value={p.id}>{p.nombre}</option>)}
-              </select>
-            </div>
-          )}
-
           {esEdicion && (
             <div className="flex items-center gap-3">
               <label className="text-sm font-medium text-gray-700">Estado</label>
@@ -201,6 +267,16 @@ export default function ModalItem({ tipo, itemInicial, onCerrar }: Props) {
           </div>
         </form>
       </div>
+
+      {mostrarSelectorProducto && (
+        <SelectorBusqueda
+          titulo="Seleccionar producto del catálogo"
+          placeholder="Buscar producto..."
+          opciones={opcionesProducto}
+          onSeleccionar={seleccionarProducto}
+          onCerrar={() => setMostrarSelectorProducto(false)}
+        />
+      )}
     </div>
   );
 }

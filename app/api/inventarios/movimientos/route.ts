@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 
 const TIPOS_MOV = ["entrada", "salida", "ajuste"] as const;
-const MOTIVOS = ["compra", "venta", "merma", "produccion", "ajuste_manual"] as const;
+const MOTIVOS = ["compra", "venta", "merma", "produccion", "ajuste_manual", "reconteo"] as const;
 
 const esquemaMovimiento = z.object({
   item_id: z.string().uuid("Ítem inválido"),

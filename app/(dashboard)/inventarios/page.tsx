@@ -12,10 +12,13 @@ const TIPOS_CONFIG = [
 ] as const;
 
 export default async function InventariosPage() {
-  const items = await prisma.inventario_items.findMany({
-    where: { activo: true },
-    select: { id: true, nombre: true, tipo: true, unidad: true, stock_actual: true, stock_minimo: true, costo_unitario: true },
-  });
+  const [items, reconteosAbiertos] = await Promise.all([
+    prisma.inventario_items.findMany({
+      where: { activo: true },
+      select: { id: true, nombre: true, tipo: true, unidad: true, stock_actual: true, stock_minimo: true, costo_unitario: true },
+    }),
+    prisma.inventario_reconteos.count({ where: { estado: "abierto" } }),
+  ]);
 
   const resumen = TIPOS_CONFIG.map(({ tipo, label, href, emoji }) => {
     const del_tipo = items.filter((i) => i.tipo === tipo);
@@ -42,7 +45,7 @@ export default async function InventariosPage() {
       </div>
 
       {/* Tarjetas por tipo */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {resumen.map((r) => (
           <Link key={r.tipo} href={r.href}
             className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow group">
@@ -68,6 +71,23 @@ export default async function InventariosPage() {
             </div>
           </Link>
         ))}
+
+        <Link href="/inventarios/reconteos"
+          className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow group">
+          <div className="flex items-center gap-3 mb-4">
+            <span className="text-2xl">🔄</span>
+            <h3 className="font-semibold text-gray-900 group-hover:text-brand transition-colors">Reconteos</h3>
+          </div>
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-500">Abiertos</span>
+              <span className={`font-medium ${reconteosAbiertos > 0 ? "text-red-600" : "text-green-600"}`}>
+                {reconteosAbiertos}
+              </span>
+            </div>
+            <p className="text-xs text-gray-400 pt-1">Registrar conteo físico y ajustar stock</p>
+          </div>
+        </Link>
       </div>
 
       {/* Alertas */}
