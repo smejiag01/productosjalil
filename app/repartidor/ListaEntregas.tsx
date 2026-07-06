@@ -195,7 +195,10 @@ export default function ListaEntregas({ entregas }: { entregas: Entrega[] }) {
       ) : (
         <div className="space-y-3">
           {filtradas.map((e) => {
-            const puedeActuar = e.estado !== "entregado" && e.estado !== "devuelto";
+            // Solo confirmado/en_reparto pueden pasar a entregado o devuelto
+            // (ver TRANSICIONES_VALIDAS en lib/pedidos.ts); pendiente/en_proceso
+            // todavía no están listos para reparto y el PATCH los rechazaría.
+            const puedeActuar = e.estado === "confirmado" || e.estado === "en_reparto";
             return (
               <div key={e.id} className="bg-white rounded-xl border border-gray-200 p-4">
                 <div className="flex items-start justify-between gap-3 mb-3">

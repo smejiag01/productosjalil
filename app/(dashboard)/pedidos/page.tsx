@@ -3,6 +3,7 @@ import { formatearPrecio } from "@/lib/formato";
 import { ESTADOS, type EstadoPedido } from "@/lib/pedidos";
 import TablaPedidos from "./TablaPedidos";
 import SelectorFecha from "./SelectorFecha";
+import DespacharRutas from "./DespacharRutas";
 
 export const dynamic = "force-dynamic";
 
@@ -79,6 +80,7 @@ export default async function PedidosPage({
     id: p.id,
     clienteNombre: p.cliente.nombre,
     clienteCodigo: p.cliente.codigo_mekano,
+    rutaId: p.ruta_id,
     rutaNombre: p.ruta?.nombre ?? "Sin ruta",
     numProductos: p.items.length,
     total: formatearPrecio(Number(p.total)),
@@ -172,6 +174,10 @@ export default async function PedidosPage({
           )}
         </div>
       </div>
+
+      {vistaActual === "fecha" && (
+        <DespacharRutas pedidos={pedidosSerializados} fecha={fechaSeleccionada} />
+      )}
 
       <TablaPedidos
         pedidos={pedidosSerializados}

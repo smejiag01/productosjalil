@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { DIAS_SEMANA } from "@/lib/dias-semana";
 import ModalRuta from "./ModalRuta";
 
@@ -76,7 +77,10 @@ export default function TablaRutas({ rutas, empleados }: Props) {
               </div>
               <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                 <span className="text-xs text-gray-500">{r.num_clientes} clientes</span>
-                <button onClick={() => { setEditando(r); setModalAbierto(true); }} className="h-9 px-4 bg-gray-50 border border-gray-200 rounded-lg text-xs font-medium text-brand hover:bg-gray-100 transition-colors">Editar</button>
+                <div className="flex items-center gap-2">
+                  <Link href={`/rutas/${r.id}`} className="h-9 px-4 bg-gray-50 border border-gray-200 rounded-lg text-xs font-medium text-brand hover:bg-gray-100 transition-colors flex items-center">Orden de entrega</Link>
+                  <button onClick={() => { setEditando(r); setModalAbierto(true); }} className="h-9 px-4 bg-gray-50 border border-gray-200 rounded-lg text-xs font-medium text-brand hover:bg-gray-100 transition-colors">Editar</button>
+                </div>
               </div>
             </div>
           ))
@@ -136,12 +140,17 @@ export default function TablaRutas({ rutas, empleados }: Props) {
                     </span>
                   </td>
                   <td className="py-3 px-4 text-right">
-                    <button
-                      onClick={() => { setEditando(r); setModalAbierto(true); }}
-                      className="text-sm text-brand hover:text-brand-light font-medium transition-colors"
-                    >
-                      Editar
-                    </button>
+                    <div className="flex items-center justify-end gap-3">
+                      <Link href={`/rutas/${r.id}`} className="text-sm text-brand hover:text-brand-light font-medium transition-colors">
+                        Orden de entrega
+                      </Link>
+                      <button
+                        onClick={() => { setEditando(r); setModalAbierto(true); }}
+                        className="text-sm text-brand hover:text-brand-light font-medium transition-colors"
+                      >
+                        Editar
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))

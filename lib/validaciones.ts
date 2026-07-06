@@ -21,3 +21,10 @@ export const esquemaPrecioCliente = z.object({
   producto_id: z.string().uuid("Producto inválido"),
   precio: z.number().positive("El precio debe ser mayor a 0"),
 });
+
+export const esquemaOrdenRuta = z.array(
+  z.object({
+    id: z.string().uuid(),
+    orden_ruta: z.number().int().min(0),
+  })
+);
