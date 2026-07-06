@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin, esApiKeyValida } from "@/lib/auth-guard";
 
+// n8n consume la configuración (horarios/mensajes de recordatorio) sin sesión
+// de dashboard; si no trae la API key válida, exigimos sesión de admin.
 export async function GET(request: NextRequest) {
-  const apiKey = request.headers.get("x-api-key");
-  const esN8n = apiKey === process.env.API_SECRET_KEY;
-
-  if (!esN8n) {
-    // Para el dashboard se valida la sesión en el middleware
+  if (!esApiKeyValida(request, "API_SECRET_KEY")) {
+    const auth = await requireAdmin();
+    if (auth.error) return auth.error;
   }
 
   try {
@@ -43,6 +44,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
     const body = await request.json();
 

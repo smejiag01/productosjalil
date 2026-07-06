@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { hoyStr, toDbDate, addDias } from "@/lib/analiticas/periodos";
+import { requireAdmin } from "@/lib/auth-guard";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +16,9 @@ type AlertaRow = {
 };
 
 export async function GET() {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
     const hoy = hoyStr();
     const dbHoy = toDbDate(hoy);

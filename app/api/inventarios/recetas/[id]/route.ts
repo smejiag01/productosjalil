@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth-guard";
 
 const esquemaActualizar = z.object({
   cantidad_requerida: z.number().positive("La cantidad debe ser mayor a 0"),
@@ -10,6 +11,9 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
     const body = await request.json();
     const resultado = esquemaActualizar.safeParse(body);
@@ -41,6 +45,9 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
     const linea = await prisma.inventario_recetas.findUnique({ where: { id: params.id } });
     if (!linea) {

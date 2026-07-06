@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth-guard";
 
 const esquemaSede = z.object({
   nombre_sede: z.string().min(2, "El nombre de la sede debe tener al menos 2 caracteres").max(120),
@@ -14,6 +15,9 @@ export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
     const sedes = await prisma.sedes.findMany({
       where: { cliente_id: params.id },
@@ -31,6 +35,9 @@ export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
     const body = await request.json();
     const resultado = esquemaSede.safeParse(body);

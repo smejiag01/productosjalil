@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { esquemaProducto } from "@/lib/validaciones-producto";
+import { requireAdmin } from "@/lib/auth-guard";
 
 export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
     const body = await request.json();
     const resultado = esquemaProducto.partial().safeParse(body);
@@ -50,6 +54,9 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
     const existente = await prisma.productos.findUnique({
       where: { id: params.id },

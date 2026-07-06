@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { esquemaPrecioCliente } from "@/lib/validaciones";
+import { requireAdmin } from "@/lib/auth-guard";
 
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
     const body = await request.json();
     const resultado = esquemaPrecioCliente.safeParse(body);
@@ -63,6 +67,9 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
     const { searchParams } = new URL(request.url);
     const producto_id = searchParams.get("producto_id");

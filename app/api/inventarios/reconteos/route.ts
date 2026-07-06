@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma";
-import { authOptions } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth-guard";
 
 const esquemaDetalle = z.object({
   item_id: z.string().uuid("Ítem inválido"),
@@ -23,6 +22,9 @@ const esquemaReconteo = z
 class ErrorNotaRequerida extends Error {}
 
 export async function GET(request: NextRequest) {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
     const { searchParams } = new URL(request.url);
     const pagina = Math.max(1, parseInt(searchParams.get("pagina") || "1"));
@@ -63,8 +65,10 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
-    const session = await getServerSession(authOptions);
     const body = await request.json();
     const resultado = esquemaReconteo.safeParse(body);
 
@@ -74,7 +78,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { nota_general, detalles } = resultado.data;
-    const usuarioId = session?.user?.id ?? null;
+    const usuarioId = auth.session.user.id;
 
     const resultadoTx = await prisma.$transaction(async (tx) => {
       const reconteo = await tx.inventario_reconteos.create({

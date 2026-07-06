@@ -2,8 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import * as XLSX from "xlsx";
 import { prisma } from "@/lib/prisma";
 import { ESTADOS, type EstadoPedido } from "@/lib/pedidos";
+import { requireAdmin } from "@/lib/auth-guard";
 
 export async function GET(request: NextRequest) {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
     const { searchParams } = new URL(request.url);
     const fechaParam = searchParams.get("fecha");

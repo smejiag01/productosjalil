@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth-guard";
 
 const esquemaRuta = z.object({
   nombre: z.string().min(2, "El nombre debe tener al menos 2 caracteres").max(100),
@@ -11,6 +12,9 @@ const esquemaRuta = z.object({
 });
 
 export async function GET() {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
     const rutas = await prisma.rutas.findMany({
       include: {
@@ -38,6 +42,9 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
     const body = await request.json();
     const resultado = esquemaRuta.safeParse(body);

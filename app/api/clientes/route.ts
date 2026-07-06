@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { esquemaCliente } from "@/lib/validaciones";
+import { requireAdmin } from "@/lib/auth-guard";
 
 export async function GET(request: NextRequest) {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
     const { searchParams } = new URL(request.url);
     const ruta_id = searchParams.get("ruta_id");
@@ -38,6 +42,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
     const body = await request.json();
     const resultado = esquemaCliente.safeParse(body);

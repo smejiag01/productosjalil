@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth-guard";
 
 const esquemaEmpleado = z.object({
   nombre: z.string().min(2, "El nombre debe tener al menos 2 caracteres").max(120),
@@ -10,6 +11,9 @@ const esquemaEmpleado = z.object({
 });
 
 export async function GET(request: NextRequest) {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
     const { searchParams } = new URL(request.url);
     const soloActivos = searchParams.get("activos") === "true";
@@ -27,6 +31,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
     const body = await request.json();
     const resultado = esquemaEmpleado.safeParse(body);

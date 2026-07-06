@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { hash } from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth-guard";
 
 const esquemaRepartidor = z.object({
   nombre: z.string().min(2, "El nombre debe tener al menos 2 caracteres").max(120),
@@ -12,6 +13,9 @@ const esquemaRepartidor = z.object({
 });
 
 export async function GET() {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
     const repartidores = await prisma.usuarios.findMany({
       where: { rol: "repartidor" },
@@ -34,6 +38,9 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
     const body = await request.json();
     const resultado = esquemaRepartidor.safeParse(body);

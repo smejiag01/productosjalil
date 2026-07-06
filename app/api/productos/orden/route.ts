@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { esquemaOrden } from "@/lib/validaciones-producto";
+import { requireAdmin } from "@/lib/auth-guard";
 
 export async function PATCH(request: NextRequest) {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
     const body = await request.json();
     const resultado = esquemaOrden.safeParse(body);

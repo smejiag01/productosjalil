@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth-guard";
 
 const esquemaEstado = z.object({
   estado: z.enum(["pendiente", "en_revision", "resuelto"], {
@@ -12,6 +13,9 @@ export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
     const pqr = await prisma.pqr.findUnique({
       where: { id: params.id },
@@ -33,6 +37,9 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
     const body = await request.json();
     const resultado = esquemaEstado.safeParse(body);

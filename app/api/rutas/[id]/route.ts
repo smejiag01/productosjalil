@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth-guard";
 
 const esquemaRutaParcial = z.object({
   nombre: z.string().min(2).max(100).optional(),
@@ -14,6 +15,9 @@ export async function GET(
   _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
     const ruta = await prisma.rutas.findUnique({
       where: { id: params.id },
@@ -41,6 +45,9 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
     const body = await request.json();
     const resultado = esquemaRutaParcial.safeParse(body);
@@ -71,6 +78,9 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
     const existente = await prisma.rutas.findUnique({ where: { id: params.id } });
     if (!existente) {

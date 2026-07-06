@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth-guard";
 
 const esquemaReceta = z.object({
   producto_terminado_id: z.string().uuid("Producto terminado inválido"),
@@ -9,6 +10,9 @@ const esquemaReceta = z.object({
 });
 
 export async function GET(request: NextRequest) {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
     const { searchParams } = new URL(request.url);
     const productoTerminadoId = searchParams.get("producto_terminado_id");
@@ -36,6 +40,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
     const body = await request.json();
     const resultado = esquemaReceta.safeParse(body);

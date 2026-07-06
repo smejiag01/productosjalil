@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { esquemaCliente } from "@/lib/validaciones";
+import { requireAdmin } from "@/lib/auth-guard";
 
 export async function GET(
   _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
     const cliente = await prisma.clientes.findUnique({
       where: { id: params.id },
@@ -38,6 +42,9 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
     const body = await request.json();
     const resultado = esquemaCliente.partial().safeParse(body);
@@ -112,6 +119,9 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
     const cliente = await prisma.clientes.findUnique({
       where: { id: params.id },

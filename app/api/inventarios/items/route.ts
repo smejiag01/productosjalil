@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth-guard";
 
 const TIPOS_VALIDOS = ["insumo", "materia_prima", "producto_terminado"] as const;
 const UNIDADES_VALIDAS = ["kg", "unidad", "caja", "libra", "arroba", "litro", "gramo"] as const;
@@ -26,6 +27,9 @@ const esquemaItem = z
   });
 
 export async function GET(request: NextRequest) {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
     const { searchParams } = new URL(request.url);
     const tipo = searchParams.get("tipo");
@@ -63,6 +67,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
     const body = await request.json();
     const resultado = esquemaItem.safeParse(body);

@@ -2,11 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { put } from "@vercel/blob";
 import sharp from "sharp";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth-guard";
 
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
     const producto = await prisma.productos.findUnique({
       where: { id: params.id },

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { calcularRango, toDbDate, toUtcInicioTs, toUtcFinTs } from "@/lib/analiticas/periodos";
 import type { Periodo } from "@/lib/analiticas/periodos";
+import { requireAdmin } from "@/lib/auth-guard";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +18,9 @@ type FilaCliente = { nombre: string; pedidos: number; total: number };
 type FilaInactivo = { nombre: string; dias: number | null };
 
 export async function GET(req: NextRequest) {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
     const params = Object.fromEntries(req.nextUrl.searchParams);
     const { periodo, fecha } = esquema.parse(params);

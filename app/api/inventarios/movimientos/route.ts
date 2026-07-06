@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import * as XLSX from "xlsx";
-import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma";
-import { authOptions } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth-guard";
 
 const TIPOS_MOV = ["entrada", "salida", "ajuste"] as const;
 const MOTIVOS = ["compra", "venta", "merma", "produccion", "ajuste_manual", "reconteo"] as const;
@@ -17,6 +16,9 @@ const esquemaMovimiento = z.object({
 });
 
 export async function GET(request: NextRequest) {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
     const { searchParams } = new URL(request.url);
     const tipoInv = searchParams.get("tipo_inventario");
@@ -92,8 +94,10 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
-    const session = await getServerSession(authOptions);
     const body = await request.json();
     const resultado = esquemaMovimiento.safeParse(body);
 
@@ -140,7 +144,7 @@ export async function POST(request: NextRequest) {
           cantidad_anterior: stockAnterior,
           cantidad_nueva: stockNuevo,
           notas: notas ?? null,
-          usuario_id: session?.user?.id ?? null,
+          usuario_id: auth.session.user.id,
         },
       }),
     ]);

@@ -1,9 +1,8 @@
 import { randomUUID } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma";
-import { authOptions } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth-guard";
 
 const esquemaProduccion = z.object({
   item_id: z.string().uuid("Producto terminado inválido"),
@@ -12,8 +11,10 @@ const esquemaProduccion = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
-    const session = await getServerSession(authOptions);
     const body = await request.json();
     const resultado = esquemaProduccion.safeParse(body);
 
@@ -23,7 +24,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { item_id, cantidad, notas } = resultado.data;
-    const usuarioId = session?.user?.id ?? null;
+    const usuarioId = auth.session.user.id;
 
     const productoTerminado = await prisma.inventario_items.findUnique({ where: { id: item_id } });
     if (!productoTerminado || productoTerminado.tipo !== "producto_terminado") {

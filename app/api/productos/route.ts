@@ -1,8 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { esquemaProducto } from "@/lib/validaciones-producto";
+import { requireAdmin, esApiKeyValida } from "@/lib/auth-guard";
 
+// n8n consume este catálogo sin sesión de dashboard (ver CLAUDE.md); si no
+// trae la API key válida, exigimos sesión de admin como en el resto del panel.
 export async function GET(request: NextRequest) {
+  if (!esApiKeyValida(request, "API_SECRET_KEY")) {
+    const auth = await requireAdmin();
+    if (auth.error) return auth.error;
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const clienteId = searchParams.get("cliente_id");
@@ -65,6 +73,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
     const body = await request.json();
     const resultado = esquemaProducto.safeParse(body);

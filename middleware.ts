@@ -11,6 +11,11 @@ export default withAuth(
       return NextResponse.redirect(new URL("/repartidor", req.url));
     }
 
+    // El admin no debe quedar "atrapado" en la vista de repartidor
+    if (rol === "admin" && pathname.startsWith("/repartidor")) {
+      return NextResponse.redirect(new URL("/", req.url));
+    }
+
     return NextResponse.next();
   },
   {
