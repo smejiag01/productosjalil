@@ -3,11 +3,13 @@ import { prisma } from "@/lib/prisma";
 import { formatearPrecio } from "@/lib/formato";
 import {
   calcularRango,
+  calcularRangoPersonalizado,
   hoyStr,
   toDbDate,
   toUtcInicioTs,
   toUtcFinTs,
   addDias,
+  fmtShort,
 } from "@/lib/analiticas/periodos";
 import type { Periodo } from "@/lib/analiticas/periodos";
 import SelectorPeriodo from "./SelectorPeriodo";
@@ -22,22 +24,27 @@ const TABS = [
   { key: "productos",  label: "Productos" },
   { key: "clientes",   label: "Clientes" },
   { key: "inventario", label: "Inventario" },
+  { key: "rutas",      label: "Rutas" },
 ];
 
 const ESTADOS_COLORES: Record<string, string> = {
   pendiente:  "#f59e0b",
   en_proceso: "#3b82f6",
   confirmado: "#10b981",
+  en_reparto: "#8b5cf6",
   cancelado:  "#ef4444",
   entregado:  "#6b7280",
+  devuelto:   "#f97316",
 };
 
 const ESTADOS_LABELS: Record<string, string> = {
   pendiente:  "Pendiente",
   en_proceso: "En proceso",
   confirmado: "Confirmado",
+  en_reparto: "En reparto",
   cancelado:  "Cancelado",
   entregado:  "Entregado",
+  devuelto:   "Devuelto",
 };
 
 const TIPOS_INV_LABEL: Record<string, string> = {
@@ -56,6 +63,27 @@ type FilaInactivo = { nombre: string; dias: number | null };
 type FilaConsumo  = { tipo: string; cantidad: number };
 type FilaMerma    = { nombre: string; cantidad: number; costo_total: number };
 type FilaRotacion = { nombre: string; movimientos: number };
+type FilaProduccion = { nombre: string; cantidad: number };
+type FilaClientePrecio = { con_precio: number; sin_precio: number };
+type FilaVentasRuta = { ruta: string; pedidos: number; total: number };
+type FilaDevolucionRuta = { ruta: string; devueltos: number; total: number };
+type FilaTiempoRuta = { ruta: string; horas_promedio: number | null };
+type FilaRepartidor = { repartidor: string; entregados: number; devueltos: number };
+type FilaTiempo = { horas_promedio: number | null };
+type FilaHoraPico = { hora: number; total: number };
+type FilaBucket = { bucket: string; total: number };
+type FilaFrecuencia = { frecuencia_promedio: number | null };
+type FilaRetencion = { anterior_total: number; retenidos: number };
+type FilaMultiSede = { multi_sede: number };
+type FilaAlertaDias = { id: string; nombre: string; dias_sin_entrada: number | null };
+
+const ORDEN_BUCKETS = ["<1h", "1-3h", "3-6h", "+6h"];
+const LABELS_BUCKETS: Record<string, string> = {
+  "<1h": "Menos de 1h",
+  "1-3h": "1 a 3h",
+  "3-6h": "3 a 6h",
+  "+6h": "Más de 6h",
+};
 
 function diffDias(a: string, b: string): number {
   return (toDbDate(b).getTime() - toDbDate(a).getTime()) / 86400000;
@@ -68,6 +96,8 @@ export default async function AnaliticasPage({
     periodo?: string;
     fecha?: string;
     tab?: string;
+    desde?: string;
+    hasta?: string;
   };
 }) {
   const periodo = (
@@ -82,7 +112,20 @@ export default async function AnaliticasPage({
 
   const tab = TABS.some((t) => t.key === searchParams.tab) ? searchParams.tab! : "ventas";
 
-  const rango = calcularRango(periodo, fecha);
+  const fechaValida = (s?: string) => /^\d{4}-\d{2}-\d{2}$/.test(s ?? "");
+  const esPersonalizado =
+    searchParams.periodo === "personalizado" &&
+    fechaValida(searchParams.desde) &&
+    fechaValida(searchParams.hasta);
+
+  // Valores por defecto para los inputs de rango libre: si aún no hay uno
+  // elegido, se sugieren los últimos 7 días para que el usuario parta de algo.
+  const desdeParam = fechaValida(searchParams.desde) ? searchParams.desde! : addDias(fecha, -6);
+  const hastaParam = fechaValida(searchParams.hasta) ? searchParams.hasta! : fecha;
+
+  const rango = esPersonalizado
+    ? calcularRangoPersonalizado(desdeParam, hastaParam)
+    : calcularRango(periodo, fecha);
   const inicioDb  = toDbDate(rango.inicio);
   const finDb     = toDbDate(rango.fin);
   const inicioAntDb = toDbDate(rango.inicioAnterior);
@@ -134,9 +177,20 @@ export default async function AnaliticasPage({
   let totalPedidos = 0, cancelados = 0, tasaCancelacion = 0;
   let porEstado: { estado: string; count: number }[] = [];
   let seriePedidos: Record<string, string | number>[] = [];
+  let horasConfirmacion: number | null = null;
+  let horasTotalPedido: number | null = null;
+  let valorPerdidoDevoluciones = 0;
+  let pedidosPorHora: { label: string; total: number }[] = [];
 
   if (tab === "pedidos") {
-    const [estadosRaw, serieRaw] = await Promise.all([
+    const [
+      estadosRaw,
+      serieRaw,
+      confirmacionRaw,
+      totalPedidoRaw,
+      devolucionesRaw,
+      horaPicoRaw,
+    ] = await Promise.all([
       prisma.pedidos.groupBy({
         by: ["estado"],
         where: { fecha_pedido: { gte: inicioDb, lte: finDb } },
@@ -148,11 +202,43 @@ export default async function AnaliticasPage({
         WHERE fecha_pedido >= ${inicioDb} AND fecha_pedido <= ${finDb}
         GROUP BY fecha_pedido, estado ORDER BY fecha_pedido
       `,
+      prisma.$queryRaw<FilaTiempo[]>`
+        SELECT CAST(AVG(EXTRACT(EPOCH FROM (confirmado_at - created_at)) / 3600) AS FLOAT) AS horas_promedio
+        FROM pedidos
+        WHERE confirmado_at IS NOT NULL
+          AND fecha_pedido >= ${inicioDb} AND fecha_pedido <= ${finDb}
+      `,
+      prisma.$queryRaw<FilaTiempo[]>`
+        SELECT CAST(AVG(EXTRACT(EPOCH FROM (entregado_at - created_at)) / 3600) AS FLOAT) AS horas_promedio
+        FROM pedidos
+        WHERE estado = 'entregado' AND entregado_at IS NOT NULL
+          AND fecha_pedido >= ${inicioDb} AND fecha_pedido <= ${finDb}
+      `,
+      prisma.$queryRaw<{ total: number | null }[]>`
+        SELECT CAST(SUM(total) AS FLOAT) AS total
+        FROM pedidos
+        WHERE estado = 'devuelto'
+          AND fecha_pedido >= ${inicioDb} AND fecha_pedido <= ${finDb}
+      `,
+      prisma.$queryRaw<FilaHoraPico[]>`
+        SELECT CAST(EXTRACT(HOUR FROM created_at AT TIME ZONE 'America/Bogota') AS INT) AS hora,
+               CAST(COUNT(*) AS INT) AS total
+        FROM pedidos
+        WHERE fecha_pedido >= ${inicioDb} AND fecha_pedido <= ${finDb}
+        GROUP BY hora ORDER BY hora
+      `,
     ]);
     porEstado = estadosRaw.map((e) => ({ estado: e.estado, count: e._count.id }));
     totalPedidos = porEstado.reduce((s, r) => s + r.count, 0);
     cancelados = porEstado.find((r) => r.estado === "cancelado")?.count ?? 0;
     tasaCancelacion = totalPedidos > 0 ? Math.round((cancelados / totalPedidos) * 1000) / 10 : 0;
+    horasConfirmacion = confirmacionRaw[0]?.horas_promedio ?? null;
+    horasTotalPedido = totalPedidoRaw[0]?.horas_promedio ?? null;
+    valorPerdidoDevoluciones = devolucionesRaw[0]?.total ?? 0;
+    pedidosPorHora = Array.from({ length: 24 }, (_, h) => {
+      const found = horaPicoRaw.find((r) => r.hora === h);
+      return { label: `${h}h`, total: found ? found.total : 0 };
+    });
     const dias = diffDias(rango.inicio, rango.fin) + 1;
     const estados = Object.keys(ESTADOS_COLORES);
     seriePedidos = Array.from({ length: dias }, (_, i) => {
@@ -199,9 +285,30 @@ export default async function AnaliticasPage({
   let masActivos: FilaCliente[] = [];
   let clientesNuevos = 0;
   let inactivos: FilaInactivo[] = [];
+  let ventasPorRutaClientes: FilaVentasRuta[] = [];
+  let clientesConPrecio = 0;
+  let clientesSinPrecio = 0;
+  let frecuenciaPromedio: number | null = null;
+  let tasaRetencion: number | null = null;
+  let clientesRetenidos = 0;
+  let clientesAnteriorTotal = 0;
+  let clientesMultiSede = 0;
 
   if (tab === "clientes") {
-    [masActivos, clientesNuevos, inactivos] = await Promise.all([
+    let clientesConPrecioRaw: FilaClientePrecio[];
+    let frecuenciaRaw: FilaFrecuencia[];
+    let retencionRaw: FilaRetencion[];
+    let multiSedeRaw: FilaMultiSede[];
+    [
+      masActivos,
+      clientesNuevos,
+      inactivos,
+      ventasPorRutaClientes,
+      clientesConPrecioRaw,
+      frecuenciaRaw,
+      retencionRaw,
+      multiSedeRaw,
+    ] = await Promise.all([
       prisma.$queryRaw<FilaCliente[]>`
         SELECT c.nombre, CAST(COUNT(p.id) AS INT) AS pedidos, CAST(SUM(p.total) AS FLOAT) AS total
         FROM pedidos p JOIN clientes c ON c.id = p.cliente_id
@@ -218,7 +325,58 @@ export default async function AnaliticasPage({
             OR MAX(p.fecha_pedido) IS NULL
         ORDER BY dias DESC NULLS LAST LIMIT 10
       `,
+      prisma.$queryRaw<FilaVentasRuta[]>`
+        SELECT COALESCE(r.nombre, 'Sin ruta') AS ruta,
+               CAST(COUNT(p.id) AS INT) AS pedidos,
+               CAST(SUM(p.total) AS FLOAT) AS total
+        FROM pedidos p LEFT JOIN rutas r ON r.id = p.ruta_id
+        WHERE p.fecha_pedido >= ${inicioDb} AND p.fecha_pedido <= ${finDb}
+        GROUP BY r.id, r.nombre ORDER BY total DESC
+      `,
+      prisma.$queryRaw<FilaClientePrecio[]>`
+        SELECT CAST(COUNT(DISTINCT pc.cliente_id) AS INT) AS con_precio,
+               CAST((SELECT COUNT(*) FROM clientes WHERE activo = true) - COUNT(DISTINCT pc.cliente_id) AS INT) AS sin_precio
+        FROM precios_cliente pc JOIN clientes c ON c.id = pc.cliente_id
+        WHERE c.activo = true
+      `,
+      prisma.$queryRaw<FilaFrecuencia[]>`
+        SELECT CAST(AVG(intervalo_dias) AS FLOAT) AS frecuencia_promedio
+        FROM (
+          SELECT cliente_id,
+                 CAST(fecha_pedido - LAG(fecha_pedido) OVER (PARTITION BY cliente_id ORDER BY fecha_pedido) AS INT) AS intervalo_dias
+          FROM pedidos
+          WHERE estado != 'cancelado'
+        ) t
+        WHERE intervalo_dias IS NOT NULL AND intervalo_dias > 0
+      `,
+      prisma.$queryRaw<FilaRetencion[]>`
+        WITH anterior AS (
+          SELECT DISTINCT cliente_id FROM pedidos
+          WHERE fecha_pedido >= ${inicioAntDb} AND fecha_pedido <= ${finAntDb} AND estado != 'cancelado'
+        ), actual AS (
+          SELECT DISTINCT cliente_id FROM pedidos
+          WHERE fecha_pedido >= ${inicioDb} AND fecha_pedido <= ${finDb} AND estado != 'cancelado'
+        )
+        SELECT
+          CAST((SELECT COUNT(*) FROM anterior) AS INT) AS anterior_total,
+          CAST((SELECT COUNT(*) FROM anterior a JOIN actual b ON a.cliente_id = b.cliente_id) AS INT) AS retenidos
+      `,
+      prisma.$queryRaw<FilaMultiSede[]>`
+        SELECT CAST(COUNT(*) AS INT) AS multi_sede
+        FROM (
+          SELECT cliente_id FROM sedes WHERE activa = true GROUP BY cliente_id HAVING COUNT(*) > 1
+        ) t
+      `,
     ]);
+    clientesConPrecio = clientesConPrecioRaw[0]?.con_precio ?? 0;
+    clientesSinPrecio = clientesConPrecioRaw[0]?.sin_precio ?? 0;
+    frecuenciaPromedio = frecuenciaRaw[0]?.frecuencia_promedio ?? null;
+    clientesAnteriorTotal = retencionRaw[0]?.anterior_total ?? 0;
+    clientesRetenidos = retencionRaw[0]?.retenidos ?? 0;
+    tasaRetencion = clientesAnteriorTotal > 0
+      ? Math.round((clientesRetenidos / clientesAnteriorTotal) * 1000) / 10
+      : null;
+    clientesMultiSede = multiSedeRaw[0]?.multi_sede ?? 0;
   }
 
   // ── Inventario ───────────────────────────────────────────────────────────
@@ -227,9 +385,11 @@ export default async function AnaliticasPage({
   let totalMermasCosto = 0;
   let masRotacion: FilaRotacion[] = [];
   let sinRotacion: { nombre: string }[] = [];
+  let produccion: FilaProduccion[] = [];
+  let alertasDiasSinEntrada: FilaAlertaDias[] = [];
 
   if (tab === "inventario") {
-    [consumoPorTipo, mermas, masRotacion, sinRotacion] = await Promise.all([
+    [consumoPorTipo, mermas, masRotacion, sinRotacion, produccion, alertasDiasSinEntrada] = await Promise.all([
       prisma.$queryRaw<FilaConsumo[]>`
         SELECT ii.tipo, CAST(SUM(im.cantidad) AS FLOAT) AS cantidad
         FROM inventario_movimientos im JOIN inventario_items ii ON ii.id = im.item_id
@@ -260,12 +420,95 @@ export default async function AnaliticasPage({
         )
         ORDER BY ii.nombre LIMIT 10
       `,
+      prisma.$queryRaw<FilaProduccion[]>`
+        SELECT ii.nombre, CAST(SUM(im.cantidad) AS FLOAT) AS cantidad
+        FROM inventario_movimientos im JOIN inventario_items ii ON ii.id = im.item_id
+        WHERE im.motivo = 'produccion' AND im.tipo = 'entrada'
+          AND im.created_at >= ${inicioTs} AND im.created_at <= ${finTs}
+        GROUP BY ii.id, ii.nombre ORDER BY cantidad DESC LIMIT 10
+      `,
+      prisma.$queryRaw<FilaAlertaDias[]>`
+        SELECT ii.id::text AS id, ii.nombre,
+               CAST(EXTRACT(day FROM NOW() - MAX(im.created_at)) AS INT) AS dias_sin_entrada
+        FROM inventario_items ii
+        LEFT JOIN inventario_movimientos im ON im.item_id = ii.id AND im.tipo = 'entrada'
+        WHERE ii.activo = true AND ii.stock_actual <= ii.stock_minimo
+        GROUP BY ii.id, ii.nombre
+        ORDER BY dias_sin_entrada DESC NULLS FIRST
+        LIMIT 10
+      `,
     ]);
     totalMermasCosto = mermas.reduce((s, m) => s + m.costo_total, 0);
   }
 
+  // ── Rutas ────────────────────────────────────────────────────────────────
+  let ventasPorRuta: FilaVentasRuta[] = [];
+  let devolucionPorRuta: FilaDevolucionRuta[] = [];
+  let tiempoPorRuta: FilaTiempoRuta[] = [];
+  let rankingRepartidores: FilaRepartidor[] = [];
+  let distribucionTiempos: { label: string; total: number }[] = [];
+
+  if (tab === "rutas") {
+    let bucketsRaw: FilaBucket[];
+    [ventasPorRuta, devolucionPorRuta, tiempoPorRuta, rankingRepartidores, bucketsRaw] = await Promise.all([
+      prisma.$queryRaw<FilaVentasRuta[]>`
+        SELECT COALESCE(r.nombre, 'Sin ruta') AS ruta,
+               CAST(COUNT(p.id) AS INT) AS pedidos,
+               CAST(SUM(p.total) AS FLOAT) AS total
+        FROM pedidos p LEFT JOIN rutas r ON r.id = p.ruta_id
+        WHERE p.fecha_pedido >= ${inicioDb} AND p.fecha_pedido <= ${finDb}
+        GROUP BY r.id, r.nombre ORDER BY total DESC
+      `,
+      prisma.$queryRaw<FilaDevolucionRuta[]>`
+        SELECT COALESCE(r.nombre, 'Sin ruta') AS ruta,
+               CAST(COUNT(*) FILTER (WHERE p.estado = 'devuelto') AS INT) AS devueltos,
+               CAST(COUNT(*) AS INT) AS total
+        FROM pedidos p LEFT JOIN rutas r ON r.id = p.ruta_id
+        WHERE p.fecha_pedido >= ${inicioDb} AND p.fecha_pedido <= ${finDb}
+        GROUP BY r.id, r.nombre ORDER BY devueltos DESC
+      `,
+      prisma.$queryRaw<FilaTiempoRuta[]>`
+        SELECT COALESCE(r.nombre, 'Sin ruta') AS ruta,
+               CAST(AVG(EXTRACT(EPOCH FROM (p.entregado_at - p.confirmado_at)) / 3600) AS FLOAT) AS horas_promedio
+        FROM pedidos p LEFT JOIN rutas r ON r.id = p.ruta_id
+        WHERE p.estado = 'entregado' AND p.entregado_at IS NOT NULL AND p.confirmado_at IS NOT NULL
+          AND p.fecha_pedido >= ${inicioDb} AND p.fecha_pedido <= ${finDb}
+        GROUP BY r.id, r.nombre ORDER BY horas_promedio ASC
+      `,
+      prisma.$queryRaw<FilaRepartidor[]>`
+        SELECT u.nombre AS repartidor,
+               CAST(COUNT(*) FILTER (WHERE p.estado = 'entregado') AS INT) AS entregados,
+               CAST(COUNT(*) FILTER (WHERE p.estado = 'devuelto') AS INT) AS devueltos
+        FROM pedidos p JOIN usuarios u ON u.id = COALESCE(p.entregado_por, p.devuelto_por)
+        WHERE p.fecha_pedido >= ${inicioDb} AND p.fecha_pedido <= ${finDb}
+          AND p.estado IN ('entregado', 'devuelto')
+        GROUP BY u.id, u.nombre ORDER BY entregados DESC
+      `,
+      prisma.$queryRaw<FilaBucket[]>`
+        SELECT
+          CASE
+            WHEN EXTRACT(EPOCH FROM (entregado_at - confirmado_at)) / 3600 < 1 THEN '<1h'
+            WHEN EXTRACT(EPOCH FROM (entregado_at - confirmado_at)) / 3600 < 3 THEN '1-3h'
+            WHEN EXTRACT(EPOCH FROM (entregado_at - confirmado_at)) / 3600 < 6 THEN '3-6h'
+            ELSE '+6h'
+          END AS bucket,
+          CAST(COUNT(*) AS INT) AS total
+        FROM pedidos
+        WHERE estado = 'entregado' AND entregado_at IS NOT NULL AND confirmado_at IS NOT NULL
+          AND fecha_pedido >= ${inicioDb} AND fecha_pedido <= ${finDb}
+        GROUP BY bucket
+      `,
+    ]);
+    distribucionTiempos = ORDEN_BUCKETS.map((b) => ({
+      label: LABELS_BUCKETS[b],
+      total: bucketsRaw.find((r) => r.bucket === b)?.total ?? 0,
+    }));
+  }
+
   function tabUrl(t: string) {
-    return `/analiticas?periodo=${periodo}&fecha=${fecha}&tab=${t}`;
+    return esPersonalizado
+      ? `/analiticas?periodo=personalizado&desde=${desdeParam}&hasta=${hastaParam}&tab=${t}`
+      : `/analiticas?periodo=${periodo}&fecha=${fecha}&tab=${t}`;
   }
 
   return (
@@ -279,7 +522,15 @@ export default async function AnaliticasPage({
       </div>
 
       {/* Selector de periodo */}
-      <SelectorPeriodo periodo={periodo} fecha={fecha} navLabel={rango.navLabel} tab={tab} />
+      <SelectorPeriodo
+        periodo={periodo}
+        fecha={fecha}
+        navLabel={rango.navLabel}
+        tab={tab}
+        esPersonalizado={esPersonalizado}
+        desde={desdeParam}
+        hasta={hastaParam}
+      />
 
       {/* Tabs */}
       <div className="flex overflow-x-auto gap-1 bg-gray-100 rounded-lg p-0.5 mb-6">
@@ -321,7 +572,11 @@ export default async function AnaliticasPage({
             <div className="bg-white rounded-xl border border-gray-200 p-5">
               <p className="text-sm text-gray-500 mb-1">Periodo anterior</p>
               <p className="text-3xl font-bold text-gray-400">{formatearPrecio(totalAnterior)}</p>
-              <p className="text-xs text-gray-400 mt-1 capitalize">{calcularRango(periodo, rango.inicioAnterior).navLabel}</p>
+              <p className="text-xs text-gray-400 mt-1 capitalize">
+                {esPersonalizado
+                  ? `${fmtShort(rango.inicioAnterior)} – ${fmtShort(rango.finAnterior)}`
+                  : calcularRango(periodo, rango.inicioAnterior).navLabel}
+              </p>
             </div>
           </div>
 
@@ -362,6 +617,30 @@ export default async function AnaliticasPage({
             </div>
           </div>
 
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="bg-white rounded-xl border border-gray-200 p-5">
+              <p className="text-sm text-gray-500 mb-1">Tiempo promedio de confirmación</p>
+              <p className="text-3xl font-bold text-gray-900">
+                {horasConfirmacion != null ? `${Math.round(horasConfirmacion * 10) / 10} h` : "—"}
+              </p>
+              <p className="text-xs text-gray-400 mt-1">desde que se crea hasta que se confirma</p>
+            </div>
+            <div className="bg-white rounded-xl border border-gray-200 p-5">
+              <p className="text-sm text-gray-500 mb-1">Tiempo total del pedido</p>
+              <p className="text-3xl font-bold text-gray-900">
+                {horasTotalPedido != null ? `${Math.round(horasTotalPedido * 10) / 10} h` : "—"}
+              </p>
+              <p className="text-xs text-gray-400 mt-1">desde que se crea hasta que se entrega</p>
+            </div>
+            <div className="bg-white rounded-xl border border-gray-200 p-5">
+              <p className="text-sm text-gray-500 mb-1">Valor perdido en devoluciones</p>
+              <p className={`text-3xl font-bold ${valorPerdidoDevoluciones > 0 ? "text-red-600" : "text-gray-900"}`}>
+                {formatearPrecio(valorPerdidoDevoluciones)}
+              </p>
+              <p className="text-xs text-gray-400 mt-1">total de pedidos devueltos en el periodo</p>
+            </div>
+          </div>
+
           <div className="bg-white rounded-xl border border-gray-200 p-5">
             <h2 className="font-semibold text-gray-900 mb-4">Pedidos por día</h2>
             <GraficoBarras
@@ -373,6 +652,16 @@ export default async function AnaliticasPage({
                 label: ESTADOS_LABELS[est],
               }))}
               altura={240}
+              formato="numero"
+            />
+          </div>
+
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <h2 className="font-semibold text-gray-900 mb-4">Pedidos por hora del día</h2>
+            <GraficoBarras
+              datos={pedidosPorHora}
+              claves={[{ key: "total", color: "#3b82f6", label: "Pedidos" }]}
+              altura={220}
               formato="numero"
             />
           </div>
@@ -507,6 +796,79 @@ export default async function AnaliticasPage({
               </div>
             </div>
           </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Ventas por ruta */}
+            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+              <div className="px-5 py-4 border-b border-gray-100">
+                <h2 className="font-semibold text-gray-900">Ventas por ruta</h2>
+              </div>
+              {ventasPorRutaClientes.length === 0 ? (
+                <div className="py-10 text-center text-gray-400 text-sm">Sin datos para este periodo</div>
+              ) : (
+                <div className="divide-y divide-gray-50">
+                  {ventasPorRutaClientes.map((r) => (
+                    <div key={r.ruta} className="px-5 py-3 flex items-center justify-between text-sm">
+                      <div>
+                        <p className="font-medium text-gray-900">{r.ruta}</p>
+                        <p className="text-xs text-gray-400">{r.pedidos} {r.pedidos === 1 ? "pedido" : "pedidos"}</p>
+                      </div>
+                      <span className="font-semibold text-gray-900">{formatearPrecio(r.total)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Precios personalizados */}
+            <div className="bg-white rounded-xl border border-gray-200 p-5">
+              <p className="text-sm text-gray-500 mb-3">Clientes con precio personalizado</p>
+              <div className="flex items-end gap-4">
+                <div>
+                  <p className="text-3xl font-bold text-gray-900">{clientesConPrecio}</p>
+                  <p className="text-xs text-gray-400 mt-1">con al menos un precio propio</p>
+                </div>
+                <div>
+                  <p className="text-3xl font-bold text-gray-400">{clientesSinPrecio}</p>
+                  <p className="text-xs text-gray-400 mt-1">usan solo el precio base</p>
+                </div>
+              </div>
+              {clientesConPrecio + clientesSinPrecio > 0 && (
+                <div className="mt-4 h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-brand"
+                    style={{ width: `${Math.round((clientesConPrecio / (clientesConPrecio + clientesSinPrecio)) * 100)}%` }}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="bg-white rounded-xl border border-gray-200 p-5">
+              <p className="text-sm text-gray-500 mb-1">Frecuencia promedio de pedido</p>
+              <p className="text-3xl font-bold text-gray-900">
+                {frecuenciaPromedio != null ? `${Math.round(frecuenciaPromedio)} días` : "—"}
+              </p>
+              <p className="text-xs text-gray-400 mt-1">entre un pedido y el siguiente (histórico)</p>
+            </div>
+            <div className="bg-white rounded-xl border border-gray-200 p-5">
+              <p className="text-sm text-gray-500 mb-1">Retención vs. periodo anterior</p>
+              <p className="text-3xl font-bold text-gray-900">
+                {tasaRetencion != null ? `${tasaRetencion}%` : "—"}
+              </p>
+              <p className="text-xs text-gray-400 mt-1">
+                {clientesAnteriorTotal > 0
+                  ? `${clientesRetenidos} de ${clientesAnteriorTotal} volvieron a pedir`
+                  : "sin pedidos en el periodo anterior"}
+              </p>
+            </div>
+            <div className="bg-white rounded-xl border border-gray-200 p-5">
+              <p className="text-sm text-gray-500 mb-1">Clientes con más de una sede</p>
+              <p className="text-3xl font-bold text-gray-900">{clientesMultiSede}</p>
+              <p className="text-xs text-gray-400 mt-1">negocios con varios puntos de entrega</p>
+            </div>
+          </div>
         </div>
       )}
 
@@ -593,6 +955,154 @@ export default async function AnaliticasPage({
                 )}
               </div>
             </div>
+          </div>
+
+          {/* Días sin reabastecer */}
+          {alertasDiasSinEntrada.length > 0 && (
+            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+              <div className="px-5 py-4 border-b border-gray-100">
+                <h2 className="font-semibold text-gray-900">Ítems en alerta — días sin reabastecer</h2>
+                <p className="text-xs text-gray-400 mt-0.5">Días desde el último movimiento de entrada</p>
+              </div>
+              <div className="divide-y divide-gray-50">
+                {alertasDiasSinEntrada.map((a) => (
+                  <div key={a.id} className="px-5 py-3 flex justify-between text-sm">
+                    <span className="text-gray-900">{a.nombre}</span>
+                    <span className={`font-semibold ${a.dias_sin_entrada != null && a.dias_sin_entrada > 7 ? "text-red-600" : "text-gray-900"}`}>
+                      {a.dias_sin_entrada != null ? `${a.dias_sin_entrada} días` : "Nunca reabastecido"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Producción */}
+          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <div className="px-5 py-4 border-b border-gray-100">
+              <h2 className="font-semibold text-gray-900">Producción registrada</h2>
+              <p className="text-xs text-gray-400 mt-0.5">Producto terminado registrado como producción en el periodo</p>
+            </div>
+            {produccion.length === 0 ? (
+              <div className="py-10 text-center text-gray-400 text-sm">Sin producción registrada en el periodo</div>
+            ) : (
+              <div className="divide-y divide-gray-50">
+                {produccion.map((p) => (
+                  <div key={p.nombre} className="px-5 py-3 flex justify-between text-sm">
+                    <span className="text-gray-900">{p.nombre}</span>
+                    <span className="font-semibold text-gray-900">{p.cantidad} unidades</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── RUTAS ──────────────────────────────────────────────────────────── */}
+      {tab === "rutas" && (
+        <div className="space-y-6">
+          {/* Ventas por ruta */}
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <h2 className="font-semibold text-gray-900 mb-4">Ventas por ruta</h2>
+            <GraficoBarras
+              datos={ventasPorRuta.map((r) => ({ label: r.ruta, total: r.total }))}
+              claves={[{ key: "total", color: "#8B1A1A", label: "Ventas" }]}
+              altura={220}
+              formato="cop"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Tasa de devolución por ruta */}
+            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+              <div className="px-5 py-4 border-b border-gray-100">
+                <h2 className="font-semibold text-gray-900">Tasa de devolución por ruta</h2>
+              </div>
+              {devolucionPorRuta.every((r) => r.total === 0) ? (
+                <div className="py-10 text-center text-gray-400 text-sm">Sin datos para este periodo</div>
+              ) : (
+                <div className="divide-y divide-gray-50">
+                  {devolucionPorRuta.map((r) => {
+                    const tasa = r.total > 0 ? Math.round((r.devueltos / r.total) * 1000) / 10 : 0;
+                    return (
+                      <div key={r.ruta} className="px-5 py-3 flex items-center justify-between text-sm">
+                        <div>
+                          <p className="font-medium text-gray-900">{r.ruta}</p>
+                          <p className="text-xs text-gray-400">{r.devueltos} de {r.total} pedidos</p>
+                        </div>
+                        <span className={`font-semibold ${tasa > 10 ? "text-red-600" : "text-gray-900"}`}>
+                          {tasa}%
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Tiempo promedio de entrega por ruta */}
+            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+              <div className="px-5 py-4 border-b border-gray-100">
+                <h2 className="font-semibold text-gray-900">Tiempo promedio de entrega</h2>
+                <p className="text-xs text-gray-400 mt-0.5">Desde confirmado hasta entregado</p>
+              </div>
+              {tiempoPorRuta.length === 0 ? (
+                <div className="py-10 text-center text-gray-400 text-sm">Sin entregas completadas en el periodo</div>
+              ) : (
+                <div className="divide-y divide-gray-50">
+                  {tiempoPorRuta.map((r) => (
+                    <div key={r.ruta} className="px-5 py-3 flex justify-between text-sm">
+                      <span className="text-gray-900">{r.ruta}</span>
+                      <span className="font-semibold text-gray-900">
+                        {r.horas_promedio != null ? `${Math.round(r.horas_promedio * 10) / 10} h` : "—"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Distribución de tiempos de entrega */}
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <h2 className="font-semibold text-gray-900 mb-1">Distribución de tiempos de entrega</h2>
+            <p className="text-xs text-gray-400 mb-4">Todas las rutas, desde confirmado hasta entregado</p>
+            <GraficoBarras
+              datos={distribucionTiempos}
+              claves={[{ key: "total", color: "#8b5cf6", label: "Pedidos" }]}
+              altura={200}
+              formato="numero"
+            />
+          </div>
+
+          {/* Ranking de repartidores */}
+          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <div className="px-5 py-4 border-b border-gray-100">
+              <h2 className="font-semibold text-gray-900">Ranking de repartidores</h2>
+            </div>
+            {rankingRepartidores.length === 0 ? (
+              <div className="py-10 text-center text-gray-400 text-sm">Sin entregas en el periodo</div>
+            ) : (
+              <div className="divide-y divide-gray-50">
+                {rankingRepartidores.map((r, i) => {
+                  const totalR = r.entregados + r.devueltos;
+                  const tasaDev = totalR > 0 ? Math.round((r.devueltos / totalR) * 1000) / 10 : 0;
+                  return (
+                    <div key={r.repartidor} className="px-5 py-3 flex items-center gap-3">
+                      <span className="text-sm font-bold text-gray-300 w-5 text-center">{i + 1}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">{r.repartidor}</p>
+                        <p className="text-xs text-gray-400">
+                          {r.entregados} entregados · {r.devueltos} devueltos
+                          {totalR > 0 && ` · ${tasaDev}% devolución`}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       )}

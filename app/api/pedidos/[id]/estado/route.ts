@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import { esTransicionValida, type EstadoPedido } from "@/lib/pedidos";
+import { notificarDespachoWhatsApp } from "@/lib/notificaciones/notificarDespacho";
 
 const ESTADOS_VALIDOS = [
   "pendiente",
@@ -26,9 +27,9 @@ const esquemaEstado = z
   });
 
 // Endpoint único y centralizado para cambios de estado de pedido (admin y
-// repartidor). Aquí es donde se debe enganchar más adelante el webhook de
-// n8n para notificar al cliente por WhatsApp (ej. al pasar a en_reparto,
-// entregado o devuelto), sin tener que tocar el resto del código.
+// repartidor). Al pasar a en_reparto notifica por WhatsApp vía n8n (ver
+// lib/notificaciones/notificarDespacho.ts); el despacho masivo por ruta
+// (app/api/pedidos/despachar) notifica por su cuenta ya que no pasa por aquí.
 export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -53,7 +54,7 @@ export async function PATCH(
 
     const pedido = await prisma.pedidos.findUnique({
       where: { id: params.id },
-      include: { ruta: true },
+      include: { ruta: true, cliente: true },
     });
 
     if (!pedido) {
@@ -102,6 +103,21 @@ export async function PATCH(
       where: { id: params.id },
       data,
     });
+
+    // El repartidor puede marcar entregado/devuelto directo desde "confirmado"
+    // (sin pasar por el despacho de ruta) cuando ya salió con el pedido antes
+    // de que el admin despachara la ruta en el sistema. En ese caso el cliente
+    // nunca recibió el aviso de "va en camino", así que lo disparamos aquí
+    // para no perder esa notificación aunque el estado final sea devuelto.
+    const saltoEnReparto =
+      pedido.estado === "confirmado" &&
+      (nuevoEstado === "entregado" || nuevoEstado === "devuelto");
+
+    if (nuevoEstado === "en_reparto" || saltoEnReparto) {
+      await notificarDespachoWhatsApp([
+        { telefono: pedido.cliente.telefono, clienteNombre: pedido.cliente.nombre },
+      ]);
+    }
 
     return NextResponse.json({ success: true, data: pedidoActualizado });
   } catch (error) {

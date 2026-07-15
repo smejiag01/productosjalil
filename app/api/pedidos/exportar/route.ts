@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
       for (const item of pedido.items) {
         filas.push({
           "Código Mekano": pedido.cliente.codigo_mekano ?? "",
-          Cliente: pedido.cliente.nombre,
+          Cliente: pedido.cliente.razon_social || pedido.cliente.nombre,
           Ruta: pedido.ruta?.nombre ?? "Sin ruta",
           Producto: item.producto_nombre,
           Cantidad: Number(item.cantidad),

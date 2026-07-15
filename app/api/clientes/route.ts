@@ -87,6 +87,8 @@ export async function POST(request: NextRequest) {
     const cliente = await prisma.clientes.create({
       data: {
         nombre: datos.nombre,
+        razon_social: datos.razon_social ?? null,
+        nit: datos.nit ?? null,
         telefono: datos.telefono,
         direccion: datos.direccion ?? null,
         codigo_mekano: datos.codigo_mekano ?? null,

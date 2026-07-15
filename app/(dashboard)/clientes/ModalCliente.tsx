@@ -11,6 +11,8 @@ interface Ruta {
 interface DatosCliente {
   id?: string;
   nombre?: string;
+  razon_social?: string | null;
+  nit?: string | null;
   telefono?: string;
   direccion?: string | null;
   codigo_mekano?: string | null;
@@ -34,6 +36,8 @@ export default function ModalCliente({
   const esEdicion = !!clienteInicial?.id;
 
   const [nombre, setNombre] = useState(clienteInicial?.nombre ?? "");
+  const [razonSocial, setRazonSocial] = useState(clienteInicial?.razon_social ?? "");
+  const [nit, setNit] = useState(clienteInicial?.nit ?? "");
   const [telefono, setTelefono] = useState(clienteInicial?.telefono ?? "");
   const [direccion, setDireccion] = useState(clienteInicial?.direccion ?? "");
   const [codigoMekano, setCodigoMekano] = useState(
@@ -54,6 +58,8 @@ export default function ModalCliente({
 
     const body = {
       nombre,
+      razon_social: razonSocial || null,
+      nit: nit || null,
       telefono: telefono.replace(/[\s\-\(\)]/g, ""),
       direccion: direccion || null,
       codigo_mekano: codigoMekano || null,
@@ -138,6 +144,43 @@ export default function ModalCliente({
             />
             {errores.nombre && (
               <p className="text-red-500 text-xs mt-1">{errores.nombre}</p>
+            )}
+          </div>
+
+          {/* Razón social */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Razón social
+            </label>
+            <input
+              type="text"
+              value={razonSocial}
+              onChange={(e) => setRazonSocial(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+              placeholder="Razón social para facturación"
+            />
+            <p className="text-xs text-gray-400 mt-1">
+              Se usa al exportar a Mekano; el nombre se sigue usando para WhatsApp
+            </p>
+            {errores.razon_social && (
+              <p className="text-red-500 text-xs mt-1">{errores.razon_social}</p>
+            )}
+          </div>
+
+          {/* NIT */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              NIT
+            </label>
+            <input
+              type="text"
+              value={nit}
+              onChange={(e) => setNit(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+              placeholder="900123456-7"
+            />
+            {errores.nit && (
+              <p className="text-red-500 text-xs mt-1">{errores.nit}</p>
             )}
           </div>
 

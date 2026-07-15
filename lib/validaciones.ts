@@ -5,6 +5,8 @@ export const esquemaCliente = z.object({
     .string()
     .min(2, "El nombre debe tener al menos 2 caracteres")
     .max(160),
+  razon_social: z.string().max(200).optional().nullable(),
+  nit: z.string().max(30).optional().nullable(),
   telefono: z
     .string()
     .min(10, "El teléfono debe tener al menos 10 dígitos")

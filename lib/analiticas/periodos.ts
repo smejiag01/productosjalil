@@ -47,7 +47,7 @@ function mesAnteriorStr(s: string): string {
   return `${ant.getUTCFullYear()}-${String(ant.getUTCMonth() + 1).padStart(2, "0")}`;
 }
 
-function fmtShort(s: string): string {
+export function fmtShort(s: string): string {
   const [y, m, d] = s.split("-").map(Number);
   return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString("es-CO", {
     day: "numeric",
@@ -130,6 +130,21 @@ export function calcularRango(periodo: Periodo, fechaRef?: string): RangoStr {
   }
 
   return { inicio, fin, inicioAnterior: inicioAnt, finAnterior: finAnt, label, navLabel };
+}
+
+// Rango de fecha libre elegido a mano (no atado a diario/semanal/quincenal/mensual).
+// El "periodo anterior" se calcula como un rango de la misma duración, justo antes.
+export function calcularRangoPersonalizado(desdeIn: string, hastaIn: string): RangoStr {
+  let inicio = desdeIn, fin = hastaIn;
+  if (toDbDate(inicio).getTime() > toDbDate(fin).getTime()) {
+    [inicio, fin] = [fin, inicio];
+  }
+  const dias = Math.round((toDbDate(fin).getTime() - toDbDate(inicio).getTime()) / 86400000) + 1;
+  const inicioAnterior = addDias(inicio, -dias);
+  const finAnterior = addDias(inicio, -1);
+  const label = inicio === fin ? fmtShort(inicio) : `${fmtShort(inicio)} – ${fmtShort(fin)}`;
+
+  return { inicio, fin, inicioAnterior, finAnterior, label, navLabel: label };
 }
 
 export function periodoAnteriorFecha(periodo: Periodo, fechaRef: string): string {

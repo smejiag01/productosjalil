@@ -7,6 +7,8 @@ interface Props {
   cliente: {
     id: string;
     nombre: string;
+    razon_social: string | null;
+    nit: string | null;
     telefono: string;
     direccion: string | null;
     codigo_mekano: string | null;

@@ -3,6 +3,7 @@ import { formatearPrecio } from "@/lib/formato";
 import { ESTADOS, type EstadoPedido } from "@/lib/pedidos";
 import TablaPedidos from "./TablaPedidos";
 import SelectorFecha from "./SelectorFecha";
+import SelectorRango from "./SelectorRango";
 import DespacharRutas from "./DespacharRutas";
 
 export const dynamic = "force-dynamic";
@@ -37,12 +38,16 @@ function formatearFechaColombia(fecha: Date | string): string {
 export default async function PedidosPage({
   searchParams,
 }: {
-  searchParams: { fecha?: string; vista?: string; pagina?: string };
+  searchParams: { fecha?: string; vista?: string; pagina?: string; desde?: string; hasta?: string };
 }) {
   const hoy = fechaBogota();
   const manana = sumarDias(hoy, 1);
-  const vistaActual = searchParams.vista === "todos" ? "todos" : "fecha";
-  const fechaSeleccionada = searchParams.fecha || formatDateStr(manana);
+  const vistaActual =
+    searchParams.vista === "todos" ? "todos" : searchParams.vista === "rango" ? "rango" : "fecha";
+  const fechaSeleccionada = searchParams.fecha || formatDateStr(hoy);
+  const fechaValida = (s?: string) => /^\d{4}-\d{2}-\d{2}$/.test(s ?? "");
+  const desdeSeleccionada = fechaValida(searchParams.desde) ? searchParams.desde! : formatDateStr(hoy);
+  const hastaSeleccionada = fechaValida(searchParams.hasta) ? searchParams.hasta! : formatDateStr(manana);
   const pagina = Math.max(1, parseInt(searchParams.pagina || "1"));
   const porPagina = 20;
 
@@ -59,6 +64,18 @@ export default async function PedidosPage({
       }),
       prisma.pedidos.count(),
     ]);
+  } else if (vistaActual === "rango") {
+    pedidos = await prisma.pedidos.findMany({
+      where: {
+        fecha_pedido: {
+          gte: new Date(desdeSeleccionada + "T00:00:00.000Z"),
+          lte: new Date(hastaSeleccionada + "T00:00:00.000Z"),
+        },
+      },
+      include: { cliente: true, ruta: true, items: true },
+      orderBy: { created_at: "desc" },
+    });
+    totalRegistros = pedidos.length;
   } else {
     pedidos = await prisma.pedidos.findMany({
       where: { fecha_pedido: new Date(fechaSeleccionada + "T00:00:00.000Z") },
@@ -91,9 +108,12 @@ export default async function PedidosPage({
     creadoEn: p.created_at.toLocaleString("es-CO", { timeZone: "America/Bogota", dateStyle: "short", timeStyle: "short" }),
   }));
 
-  const fechaLabel = vistaActual === "todos"
-    ? `${totalRegistros} pedidos en total`
-    : formatearFechaColombia(fechaSeleccionada);
+  const fechaLabel =
+    vistaActual === "todos"
+      ? `${totalRegistros} pedidos en total`
+      : vistaActual === "rango"
+        ? `${totalRegistros} pedidos entre ${formatearFechaColombia(desdeSeleccionada)} y ${formatearFechaColombia(hastaSeleccionada)}`
+        : formatearFechaColombia(fechaSeleccionada);
 
   const esManana = fechaSeleccionada === formatDateStr(manana);
   const esHoy = fechaSeleccionada === formatDateStr(hoy);
@@ -105,16 +125,18 @@ export default async function PedidosPage({
         <div className="min-w-0">
           <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Pedidos</h1>
         </div>
-        <a
-          href={`/api/pedidos/exportar?fecha=${fechaSeleccionada}`}
-          className="h-11 px-3 lg:px-4 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-light transition-colors flex items-center gap-2 flex-shrink-0"
-          title="Exportar a Excel"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
-          </svg>
-          <span className="hidden sm:inline">Exportar</span>
-        </a>
+        {vistaActual !== "rango" && (
+          <a
+            href={`/api/pedidos/exportar?fecha=${fechaSeleccionada}`}
+            className="h-11 px-3 lg:px-4 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-light transition-colors flex items-center gap-2 flex-shrink-0"
+            title="Exportar a Excel"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            <span className="hidden sm:inline">Exportar</span>
+          </a>
+        )}
       </div>
 
       {/* Toggle vista + date picker */}
@@ -141,6 +163,16 @@ export default async function PedidosPage({
           >
             Todos
           </a>
+          <a
+            href={`/pedidos?vista=rango&desde=${desdeSeleccionada}&hasta=${hastaSeleccionada}`}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
+              vistaActual === "rango"
+                ? "bg-white shadow-sm text-gray-900"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            Rango
+          </a>
         </div>
 
         {vistaActual === "fecha" && (
@@ -163,6 +195,10 @@ export default async function PedidosPage({
               </a>
             )}
           </div>
+        )}
+
+        {vistaActual === "rango" && (
+          <SelectorRango desdeActual={desdeSeleccionada} hastaActual={hastaSeleccionada} />
         )}
 
         <div className="flex items-center gap-3 sm:ml-auto">

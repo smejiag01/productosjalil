@@ -40,7 +40,7 @@ export default function TablaPedidos({
   const pedidosFiltrados =
     filtro === "todos" ? pedidos : pedidos.filter((p) => p.estado === filtro);
 
-  const mostrarFecha = vistaActual === "todos";
+  const mostrarFecha = vistaActual === "todos" || vistaActual === "rango";
 
   const estadoVacio = (
     <div className="py-16 text-center text-gray-400">

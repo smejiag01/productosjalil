@@ -57,6 +57,8 @@ model rutas {
 model clientes {
   id              String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   nombre          String               @db.VarChar(160)
+  razon_social    String?              @db.VarChar(200)
+  nit             String?              @db.VarChar(30)
   telefono        String               @unique @db.VarChar(40)
   direccion       String?
   ruta_id         String?              @db.Uuid

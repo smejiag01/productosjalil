@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth-guard";
+import { notificarDespachoWhatsApp } from "@/lib/notificaciones/notificarDespacho";
 
 const esquemaDespacho = z.object({
   ruta_id: z.string().uuid("Ruta inválida"),
@@ -36,14 +37,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const filtroDespacho = {
+      ruta_id,
+      fecha_pedido: new Date(fecha + "T00:00:00.000Z"),
+      estado: "confirmado" as const,
+    };
+
+    // Prisma updateMany no soporta "returning", así que primero traemos los
+    // pedidos que serán despachados (con su cliente) para poder notificar.
+    const pedidosADespachar = await prisma.pedidos.findMany({
+      where: filtroDespacho,
+      include: { cliente: true },
+    });
+
     const resultadoUpdate = await prisma.pedidos.updateMany({
-      where: {
-        ruta_id,
-        fecha_pedido: new Date(fecha + "T00:00:00.000Z"),
-        estado: "confirmado",
-      },
+      where: filtroDespacho,
       data: { estado: "en_reparto" },
     });
+
+    await notificarDespachoWhatsApp(
+      pedidosADespachar.map((p) => ({
+        telefono: p.cliente.telefono,
+        clienteNombre: p.cliente.nombre,
+      }))
+    );
 
     return NextResponse.json({
       success: true,

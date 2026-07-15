@@ -112,10 +112,16 @@ export default async function DetalleClientePage({
                 {cliente.activo ? "Activo" : "Inactivo"}
               </span>
             </div>
+            {cliente.razon_social && (
+              <p className="text-sm text-gray-500">{cliente.razon_social}</p>
+            )}
             {cliente.codigo_mekano && (
               <p className="text-sm text-gray-400">
                 Código Mekano: {cliente.codigo_mekano}
               </p>
+            )}
+            {cliente.nit && (
+              <p className="text-sm text-gray-400">NIT: {cliente.nit}</p>
             )}
           </div>
         </div>
@@ -123,6 +129,8 @@ export default async function DetalleClientePage({
           cliente={{
             id: cliente.id,
             nombre: cliente.nombre,
+            razon_social: cliente.razon_social,
+            nit: cliente.nit,
             telefono: cliente.telefono,
             direccion: cliente.direccion,
             codigo_mekano: cliente.codigo_mekano,

@@ -11,8 +11,10 @@ const ESTADOS_CONFIG: Record<string, { label: string; color: string }> = {
   pendiente:   { label: "Pendiente",   color: "bg-yellow-100 text-yellow-700" },
   en_proceso:  { label: "En proceso",  color: "bg-blue-100 text-blue-700" },
   confirmado:  { label: "Confirmado",  color: "bg-emerald-100 text-emerald-700" },
+  en_reparto:  { label: "En reparto",  color: "bg-purple-100 text-purple-700" },
   cancelado:   { label: "Cancelado",   color: "bg-red-100 text-red-700" },
   entregado:   { label: "Entregado",   color: "bg-gray-100 text-gray-600" },
+  devuelto:    { label: "Devuelto",    color: "bg-orange-100 text-orange-700" },
 };
 
 const TIPOS_INV: Record<string, string> = {
@@ -36,7 +38,7 @@ export default async function HomePage() {
   const dbHoy = toDbDate(hoy);
   const hace6dias = addDias(hoy, -6);
 
-  const [resumenHoy, pedidosPorEstado, pedidosClientes, ventas7d, alertas] =
+  const [resumenHoy, pedidosPorEstado, pedidosClientes, ventas7d, alertas, rutasPorDespachar, clientesSinRuta, pqrsAbiertas] =
     await Promise.all([
       prisma.pedidos.aggregate({
         where: { fecha_pedido: dbHoy },
@@ -69,11 +71,19 @@ export default async function HomePage() {
         ORDER BY (CAST(stock_actual AS FLOAT) / NULLIF(CAST(stock_minimo AS FLOAT), 0)) ASC
         LIMIT 5
       `,
+      prisma.pedidos.findMany({
+        where: { fecha_pedido: dbHoy, estado: "confirmado", ruta_id: { not: null } },
+        select: { ruta_id: true },
+        distinct: ["ruta_id"],
+      }),
+      prisma.clientes.count({ where: { activo: true, ruta_id: null } }),
+      prisma.pqr.count({ where: { estado: { in: ["pendiente", "en_revision"] } } }),
     ]);
 
   const ventasHoy = Number(resumenHoy._sum.total ?? 0);
   const pedidosHoy = resumenHoy._count.id;
   const clientesHoy = new Set(pedidosClientes.map((p) => p.cliente_id)).size;
+  const numRutasPorDespachar = rutasPorDespachar.length;
 
   // Rellenar días sin ventas con 0
   const datosGrafico = Array.from({ length: 7 }, (_, i) => {
@@ -149,6 +159,42 @@ export default async function HomePage() {
             <p className="text-xs text-gray-400 mt-1">con pedido hoy</p>
           </div>
         </div>
+
+        {/* Acciones pendientes */}
+        {(numRutasPorDespachar > 0 || clientesSinRuta > 0 || pqrsAbiertas > 0) && (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            {numRutasPorDespachar > 0 && (
+              <Link
+                href="/pedidos"
+                className="bg-purple-50 border border-purple-200 rounded-xl p-5 hover:bg-purple-100 transition-colors"
+              >
+                <p className="text-sm text-purple-700 mb-1">🚚 Rutas listas para despachar</p>
+                <p className="text-3xl font-bold text-purple-900">{numRutasPorDespachar}</p>
+                <p className="text-xs text-purple-600 mt-1">con pedidos confirmados hoy</p>
+              </Link>
+            )}
+            {clientesSinRuta > 0 && (
+              <Link
+                href="/clientes"
+                className="bg-amber-50 border border-amber-200 rounded-xl p-5 hover:bg-amber-100 transition-colors"
+              >
+                <p className="text-sm text-amber-700 mb-1">📍 Clientes sin ruta asignada</p>
+                <p className="text-3xl font-bold text-amber-900">{clientesSinRuta}</p>
+                <p className="text-xs text-amber-600 mt-1">no reciben recordatorios de WhatsApp</p>
+              </Link>
+            )}
+            {pqrsAbiertas > 0 && (
+              <Link
+                href="/pqrs"
+                className="bg-red-50 border border-red-200 rounded-xl p-5 hover:bg-red-100 transition-colors"
+              >
+                <p className="text-sm text-red-700 mb-1">📋 PQR&apos;s abiertas</p>
+                <p className="text-3xl font-bold text-red-900">{pqrsAbiertas}</p>
+                <p className="text-xs text-red-600 mt-1">pendientes + en revisión</p>
+              </Link>
+            )}
+          </div>
+        )}
 
         {/* Gráfico 7 días */}
         <div className="bg-white rounded-xl border border-gray-200 p-5 mb-6">
