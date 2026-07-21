@@ -39,6 +39,7 @@ export const config = {
     "/rutas/:path*",
     "/empleados/:path*",
     "/repartidores/:path*",
+    "/usuarios/:path*",
     "/configuracion/:path*",
     "/repartidor/:path*",
   ],
