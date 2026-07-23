@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { formatearPrecio } from "@/lib/formato";
 import { ESTADOS, type EstadoPedido } from "@/lib/pedidos";
@@ -5,6 +6,7 @@ import TablaPedidos from "./TablaPedidos";
 import SelectorFecha from "./SelectorFecha";
 import SelectorRango from "./SelectorRango";
 import DespacharRutas from "./DespacharRutas";
+import PanelInformes from "./PanelInformes";
 
 export const dynamic = "force-dynamic";
 
@@ -43,7 +45,13 @@ export default async function PedidosPage({
   const hoy = fechaBogota();
   const manana = sumarDias(hoy, 1);
   const vistaActual =
-    searchParams.vista === "todos" ? "todos" : searchParams.vista === "rango" ? "rango" : "fecha";
+    searchParams.vista === "todos"
+      ? "todos"
+      : searchParams.vista === "rango"
+        ? "rango"
+        : searchParams.vista === "informes"
+          ? "informes"
+          : "fecha";
   const fechaSeleccionada = searchParams.fecha || formatDateStr(hoy);
   const fechaValida = (s?: string) => /^\d{4}-\d{2}-\d{2}$/.test(s ?? "");
   const desdeSeleccionada = fechaValida(searchParams.desde) ? searchParams.desde! : formatDateStr(hoy);
@@ -51,10 +59,17 @@ export default async function PedidosPage({
   const pagina = Math.max(1, parseInt(searchParams.pagina || "1"));
   const porPagina = 20;
 
-  let pedidos;
+  type PedidoConDetalle = Prisma.pedidosGetPayload<{
+    include: { cliente: true; ruta: true; items: true };
+  }>;
+
+  let pedidos: PedidoConDetalle[];
   let totalRegistros: number;
 
-  if (vistaActual === "todos") {
+  if (vistaActual === "informes") {
+    pedidos = [];
+    totalRegistros = 0;
+  } else if (vistaActual === "todos") {
     [pedidos, totalRegistros] = await Promise.all([
       prisma.pedidos.findMany({
         include: { cliente: true, ruta: true, items: true },
@@ -125,17 +140,29 @@ export default async function PedidosPage({
         <div className="min-w-0">
           <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Pedidos</h1>
         </div>
-        {vistaActual !== "rango" && (
-          <a
-            href={`/api/pedidos/exportar?fecha=${fechaSeleccionada}`}
-            className="h-11 px-3 lg:px-4 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-light transition-colors flex items-center gap-2 flex-shrink-0"
-            title="Exportar a Excel"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
-            </svg>
-            <span className="hidden sm:inline">Exportar</span>
-          </a>
+        {(vistaActual === "fecha" || vistaActual === "todos") && (
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <a
+              href={`/api/pedidos/exportar-pdf?fecha=${fechaSeleccionada}`}
+              className="h-11 px-3 lg:px-4 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors flex items-center gap-2"
+              title="PDF simple para quien despacha la ruta"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" />
+              </svg>
+              <span className="hidden sm:inline">PDF (Despacho)</span>
+            </a>
+            <a
+              href={`/api/pedidos/exportar?fecha=${fechaSeleccionada}`}
+              className="h-11 px-3 lg:px-4 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-light transition-colors flex items-center gap-2"
+              title="Excel detallado (una fila por producto) para Mekano"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              <span className="hidden sm:inline">Excel (Mekano)</span>
+            </a>
+          </div>
         )}
       </div>
 
@@ -173,6 +200,16 @@ export default async function PedidosPage({
           >
             Rango
           </a>
+          <a
+            href="/pedidos?vista=informes"
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
+              vistaActual === "informes"
+                ? "bg-white shadow-sm text-gray-900"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            Informes
+          </a>
         </div>
 
         {vistaActual === "fecha" && (
@@ -201,25 +238,33 @@ export default async function PedidosPage({
           <SelectorRango desdeActual={desdeSeleccionada} hastaActual={hastaSeleccionada} />
         )}
 
-        <div className="flex items-center gap-3 sm:ml-auto">
-          <span className="text-sm text-gray-500 capitalize">{fechaLabel}</span>
-          {totalGeneral > 0 && (
-            <span className="text-sm font-semibold text-gray-900">
-              Total: {formatearPrecio(totalGeneral)}
-            </span>
-          )}
-        </div>
+        {vistaActual !== "informes" && (
+          <div className="flex items-center gap-3 sm:ml-auto">
+            <span className="text-sm text-gray-500 capitalize">{fechaLabel}</span>
+            {totalGeneral > 0 && (
+              <span className="text-sm font-semibold text-gray-900">
+                Total: {formatearPrecio(totalGeneral)}
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
-      {vistaActual === "fecha" && (
-        <DespacharRutas pedidos={pedidosSerializados} fecha={fechaSeleccionada} />
-      )}
+      {vistaActual === "informes" ? (
+        <PanelInformes />
+      ) : (
+        <>
+          {vistaActual === "fecha" && (
+            <DespacharRutas pedidos={pedidosSerializados} fecha={fechaSeleccionada} />
+          )}
 
-      <TablaPedidos
-        pedidos={pedidosSerializados}
-        contadores={contadores}
-        vistaActual={vistaActual}
-      />
+          <TablaPedidos
+            pedidos={pedidosSerializados}
+            contadores={contadores}
+            vistaActual={vistaActual}
+          />
+        </>
+      )}
 
       {/* Paginación para vista "todos" */}
       {vistaActual === "todos" && totalPaginas > 1 && (
