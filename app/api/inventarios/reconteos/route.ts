@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth-guard";
+import { INVENTARIO_MATERIA_PRIMA_HABILITADO, respuestaInventarioDeshabilitado } from "@/lib/inventario-flags";
 
 const esquemaDetalle = z.object({
   item_id: z.string().uuid("Ítem inválido"),
@@ -24,6 +25,7 @@ class ErrorNotaRequerida extends Error {}
 export async function GET(request: NextRequest) {
   const auth = await requireAdmin();
   if (auth.error) return auth.error;
+  if (!INVENTARIO_MATERIA_PRIMA_HABILITADO) return respuestaInventarioDeshabilitado();
 
   try {
     const { searchParams } = new URL(request.url);
@@ -67,6 +69,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const auth = await requireAdmin();
   if (auth.error) return auth.error;
+  if (!INVENTARIO_MATERIA_PRIMA_HABILITADO) return respuestaInventarioDeshabilitado();
 
   try {
     const body = await request.json();

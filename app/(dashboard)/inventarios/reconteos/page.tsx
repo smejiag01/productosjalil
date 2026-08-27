@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { INVENTARIO_MATERIA_PRIMA_HABILITADO } from "@/lib/inventario-flags";
 
 export const dynamic = "force-dynamic";
 
@@ -10,6 +12,8 @@ const LABEL_ESTADO: Record<string, { label: string; color: string }> = {
 };
 
 export default async function ReconteosPage() {
+  if (!INVENTARIO_MATERIA_PRIMA_HABILITADO) notFound();
+
   const reconteos = await prisma.inventario_reconteos.findMany({
     include: {
       usuario: { select: { id: true, nombre: true } },

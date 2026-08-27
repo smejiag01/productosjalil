@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { formatearPrecio } from "@/lib/formato";
+import { INVENTARIO_MATERIA_PRIMA_HABILITADO } from "@/lib/inventario-flags";
 import BadgeStock from "./BadgeStock";
 import ModalItem from "./ModalItem";
 import ModalMovimiento from "./ModalMovimiento";
@@ -111,8 +112,13 @@ export default function TablaInventario({ items, tipo, titulo }: Props) {
             <div className="flex items-center gap-2 pt-3 border-t border-gray-100 justify-end flex-wrap">
               {tipo === "producto_terminado" && (
                 <>
-                  <Link href={`/inventarios/producto-terminado/${item.id}`} className="h-9 px-3 bg-gray-50 border border-gray-200 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-100 flex items-center">Receta</Link>
-                  <button onClick={() => setProduccion(item)} className="h-9 px-3 bg-gray-50 border border-gray-200 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-100">Producción</button>
+                  {INVENTARIO_MATERIA_PRIMA_HABILITADO && (
+                    <>
+                      <Link href={`/inventarios/producto-terminado/${item.id}`} className="h-9 px-3 bg-gray-50 border border-gray-200 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-100 flex items-center">Receta</Link>
+                      <button onClick={() => setProduccion(item)} className="h-9 px-3 bg-gray-50 border border-gray-200 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-100">Producción</button>
+                    </>
+                  )}
+                  <Link href={`/inventarios/producto-terminado/${item.id}`} className="h-9 px-3 bg-gray-50 border border-gray-200 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-100 flex items-center">Historial</Link>
                 </>
               )}
               <button onClick={() => setMovimiento(item)} className="h-9 px-3 bg-gray-50 border border-gray-200 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-100">Movimiento</button>
@@ -161,7 +167,7 @@ export default function TablaInventario({ items, tipo, titulo }: Props) {
                   <td className="py-3 px-4 text-sm text-center">{item.requiere_refrigeracion ? "Sí" : "No"}</td>
                 </>}
                 {tipo === "producto_terminado" && <>
-                  <td className="py-3 px-4 text-sm text-gray-600">{item.fecha_vencimiento ? new Date(item.fecha_vencimiento).toLocaleDateString("es-CO") : "—"}</td>
+                  <td className="py-3 px-4 text-sm text-gray-600">{item.fecha_vencimiento ? new Date(item.fecha_vencimiento).toLocaleDateString("es-CO", { timeZone: "UTC" }) : "—"}</td>
                   <td className="py-3 px-4 text-sm text-gray-600">{item.producto?.nombre || "—"}</td>
                 </>}
                 <td className="py-3 px-4"><BadgeStock actual={item.stock_actual} minimo={item.stock_minimo} /></td>
@@ -169,8 +175,13 @@ export default function TablaInventario({ items, tipo, titulo }: Props) {
                   <div className="flex items-center justify-end gap-3">
                     {tipo === "producto_terminado" && (
                       <>
-                        <Link href={`/inventarios/producto-terminado/${item.id}`} className="text-sm text-gray-600 hover:text-gray-900 font-medium">Receta</Link>
-                        <button onClick={() => setProduccion(item)} className="text-sm text-gray-600 hover:text-gray-900 font-medium">Producción</button>
+                        {INVENTARIO_MATERIA_PRIMA_HABILITADO && (
+                          <>
+                            <Link href={`/inventarios/producto-terminado/${item.id}`} className="text-sm text-gray-600 hover:text-gray-900 font-medium">Receta</Link>
+                            <button onClick={() => setProduccion(item)} className="text-sm text-gray-600 hover:text-gray-900 font-medium">Producción</button>
+                          </>
+                        )}
+                        <Link href={`/inventarios/producto-terminado/${item.id}`} className="text-sm text-gray-600 hover:text-gray-900 font-medium">Historial</Link>
                       </>
                     )}
                     <button onClick={() => setMovimiento(item)} className="text-sm text-gray-600 hover:text-gray-900 font-medium">Movimiento</button>

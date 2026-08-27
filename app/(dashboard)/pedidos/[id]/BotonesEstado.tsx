@@ -39,15 +39,6 @@ const ESTILOS_BOTON: Record<
       </svg>
     ),
   },
-  cancelado: {
-    clase: "bg-white border border-red-300 text-red-600 hover:bg-red-50",
-    icono: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <line x1="18" y1="6" x2="6" y2="18" />
-        <line x1="6" y1="6" x2="18" y2="18" />
-      </svg>
-    ),
-  },
 };
 
 export default function BotonesEstado({
@@ -89,29 +80,19 @@ export default function BotonesEstado({
 
   // en_reparto/devuelto son transiciones habilitadas para el flujo del
   // repartidor (ver mini-dashboard); el admin no necesita estos botones aquí.
-  const cancelar = transiciones.find((t) => t === "cancelado");
+  // "cancelado" no se muestra aquí — vive aparte, en la zona de acciones
+  // destructivas al final de la página (ver CancelarPedido.tsx), para que no
+  // quede al lado de los botones normales de avance de estado.
   const positivas = transiciones.filter(
     (t) => t !== "cancelado" && t !== "en_reparto" && t !== "devuelto"
   );
+
+  if (positivas.length === 0) return null;
 
   return (
     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
       {error && (
         <span className="text-red-500 text-xs">{error}</span>
-      )}
-      {cancelar && (
-        <button
-          onClick={() => cambiarEstado("cancelado")}
-          disabled={cargando !== null}
-          className={`h-11 px-4 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50 ${ESTILOS_BOTON.cancelado.clase}`}
-        >
-          {cargando === "cancelado" ? (
-            <div className="w-4 h-4 border-2 border-red-300 border-t-red-600 rounded-full animate-spin" />
-          ) : (
-            ESTILOS_BOTON.cancelado.icono
-          )}
-          Cancelar
-        </button>
       )}
       {positivas.map((t) => {
         const estilo = ESTILOS_BOTON[t] ?? ESTILOS_BOTON.confirmado;

@@ -1,10 +1,15 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { formatearPrecio, formatearFechaCorta } from "@/lib/formato";
-import { TRANSICIONES_VALIDAS, type EstadoPedido } from "@/lib/pedidos";
+import { formatearPrecio } from "@/lib/formato";
+import { formatearFechaHora } from "@/lib/fechas";
+import { TRANSICIONES_VALIDAS, esPedidoModificable, type EstadoPedido } from "@/lib/pedidos";
 import BadgeEstado from "@/components/BadgeEstado";
 import BotonesEstado from "./BotonesEstado";
+import CancelarPedido from "./CancelarPedido";
+import BotonModificarPedido from "./BotonModificarPedido";
+import SeccionProductosPedido from "./SeccionProductosPedido";
+import { EdicionPedidoProvider } from "./EdicionPedidoContext";
 
 export const dynamic = "force-dynamic";
 
@@ -28,8 +33,22 @@ export default async function DetallePedidoPage({
   const estado = pedido.estado as EstadoPedido;
   const transicionesDisponibles = TRANSICIONES_VALIDAS[estado] ?? [];
   const totalPedido = Number(pedido.total);
+  const numeroPedido = `PED-${pedido.id.substring(0, 4).toUpperCase()}`;
+  const puedeCancelar = transicionesDisponibles.includes("cancelado");
+  const puedeModificar = esPedidoModificable(estado);
+
+  const itemsSerializados = pedido.items.map((item) => ({
+    key: item.id,
+    id: item.id,
+    producto_id: item.producto_id,
+    producto_nombre: item.producto_nombre,
+    unidad: item.producto?.unidad ?? "",
+    cantidad: Number(item.cantidad),
+    precio_unitario: Number(item.precio_unitario),
+  }));
 
   return (
+    <EdicionPedidoProvider>
     <div>
       <div className="mb-6">
         <Link
@@ -45,14 +64,17 @@ export default async function DetallePedidoPage({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
-              Pedido PED-{pedido.id.substring(0, 4).toUpperCase()}
+              Pedido {numeroPedido}
             </h1>
             <BadgeEstado estado={estado} />
           </div>
-          <BotonesEstado
-            pedidoId={pedido.id}
-            transiciones={transicionesDisponibles}
-          />
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+            {puedeModificar && <BotonModificarPedido />}
+            <BotonesEstado
+              pedidoId={pedido.id}
+              transiciones={transicionesDisponibles}
+            />
+          </div>
         </div>
       </div>
 
@@ -101,70 +123,31 @@ export default async function DetallePedidoPage({
                 {pedido.fecha_pedido.toLocaleDateString("es-CO", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" })}
               </span>
             </div>
-            <div className="flex justify-between text-sm"><span className="text-gray-500">Creado</span><span className="text-gray-900 font-medium">{formatearFechaCorta(pedido.created_at)}</span></div>
+            <div className="flex justify-between text-sm"><span className="text-gray-500">Creado</span><span className="text-gray-900 font-medium">{formatearFechaHora(pedido.created_at)}</span></div>
             <div className="flex justify-between text-sm"><span className="text-gray-500">Ruta</span><span className="text-gray-900 font-medium">{pedido.ruta?.nombre ?? "Sin ruta"}</span></div>
             <div className="flex justify-between text-sm items-center"><span className="text-gray-500">Estado</span><BadgeEstado estado={estado} /></div>
-            {pedido.confirmado_at && <div className="flex justify-between text-sm"><span className="text-gray-500">Confirmado</span><span className="text-gray-900 font-medium">{formatearFechaCorta(pedido.confirmado_at)}</span></div>}
+            {pedido.confirmado_at && <div className="flex justify-between text-sm"><span className="text-gray-500">Confirmado</span><span className="text-gray-900 font-medium">{formatearFechaHora(pedido.confirmado_at)}</span></div>}
             {pedido.notas && <div className="pt-2 border-t border-gray-100"><p className="text-xs text-gray-500 mb-1">Notas</p><p className="text-sm text-gray-700">{pedido.notas}</p></div>}
           </div>
         </div>
       </div>
 
-      {/* Productos — cards en móvil, tabla en desktop */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div className="px-4 sm:px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-          <h3 className="font-semibold text-gray-900">Productos del pedido</h3>
-          <span className="text-sm text-gray-400">{pedido.items.length} productos</span>
-        </div>
+      {/* Productos — cards en móvil, tabla en desktop; editable si el pedido lo permite */}
+      <SeccionProductosPedido
+        pedidoId={pedido.id}
+        clienteId={pedido.cliente_id}
+        itemsIniciales={itemsSerializados}
+      />
 
-        {/* Cards móvil */}
-        <div className="md:hidden divide-y divide-gray-50">
-          {pedido.items.map((item) => (
-            <div key={item.id} className="p-4">
-              <p className="text-sm font-medium text-gray-900 mb-2">{item.producto_nombre}</p>
-              <div className="flex justify-between text-xs text-gray-500">
-                <span>{Number(item.cantidad)} {item.producto?.unidad ?? ""}</span>
-                <span>{formatearPrecio(Number(item.precio_unitario))}/{item.producto?.unidad ?? ""}</span>
-              </div>
-              <div className="flex justify-end mt-1">
-                <span className="text-sm font-medium text-gray-900">{formatearPrecio(Number(item.subtotal))}</span>
-              </div>
-            </div>
-          ))}
-          <div className="p-4 flex justify-between items-center border-t-2 border-gray-200">
-            <span className="text-sm font-medium text-gray-500">Total</span>
-            <span className="text-xl font-bold text-brand">{formatearPrecio(totalPedido)}</span>
-          </div>
-        </div>
-
-        {/* Tabla desktop */}
-        <table className="w-full hidden md:table">
-          <thead>
-            <tr className="border-b border-gray-100">
-              <th className="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
-              <th className="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Cantidad</th>
-              <th className="text-right py-3 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Precio unitario</th>
-              <th className="text-right py-3 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Subtotal</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-50">
-            {pedido.items.map((item) => (
-              <tr key={item.id}>
-                <td className="py-3 px-6"><div className="flex items-center gap-2"><span className="text-gray-400">•</span><span className="text-sm font-medium text-gray-900">{item.producto_nombre}</span></div></td>
-                <td className="py-3 px-6 text-sm text-gray-600">{Number(item.cantidad)} {item.producto?.unidad ?? ""}</td>
-                <td className="py-3 px-6 text-sm text-gray-600 text-right">{formatearPrecio(Number(item.precio_unitario))}{item.producto?.unidad ? `/${item.producto.unidad}` : ""}</td>
-                <td className="py-3 px-6 text-sm font-medium text-gray-900 text-right">{formatearPrecio(Number(item.subtotal))}</td>
-              </tr>
-            ))}
-          </tbody>
-          <tfoot>
-            <tr className="border-t-2 border-gray-200">
-              <td colSpan={3} className="py-4 px-6 text-right text-sm font-medium text-gray-500">Total</td>
-              <td className="py-4 px-6 text-right text-xl font-bold text-brand">{formatearPrecio(totalPedido)}</td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
+      {puedeCancelar && (
+        <CancelarPedido
+          pedidoId={pedido.id}
+          numeroPedido={numeroPedido}
+          clienteNombre={pedido.cliente.nombre}
+          total={formatearPrecio(totalPedido)}
+        />
+      )}
     </div>
+    </EdicionPedidoProvider>
   );
 }

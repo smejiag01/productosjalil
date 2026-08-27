@@ -3,7 +3,7 @@ import { z } from "zod";
 import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
-import { esTransicionValida, type EstadoPedido } from "@/lib/pedidos";
+import { esTransicionValida, esRetrocesoValido, type EstadoPedido } from "@/lib/pedidos";
 import { notificarDespachoWhatsApp } from "@/lib/notificaciones/notificarDespacho";
 
 const ESTADOS_VALIDOS = [
@@ -54,7 +54,7 @@ export async function PATCH(
 
     const pedido = await prisma.pedidos.findUnique({
       where: { id: params.id },
-      include: { ruta: true, cliente: true },
+      include: { ruta: true, cliente: true, items: true },
     });
 
     if (!pedido) {
@@ -76,7 +76,10 @@ export async function PATCH(
       }
     }
 
-    if (!esTransicionValida(pedido.estado as EstadoPedido, nuevoEstado)) {
+    const esAvance = esTransicionValida(pedido.estado as EstadoPedido, nuevoEstado);
+    const esRetroceso = esRetrocesoValido(pedido.estado as EstadoPedido, nuevoEstado);
+
+    if (!esAvance && !esRetroceso) {
       return NextResponse.json(
         { success: false, error: `No se puede cambiar de "${pedido.estado}" a "${nuevoEstado}"` },
         { status: 422 }
@@ -86,7 +89,10 @@ export async function PATCH(
     const ahora = new Date();
     const data: Record<string, unknown> = { estado: nuevoEstado };
 
-    if (nuevoEstado === "confirmado") {
+    // Al deshacer "entregado" -> "confirmado" nuevoEstado también es
+    // "confirmado", pero eso es un retroceso, no una confirmación nueva: no
+    // debe pisar la fecha original de confirmación (esAvance lo distingue).
+    if (nuevoEstado === "confirmado" && esAvance) {
       data.confirmado_at = ahora;
     }
     if (nuevoEstado === "entregado") {
@@ -103,6 +109,54 @@ export async function PATCH(
       where: { id: params.id },
       data,
     });
+
+    // Al entregarse de verdad (no al deshacer hacia "entregado", eso no
+    // existe) se descuenta el stock de producto terminado y queda un
+    // movimiento con referencia al pedido — así se puede ver después en qué
+    // pedido salió cada producto y cuánto.
+    if (nuevoEstado === "entregado" && esAvance) {
+      const cantidadPorProducto = new Map<string, number>();
+      for (const item of pedido.items) {
+        const actual = cantidadPorProducto.get(item.producto_id) ?? 0;
+        cantidadPorProducto.set(item.producto_id, actual + Number(item.cantidad));
+      }
+
+      const productoIds = Array.from(cantidadPorProducto.keys());
+      if (productoIds.length > 0) {
+        const itemsInventario = await prisma.inventario_items.findMany({
+          where: { producto_id: { in: productoIds }, tipo: "producto_terminado" },
+        });
+
+        if (itemsInventario.length > 0) {
+          await prisma.$transaction(
+            itemsInventario.flatMap((inv) => {
+              const cantidad = cantidadPorProducto.get(inv.producto_id!)!;
+              const cantidadAnterior = Number(inv.stock_actual);
+              const cantidadNueva = cantidadAnterior - cantidad;
+              return [
+                prisma.inventario_movimientos.create({
+                  data: {
+                    item_id: inv.id,
+                    tipo: "salida",
+                    motivo: "venta",
+                    cantidad,
+                    cantidad_anterior: cantidadAnterior,
+                    cantidad_nueva: cantidadNueva,
+                    usuario_id: session.user.id,
+                    referencia_tipo: "pedido",
+                    referencia_id: pedido.id,
+                  },
+                }),
+                prisma.inventario_items.update({
+                  where: { id: inv.id },
+                  data: { stock_actual: cantidadNueva },
+                }),
+              ];
+            })
+          );
+        }
+      }
+    }
 
     // El repartidor puede marcar entregado/devuelto directo desde "confirmado"
     // (sin pasar por el despacho de ruta) cuando ya salió con el pedido antes

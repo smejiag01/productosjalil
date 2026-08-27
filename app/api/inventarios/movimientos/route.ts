@@ -3,6 +3,7 @@ import { z } from "zod";
 import * as XLSX from "xlsx";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth-guard";
+import { formatearFechaHora, inicioDelDiaBogota, finDelDiaBogota } from "@/lib/fechas";
 
 const TIPOS_MOV = ["entrada", "salida", "ajuste"] as const;
 const MOTIVOS = ["compra", "venta", "merma", "produccion", "ajuste_manual", "reconteo"] as const;
@@ -34,8 +35,8 @@ export async function GET(request: NextRequest) {
     if (tipoInv) where.item = { tipo: tipoInv };
     if (desde || hasta) {
       const fechaFiltro: Record<string, Date> = {};
-      if (desde) fechaFiltro.gte = new Date(desde + "T00:00:00.000Z");
-      if (hasta) fechaFiltro.lte = new Date(hasta + "T23:59:59.999Z");
+      if (desde) fechaFiltro.gte = inicioDelDiaBogota(desde);
+      if (hasta) fechaFiltro.lte = finDelDiaBogota(hasta);
       where.created_at = fechaFiltro;
     }
 
@@ -56,7 +57,7 @@ export async function GET(request: NextRequest) {
     if (exportar) {
       const LABELS_TIPO: Record<string, string> = { insumo: "Insumo", materia_prima: "Materia prima", producto_terminado: "Producto terminado" };
       const filas = movimientos.map((m) => ({
-        Fecha: m.created_at.toLocaleString("es-CO", { timeZone: "America/Bogota" }),
+        Fecha: formatearFechaHora(m.created_at),
         Ítem: m.item.nombre,
         "Tipo inventario": LABELS_TIPO[m.item.tipo] ?? m.item.tipo,
         "Tipo movimiento": m.tipo,

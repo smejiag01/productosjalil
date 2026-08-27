@@ -74,3 +74,28 @@ export function esTransicionValida(
 ): boolean {
   return TRANSICIONES_VALIDAS[actual]?.includes(nuevo) ?? false;
 }
+
+// Retroceso de un paso para el control de estado compacto del listado de
+// pedidos (deshacer). Es independiente de TRANSICIONES_VALIDAS a propósito:
+// esa tabla se usa también para generar los botones de avance en el detalle
+// del pedido, y un retroceso no debe aparecer ahí como una acción más.
+export const ESTADO_ANTERIOR: Partial<Record<EstadoPedido, EstadoPedido>> = {
+  en_proceso: "pendiente",
+  confirmado: "en_proceso",
+  entregado: "confirmado",
+};
+
+export function esRetrocesoValido(
+  actual: EstadoPedido,
+  nuevo: EstadoPedido
+): boolean {
+  return ESTADO_ANTERIOR[actual] === nuevo;
+}
+
+// Un pedido solo se puede modificar (agregar/quitar/cambiar cantidad de
+// productos) mientras todavía no salió a reparto ni se cerró su ciclo.
+export const ESTADOS_MODIFICABLES: EstadoPedido[] = ["pendiente", "en_proceso", "confirmado"];
+
+export function esPedidoModificable(estado: EstadoPedido): boolean {
+  return ESTADOS_MODIFICABLES.includes(estado);
+}

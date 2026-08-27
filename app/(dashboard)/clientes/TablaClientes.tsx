@@ -13,6 +13,8 @@ interface ClienteFila {
   rutaNombre: string | null;
   ruta_id: string | null;
   activo: boolean;
+  numContactos: number;
+  contactosSinVerificar: number;
 }
 
 interface Ruta {
@@ -187,6 +189,13 @@ export default function TablaClientes({
                   <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
                 </svg>
                 <span>{c.telefono}</span>
+                <span className="text-gray-300">·</span>
+                <span>{c.numContactos} contacto{c.numContactos === 1 ? "" : "s"}</span>
+                {c.contactosSinVerificar > 0 && (
+                  <span className="text-xs px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800 font-medium">
+                    {c.contactosSinVerificar} sin verificar
+                  </span>
+                )}
               </div>
               <Link
                 href={`/clientes/${c.id}`}
@@ -220,6 +229,9 @@ export default function TablaClientes({
                 Ruta asignada
               </th>
               <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Contactos
+              </th>
+              <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Estado
               </th>
               <th className="text-right py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -230,7 +242,7 @@ export default function TablaClientes({
           <tbody className="divide-y divide-gray-50">
             {clientesFiltrados.length === 0 ? (
               <tr>
-                <td colSpan={7} className="py-16 text-center text-gray-400">
+                <td colSpan={8} className="py-16 text-center text-gray-400">
                   <div className="flex flex-col items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" className="w-12 h-12 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
@@ -255,7 +267,7 @@ export default function TablaClientes({
               clientesFiltrados.map((c) => (
                 <tr
                   key={c.id}
-                  className="hover:bg-gray-50/50 transition-colors"
+                  className={`hover:bg-gray-50/50 transition-colors ${c.contactosSinVerificar > 0 ? "bg-amber-50/60" : ""}`}
                 >
                   <td className="py-3 px-4">
                     {c.codigo_mekano ? (
@@ -279,6 +291,19 @@ export default function TablaClientes({
                   </td>
                   <td className="py-3 px-4 text-sm text-gray-600">
                     {c.rutaNombre || "Sin ruta"}
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-sm text-gray-600">{c.numContactos}</span>
+                      {c.contactosSinVerificar > 0 && (
+                        <span
+                          className="text-xs px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800 font-medium whitespace-nowrap"
+                          title="Tiene contactos sin verificar"
+                        >
+                          {c.contactosSinVerificar} sin verificar
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="py-3 px-4">
                     <span

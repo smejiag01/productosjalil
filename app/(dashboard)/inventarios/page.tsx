@@ -1,15 +1,22 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { formatearPrecio } from "@/lib/formato";
+import { INVENTARIO_MATERIA_PRIMA_HABILITADO } from "@/lib/inventario-flags";
 import BadgeStock from "./BadgeStock";
 
 export const dynamic = "force-dynamic";
 
+// Insumos/materias primas quedaron fuera de alcance (ver INVENTARIO_MATERIA_PRIMA_HABILITADO).
+// Producto terminado es lo único que se muestra mientras el flag esté apagado.
 const TIPOS_CONFIG = [
   { tipo: "insumo", label: "Insumos", href: "/inventarios/insumos", emoji: "📦" },
   { tipo: "materia_prima", label: "Materias primas", href: "/inventarios/materias-primas", emoji: "🥩" },
   { tipo: "producto_terminado", label: "Producto terminado", href: "/inventarios/producto-terminado", emoji: "🏷️" },
 ] as const;
+
+const TIPOS_VISIBLES = INVENTARIO_MATERIA_PRIMA_HABILITADO
+  ? TIPOS_CONFIG
+  : TIPOS_CONFIG.filter((t) => t.tipo === "producto_terminado");
 
 export default async function InventariosPage() {
   const [items, reconteosAbiertos] = await Promise.all([
@@ -17,17 +24,22 @@ export default async function InventariosPage() {
       where: { activo: true },
       select: { id: true, nombre: true, tipo: true, unidad: true, stock_actual: true, stock_minimo: true, costo_unitario: true },
     }),
-    prisma.inventario_reconteos.count({ where: { estado: "abierto" } }),
+    INVENTARIO_MATERIA_PRIMA_HABILITADO
+      ? prisma.inventario_reconteos.count({ where: { estado: "abierto" } })
+      : 0,
   ]);
 
-  const resumen = TIPOS_CONFIG.map(({ tipo, label, href, emoji }) => {
+  const resumen = TIPOS_VISIBLES.map(({ tipo, label, href, emoji }) => {
     const del_tipo = items.filter((i) => i.tipo === tipo);
     const bajo_stock = del_tipo.filter((i) => Number(i.stock_actual) <= Number(i.stock_minimo));
     const valor_total = del_tipo.reduce((s, i) => s + Number(i.stock_actual) * Number(i.costo_unitario), 0);
     return { tipo, label, href, emoji, total: del_tipo.length, bajo_stock: bajo_stock.length, valor_total };
   });
 
+  // Sin el flag, solo mostramos alertas de producto terminado — insumos y
+  // materia prima ya no se gestionan desde aquí aunque sigan en la BD.
   const alertas = items
+    .filter((i) => INVENTARIO_MATERIA_PRIMA_HABILITADO || i.tipo === "producto_terminado")
     .filter((i) => Number(i.stock_actual) <= Number(i.stock_minimo))
     .map((i) => ({ ...i, stock_actual: Number(i.stock_actual), stock_minimo: Number(i.stock_minimo) }));
 
@@ -38,10 +50,12 @@ export default async function InventariosPage() {
           <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Inventarios</h1>
           <p className="text-gray-500 text-sm mt-1">Resumen general de existencias</p>
         </div>
-        <Link href="/inventarios/movimientos"
-          className="h-11 px-3 lg:px-4 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2 flex-shrink-0">
-          Historial de movimientos
-        </Link>
+        {INVENTARIO_MATERIA_PRIMA_HABILITADO && (
+          <Link href="/inventarios/movimientos"
+            className="h-11 px-3 lg:px-4 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2 flex-shrink-0">
+            Historial de movimientos
+          </Link>
+        )}
       </div>
 
       {/* Tarjetas por tipo */}
@@ -72,6 +86,7 @@ export default async function InventariosPage() {
           </Link>
         ))}
 
+        {INVENTARIO_MATERIA_PRIMA_HABILITADO && (
         <Link href="/inventarios/reconteos"
           className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow group">
           <div className="flex items-center gap-3 mb-4">
@@ -88,6 +103,7 @@ export default async function InventariosPage() {
             <p className="text-xs text-gray-400 pt-1">Registrar conteo físico y ajustar stock</p>
           </div>
         </Link>
+        )}
       </div>
 
       {/* Alertas */}

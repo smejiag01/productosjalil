@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { formatearFechaHora } from "@/lib/fechas";
 import BadgeEstadoPqr from "@/components/BadgeEstadoPqr";
 import SelectorEstadoPqr from "./SelectorEstadoPqr";
 
@@ -94,7 +95,7 @@ export default async function DetallePqrPage({ params }: { params: { id: string 
             <div className="flex justify-between text-sm">
               <span className="text-gray-500">Recibido</span>
               <span className="text-gray-900 font-medium">
-                {pqr.createdAt.toLocaleString("es-CO", { timeZone: "America/Bogota", dateStyle: "long", timeStyle: "short" })}
+                {formatearFechaHora(pqr.createdAt)}
               </span>
             </div>
             <div className="flex justify-between text-sm items-center">
@@ -105,7 +106,7 @@ export default async function DetallePqrPage({ params }: { params: { id: string 
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Última actualización</span>
                 <span className="text-gray-900 font-medium">
-                  {pqr.updatedAt.toLocaleString("es-CO", { timeZone: "America/Bogota", dateStyle: "long", timeStyle: "short" })}
+                  {formatearFechaHora(pqr.updatedAt)}
                 </span>
               </div>
             )}

@@ -55,25 +55,26 @@ model rutas {
 }
 
 model clientes {
-  id              String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  nombre          String               @db.VarChar(160)
-  razon_social    String?              @db.VarChar(200)
-  nit             String?              @db.VarChar(30)
-  telefono        String               @unique @db.VarChar(40)
-  direccion       String?
-  ruta_id         String?              @db.Uuid
-  activo          Boolean              @default(true)
-  notas           String?
-  created_at      DateTime             @default(now()) @db.Timestamptz(6)
-  updated_at      DateTime             @default(now()) @updatedAt @db.Timestamptz(6)
-  codigo_mekano   String?              @unique @db.VarChar(40)
-  orden_ruta      Int?
-  ruta            rutas?               @relation(fields: [ruta_id], references: [id], onUpdate: NoAction)
-  conversaciones  conversaciones_wpp[]
-  pedidos         pedidos[]
-  pqrs            Pqr[]
-  precios_cliente precios_cliente[]
-  sedes           sedes[]
+  id                String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nombre            String               @db.VarChar(160)
+  telefono          String               @unique @db.VarChar(40)
+  direccion         String?
+  ruta_id           String?              @db.Uuid
+  activo            Boolean              @default(true)
+  notas             String?
+  created_at        DateTime             @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime             @default(now()) @updatedAt @db.Timestamptz(6)
+  codigo_mekano     String?              @unique @db.VarChar(40)
+  orden_ruta        Int?
+  razon_social      String?              @db.VarChar(200)
+  nit               String?              @db.VarChar(30)
+  cliente_contactos cliente_contactos[]
+  ruta              rutas?               @relation(fields: [ruta_id], references: [id], onUpdate: NoAction)
+  conversaciones    conversaciones_wpp[]
+  pedidos           pedidos[]
+  pqrs              Pqr[]
+  precios_cliente   precios_cliente[]
+  sedes             sedes[]
 
   @@index([codigo_mekano], map: "idx_clientes_codigo_mek")
   @@index([ruta_id], map: "idx_clientes_ruta")
@@ -201,6 +202,8 @@ model conversaciones_wpp {
   fecha_entrega      DateTime? @db.Date
   pqr_texto          String?
   pqr_adjuntos       Json?     @default("[]")
+  sede_id            String?   @db.Uuid
+  nit_temporal       String?   @db.VarChar(40)
   cliente            clientes? @relation(fields: [cliente_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   pedido             pedidos?  @relation(fields: [pedido_id], references: [id], onUpdate: NoAction)
 
@@ -361,6 +364,38 @@ model sedes {
   cliente      clientes  @relation(fields: [cliente_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([cliente_id], map: "idx_sedes_cliente")
+}
+
+model cliente_contactos {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cliente_id String   @db.Uuid
+  telefono   String   @db.VarChar(40)
+  nombre     String?  @db.VarChar(160)
+  principal  Boolean  @default(false)
+  verificado Boolean  @default(false)
+  origen     String   @default("manual") @db.VarChar(30)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  clientes   clientes @relation(fields: [cliente_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([telefono, cliente_id], map: "idx_contactos_tel_cliente")
+  @@index([cliente_id], map: "idx_contactos_cliente")
+  @@index([telefono], map: "idx_contactos_telefono")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model contactos_pendientes {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  telefono          String    @db.VarChar(40)
+  nombre_perfil     String?   @db.VarChar(160)
+  motivo            String    @db.VarChar(40)
+  telefono_contacto String?   @db.VarChar(40)
+  nit_intentado     String?   @db.VarChar(40)
+  notas             String?
+  atendido          Boolean   @default(false)
+  atendido_at       DateTime? @db.Timestamptz(6)
+  created_at        DateTime  @default(now()) @db.Timestamptz(6)
+
+  @@index([atendido, created_at(sort: Desc)], map: "idx_pendientes_atendido")
 }
 
 enum motivo_movimiento {

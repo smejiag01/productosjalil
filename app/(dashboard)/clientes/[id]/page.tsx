@@ -1,11 +1,13 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { formatearPrecio, formatearFechaCorta } from "@/lib/formato";
+import { formatearPrecio } from "@/lib/formato";
+import { formatearFechaHora } from "@/lib/fechas";
 import BadgeEstado from "@/components/BadgeEstado";
 import TablaPrecios from "./TablaPrecios";
 import AccionesCliente from "./AccionesCliente";
 import SeccionSedes from "./SeccionSedes";
+import SeccionContactos from "./SeccionContactos";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +16,7 @@ export default async function DetalleClientePage({
 }: {
   params: { id: string };
 }) {
-  const [cliente, productos, pedidos, rutas, sedes] = await Promise.all([
+  const [cliente, productos, pedidos, rutas, sedes, contactos] = await Promise.all([
     prisma.clientes.findUnique({
       where: { id: params.id },
       include: {
@@ -42,6 +44,10 @@ export default async function DetalleClientePage({
       where: { cliente_id: params.id },
       orderBy: [{ es_principal: "desc" }, { nombre_sede: "asc" }],
     }),
+    prisma.cliente_contactos.findMany({
+      where: { cliente_id: params.id },
+      orderBy: [{ principal: "desc" }, { created_at: "asc" }],
+    }),
   ]);
 
   if (!cliente) notFound();
@@ -54,6 +60,15 @@ export default async function DetalleClientePage({
     longitud: s.longitud,
     es_principal: s.es_principal,
     activa: s.activa,
+  }));
+
+  const contactosSerializados = contactos.map((c) => ({
+    id: c.id,
+    telefono: c.telefono,
+    nombre: c.nombre,
+    principal: c.principal,
+    verificado: c.verificado,
+    origen: c.origen,
   }));
 
   const preciosMap = new Map(
@@ -192,6 +207,11 @@ export default async function DetalleClientePage({
         </div>
       </div>
 
+      {/* Contactos */}
+      <div className="mb-6 sm:mb-8">
+        <SeccionContactos clienteId={cliente.id} contactosIniciales={contactosSerializados} />
+      </div>
+
       {/* Sedes */}
       <div className="mb-6 sm:mb-8">
         <SeccionSedes clienteId={cliente.id} sedesIniciales={sedesSerializadas} />
@@ -239,7 +259,7 @@ export default async function DetalleClientePage({
               {pedidos.map((p) => (
                 <tr key={p.id} className="hover:bg-gray-50/50">
                   <td className="py-3 px-6 text-sm text-gray-700">
-                    {formatearFechaCorta(p.created_at)}
+                    {formatearFechaHora(p.created_at)}
                   </td>
                   <td className="py-3 px-6 text-sm text-gray-600">
                     {p.ruta?.nombre ?? "—"}

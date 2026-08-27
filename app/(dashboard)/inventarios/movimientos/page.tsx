@@ -1,4 +1,7 @@
+import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { formatearFechaHora, inicioDelDiaBogota, finDelDiaBogota } from "@/lib/fechas";
+import { INVENTARIO_MATERIA_PRIMA_HABILITADO } from "@/lib/inventario-flags";
 import TablaMovimientos from "./TablaMovimientos";
 
 export const dynamic = "force-dynamic";
@@ -14,6 +17,8 @@ export default async function MovimientosPage({
 }: {
   searchParams: { tipo_inventario?: string; tipo_movimiento?: string; desde?: string; hasta?: string; pagina?: string };
 }) {
+  if (!INVENTARIO_MATERIA_PRIMA_HABILITADO) notFound();
+
   const pagina = Math.max(1, parseInt(searchParams.pagina || "1"));
   const porPagina = 20;
 
@@ -22,8 +27,8 @@ export default async function MovimientosPage({
   if (searchParams.tipo_inventario) where.item = { tipo: searchParams.tipo_inventario };
   if (searchParams.desde || searchParams.hasta) {
     const fechaFiltro: Record<string, Date> = {};
-    if (searchParams.desde) fechaFiltro.gte = new Date(searchParams.desde + "T00:00:00.000Z");
-    if (searchParams.hasta) fechaFiltro.lte = new Date(searchParams.hasta + "T23:59:59.999Z");
+    if (searchParams.desde) fechaFiltro.gte = inicioDelDiaBogota(searchParams.desde);
+    if (searchParams.hasta) fechaFiltro.lte = finDelDiaBogota(searchParams.hasta);
     where.created_at = fechaFiltro;
   }
 
@@ -45,7 +50,7 @@ export default async function MovimientosPage({
 
   const serializados = movimientos.map((m) => ({
     id: m.id,
-    fecha: m.created_at.toLocaleString("es-CO", { timeZone: "America/Bogota", dateStyle: "short", timeStyle: "short" }),
+    fecha: formatearFechaHora(m.created_at),
     itemNombre: m.item.nombre,
     tipoInventario: LABELS_TIPO[m.item.tipo] ?? m.item.tipo,
     tipoMov: m.tipo,
