@@ -6,7 +6,14 @@ export const esquemaCliente = z.object({
     .min(2, "El nombre debe tener al menos 2 caracteres")
     .max(160),
   razon_social: z.string().max(200).optional().nullable(),
-  nit: z.string().max(30).optional().nullable(),
+  // El cliente ya no maneja el dígito de verificación por separado — si lo
+  // pegan junto al NIT (ej. "900123456-7"), se lo quitamos al guardar.
+  nit: z
+    .string()
+    .max(30)
+    .optional()
+    .nullable()
+    .transform((val) => (val ? val.trim().replace(/-\d+$/, "") : val)),
   telefono: z
     .string()
     .min(10, "El teléfono debe tener al menos 10 dígitos")
