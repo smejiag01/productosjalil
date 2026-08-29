@@ -160,7 +160,27 @@ export default async function PedidosPage({
               <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
               </svg>
-              <span className="hidden sm:inline">Excel (Mekano)</span>
+              <span className="hidden sm:inline">Excel Pedidos</span>
+            </a>
+            <a
+              href={`/api/pedidos/exportar-matriz?fecha=${fechaSeleccionada}`}
+              className="h-11 px-3 lg:px-4 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors flex items-center gap-2"
+              title="Excel con una hoja por ruta, cliente x producto (para saber qué preparar)"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="3" y1="15" x2="21" y2="15" /><line x1="9" y1="3" x2="9" y2="21" /><line x1="15" y1="3" x2="15" y2="21" />
+              </svg>
+              <span className="hidden sm:inline">Matriz por ruta</span>
+            </a>
+            <a
+              href={`/api/pedidos/exportar-por-cliente?fecha=${fechaSeleccionada}`}
+              className="h-11 px-3 lg:px-4 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors flex items-center gap-2"
+              title="Excel con una fila por cliente y el detalle de lo que pidió"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+              <span className="hidden sm:inline">Por cliente</span>
             </a>
           </div>
         )}
