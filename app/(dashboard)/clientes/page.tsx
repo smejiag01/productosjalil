@@ -34,7 +34,7 @@ export default async function ClientesPage() {
 
   const clientesSerializados = clientes.map((c) => ({
     id: c.id,
-    codigo_mekano: c.codigo_mekano,
+    nit: c.nit,
     nombre: c.nombre,
     telefono: c.telefono,
     direccion: c.direccion,

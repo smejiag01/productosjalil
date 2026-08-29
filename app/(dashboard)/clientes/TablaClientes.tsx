@@ -6,7 +6,7 @@ import ModalCliente from "./ModalCliente";
 
 interface ClienteFila {
   id: string;
-  codigo_mekano: string | null;
+  nit: string | null;
   nombre: string;
   telefono: string;
   direccion: string | null;
@@ -57,7 +57,7 @@ export default function TablaClientes({
       return (
         c.nombre.toLowerCase().includes(q) ||
         c.telefono.includes(q) ||
-        (c.codigo_mekano?.toLowerCase().includes(q) ?? false)
+        (c.nit?.toLowerCase().includes(q) ?? false)
       );
     }
     return true;
@@ -157,7 +157,7 @@ export default function TablaClientes({
           </svg>
           <input
             type="text"
-            placeholder="Buscar por nombre, código o tel..."
+            placeholder="Buscar por nombre, NIT o tel..."
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
             className="pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm w-full sm:w-72 outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
@@ -178,7 +178,7 @@ export default function TablaClientes({
               <div className="flex items-start justify-between mb-2">
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-gray-900 truncate">{c.nombre}</p>
-                  <p className="text-xs text-gray-400">{c.codigo_mekano || "Sin código"} · {c.rutaNombre || "Sin ruta"}</p>
+                  <p className="text-xs text-gray-400">{c.nit || "Sin NIT"} · {c.rutaNombre || "Sin ruta"}</p>
                 </div>
                 <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border flex-shrink-0 ml-2 ${c.activo ? "bg-green-50 border-green-200 text-green-800" : "bg-red-50 border-red-200 text-red-800"}`}>
                   {c.activo ? "Activo" : "Inactivo"}
@@ -214,7 +214,7 @@ export default function TablaClientes({
           <thead>
             <tr className="border-b border-gray-100">
               <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Código
+                NIT / Documento
               </th>
               <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Nombre
@@ -270,13 +270,13 @@ export default function TablaClientes({
                   className={`hover:bg-gray-50/50 transition-colors ${c.contactosSinVerificar > 0 ? "bg-amber-50/60" : ""}`}
                 >
                   <td className="py-3 px-4">
-                    {c.codigo_mekano ? (
+                    {c.nit ? (
                       <span className="text-sm font-mono text-gray-700">
-                        {c.codigo_mekano}
+                        {c.nit}
                       </span>
                     ) : (
                       <span className="text-xs text-yellow-600 bg-yellow-50 px-2 py-0.5 rounded">
-                        Sin código
+                        Sin NIT
                       </span>
                     )}
                   </td>
