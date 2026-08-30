@@ -118,7 +118,7 @@ export function libroDetalle(pedidos: PedidoExportable[]): Buffer {
 
 /** Excel no permite : \ / ? * [ ] en el nombre de hoja, ni más de 31 caracteres. */
 function nombreHojaValido(nombre: string, usados: Set<string>): string {
-  let limpio = nombre.replace(/[:\\/?*[\]]/g, "").trim().slice(0, 31) || "Ruta";
+  const limpio = nombre.replace(/[:\\/?*[\]]/g, "").trim().slice(0, 31) || "Ruta";
   let final = limpio;
   let i = 2;
   while (usados.has(final.toLowerCase())) {
