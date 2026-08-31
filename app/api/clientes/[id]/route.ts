@@ -116,7 +116,7 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   const auth = await requireAdmin();
@@ -134,14 +134,37 @@ export async function DELETE(
       );
     }
 
-    const clienteDesactivado = await prisma.clientes.update({
-      where: { id: params.id },
-      data: { activo: false },
-    });
+    const permanente = request.nextUrl.searchParams.get("permanente") === "true";
 
-    return NextResponse.json({ success: true, data: clienteDesactivado });
+    if (!permanente) {
+      const clienteDesactivado = await prisma.clientes.update({
+        where: { id: params.id },
+        data: { activo: false },
+      });
+      return NextResponse.json({ success: true, data: clienteDesactivado });
+    }
+
+    const [numPedidos, numPqrs] = await Promise.all([
+      prisma.pedidos.count({ where: { cliente_id: params.id } }),
+      prisma.pqr.count({ where: { clienteId: params.id } }),
+    ]);
+
+    if (numPedidos > 0 || numPqrs > 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "No se puede eliminar de forma permanente: el cliente tiene pedidos o PQRs registrados. Archívalo en su lugar.",
+        },
+        { status: 409 }
+      );
+    }
+
+    await prisma.clientes.delete({ where: { id: params.id } });
+
+    return NextResponse.json({ success: true, data: null });
   } catch (error) {
-    console.error("Error al desactivar cliente:", error);
+    console.error("Error al eliminar cliente:", error);
     return NextResponse.json(
       { success: false, error: "Error interno del servidor" },
       { status: 500 }

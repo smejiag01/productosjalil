@@ -16,7 +16,7 @@ export default async function DetalleClientePage({
 }: {
   params: { id: string };
 }) {
-  const [cliente, productos, pedidos, rutas, sedes, contactos] = await Promise.all([
+  const [cliente, productos, pedidos, totalPedidos, totalPqrs, rutas, sedes, contactos] = await Promise.all([
     prisma.clientes.findUnique({
       where: { id: params.id },
       include: {
@@ -36,6 +36,8 @@ export default async function DetalleClientePage({
       take: 5,
       include: { ruta: true },
     }),
+    prisma.pedidos.count({ where: { cliente_id: params.id } }),
+    prisma.pqr.count({ where: { clienteId: params.id } }),
     prisma.rutas.findMany({
       where: { activa: true },
       orderBy: { nombre: "asc" },
@@ -154,6 +156,7 @@ export default async function DetalleClientePage({
             notas: cliente.notas,
           }}
           rutas={rutas.map((r) => ({ id: r.id, nombre: r.nombre }))}
+          puedeEliminar={totalPedidos === 0 && totalPqrs === 0}
         />
       </div>
 
