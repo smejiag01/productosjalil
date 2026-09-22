@@ -77,6 +77,7 @@ model clientes {
   sedes             sedes[]
 
   @@index([codigo_mekano], map: "idx_clientes_codigo_mek")
+  @@index([nit], map: "idx_clientes_nit")
   @@index([ruta_id], map: "idx_clientes_ruta")
   @@index([telefono], map: "idx_clientes_telefono")
 }
