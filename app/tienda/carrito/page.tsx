@@ -46,6 +46,26 @@ function etiquetaFecha(fechaStr: string): string {
   return texto.charAt(0).toUpperCase() + texto.slice(1);
 }
 
+const NOMBRES_DIA = [
+  "domingos",
+  "lunes",
+  "martes",
+  "miércoles",
+  "jueves",
+  "viernes",
+  "sábados",
+];
+
+function etiquetaDiasRuta(dias: number[]): string {
+  const nombres = [...dias]
+    .sort((a, b) => a - b)
+    .map((d) => NOMBRES_DIA[d])
+    .filter(Boolean);
+  if (nombres.length === 0) return "";
+  if (nombres.length === 1) return nombres[0];
+  return `${nombres.slice(0, -1).join(", ")} y ${nombres[nombres.length - 1]}`;
+}
+
 export default async function CarritoPage() {
   const cliente = await obtenerClienteSesion();
   if (!cliente) redirect("/tienda/login");
@@ -74,6 +94,7 @@ export default async function CarritoPage() {
           producto_id: p.id,
           nombre: p.nombre,
           unidad: p.unidad,
+          imagen_url: p.imagen_url,
           cantidad: i.cantidad,
           precio_unitario: precio,
         };
@@ -86,7 +107,11 @@ export default async function CarritoPage() {
 
   let fechas: FechaOpcion[] = [];
   let sedes: SedeOpcion[] = [];
+  let rutaNombre = "";
+  let diasRutaLabel = "";
   if (!sinRuta && cliente.ruta) {
+    rutaNombre = cliente.ruta.nombre;
+    diasRutaLabel = etiquetaDiasRuta(cliente.ruta.dias_semana);
     const disponibles = proximasFechasEntrega({
       dias_semana: cliente.ruta.dias_semana,
       frecuencia: cliente.ruta.frecuencia,
@@ -131,6 +156,8 @@ export default async function CarritoPage() {
       fechas={fechas}
       sedes={sedes}
       direccionCliente={cliente.direccion}
+      rutaNombre={rutaNombre}
+      diasRutaLabel={diasRutaLabel}
     />
   );
 }

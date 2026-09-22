@@ -9,8 +9,48 @@ export interface LineaHidratada {
   producto_id: string;
   nombre: string;
   unidad: string;
+  imagen_url: string | null;
   cantidad: number;
   precio_unitario: number;
+}
+
+function Miniatura({
+  nombre,
+  imagenUrl,
+  className = "",
+}: {
+  nombre: string;
+  imagenUrl: string | null;
+  className?: string;
+}) {
+  if (imagenUrl) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={imagenUrl}
+        alt={nombre}
+        loading="lazy"
+        className={`object-cover bg-gray-100 ${className}`}
+      />
+    );
+  }
+  return (
+    <div className={`bg-gray-100 flex items-center justify-center text-gray-300 ${className}`}>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="w-1/2 h-1/2"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
+        <path d="M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" />
+      </svg>
+    </div>
+  );
 }
 
 export interface FechaOpcion {
@@ -37,6 +77,8 @@ interface Props {
   fechas: FechaOpcion[];
   sedes: SedeOpcion[];
   direccionCliente: string | null;
+  rutaNombre: string;
+  diasRutaLabel: string;
 }
 
 export default function CarritoCliente({
@@ -44,6 +86,8 @@ export default function CarritoCliente({
   fechas,
   sedes,
   direccionCliente,
+  rutaNombre,
+  diasRutaLabel,
 }: Props) {
   const { items, incrementar, decrementar, quitar, limpiar } = useCarrito();
 
@@ -202,48 +246,83 @@ export default function CarritoCliente({
   return (
     <div className="min-h-screen bg-gray-50 pb-8">
       <div className="max-w-3xl mx-auto px-4 py-6">
-        <Link href="/tienda" className="text-sm text-gray-400 hover:text-gray-600">
-          ← Seguir comprando
+        <Link
+          href="/tienda"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-4 h-4"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+          Seguir comprando
         </Link>
-        <h1 className="text-xl font-bold text-gray-900 mt-2 mb-4">Tu pedido</h1>
+        <h1 className="text-xl font-bold text-gray-900 mt-3 mb-4">Tu pedido</h1>
 
         {/* Líneas */}
         <div className="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100 mb-4">
           {lineas.map((l) => (
-            <div key={l.producto_id} className="p-3 flex items-center gap-3">
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-gray-900">{l.nombre}</p>
-                <p className="text-xs text-gray-500">
+            <div key={l.producto_id} className="p-3 flex gap-3">
+              <Miniatura
+                nombre={l.nombre}
+                imagenUrl={l.imagen_url}
+                className="w-16 h-16 rounded-lg flex-shrink-0"
+              />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between gap-2">
+                  <p className="text-sm font-medium text-gray-900 leading-tight">{l.nombre}</p>
+                  <button
+                    onClick={() => quitar(l.producto_id)}
+                    aria-label="Eliminar producto"
+                    className="text-gray-400 hover:text-red-600 flex-shrink-0"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="w-4 h-4"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polyline points="3 6 5 6 21 6" />
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    </svg>
+                  </button>
+                </div>
+                <p className="text-xs text-gray-500 mt-0.5">
                   {formatearPrecio(l.precio_unitario)} / {l.unidad}
                 </p>
-              </div>
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <button
-                  onClick={() => decrementar(l.producto_id)}
-                  aria-label="Quitar uno"
-                  className="w-8 h-8 rounded-lg border border-gray-300 text-gray-700 text-lg hover:bg-gray-50 flex items-center justify-center"
-                >
-                  −
-                </button>
-                <span className="w-6 text-center text-sm font-semibold">{l.cantidad}</span>
-                <button
-                  onClick={() => incrementar(l.producto_id)}
-                  aria-label="Agregar uno"
-                  className="w-8 h-8 rounded-lg bg-brand text-white text-lg hover:bg-brand-light flex items-center justify-center"
-                >
-                  +
-                </button>
-              </div>
-              <div className="w-20 text-right flex-shrink-0">
-                <p className="text-sm font-semibold text-gray-900">
-                  {formatearPrecio(l.subtotal)}
-                </p>
-                <button
-                  onClick={() => quitar(l.producto_id)}
-                  className="text-xs text-gray-400 hover:text-red-600"
-                >
-                  Quitar
-                </button>
+                <div className="flex items-center justify-between mt-2">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => decrementar(l.producto_id)}
+                      aria-label="Quitar uno"
+                      className="w-8 h-8 rounded-lg border border-gray-300 text-gray-700 text-lg hover:bg-gray-50 flex items-center justify-center"
+                    >
+                      −
+                    </button>
+                    <span className="w-6 text-center text-sm font-semibold">{l.cantidad}</span>
+                    <button
+                      onClick={() => incrementar(l.producto_id)}
+                      aria-label="Agregar uno"
+                      className="w-8 h-8 rounded-lg bg-brand text-white text-lg hover:bg-brand-light flex items-center justify-center"
+                    >
+                      +
+                    </button>
+                  </div>
+                  <span className="text-sm font-semibold text-gray-900">
+                    {formatearPrecio(l.subtotal)}
+                  </span>
+                </div>
               </div>
             </div>
           ))}
@@ -256,9 +335,14 @@ export default function CarritoCliente({
         {/* Checkout: fecha + sede al final */}
         <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-4 mb-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               Fecha de entrega
             </label>
+            {diasRutaLabel && (
+              <p className="text-xs text-gray-500 mb-1.5">
+                Tu ruta ({rutaNombre}) entrega los {diasRutaLabel}.
+              </p>
+            )}
             {fechas.length === 0 ? (
               <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2">
                 No hay fechas de entrega disponibles próximamente. Comunícate con
