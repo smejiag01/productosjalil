@@ -8,6 +8,50 @@ import { precioEfectivo, resolverPreciosCliente } from "@/lib/precios";
 import { calcularLineas, type LineaPrecio } from "@/lib/pedido-calculo";
 import { toDbDate } from "@/lib/analiticas/periodos";
 
+const TIMEOUT_WEBHOOK_MS = 5000;
+
+/**
+ * Best-effort: avisa a n8n que se creó un pedido en la tienda para que dispare
+ * el WhatsApp de confirmación. Un fallo aquí (timeout, no-2xx, n8n caído)
+ * NUNCA afecta la creación del pedido —ya está guardado— ni la respuesta al
+ * cliente. Payload mínimo: n8n consulta el resto (nombre, total, fecha, sede)
+ * en la base de datos. El teléfono viene de la BD, no del navegador.
+ */
+async function notificarPedidoN8n(pedidoId: string, telefono: string): Promise<void> {
+  const url = process.env.N8N_PEDIDO_WEBHOOK_URL;
+  const secret = process.env.N8N_PEDIDO_WEBHOOK_SECRET;
+  if (!url || !secret) {
+    console.warn(
+      `N8N_PEDIDO_WEBHOOK_URL/SECRET sin configurar; se omite la notificación del pedido ${pedidoId}`
+    );
+    return;
+  }
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_WEBHOOK_MS);
+
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-internal-secret": secret,
+      },
+      body: JSON.stringify({ pedido_id: pedidoId, telefono }),
+      signal: controller.signal,
+    });
+    if (!res.ok) {
+      console.error(
+        `Notificación de pedido a n8n devolvió ${res.status} para el pedido ${pedidoId}`
+      );
+    }
+  } catch (error) {
+    console.error(`Error al notificar el pedido ${pedidoId} a n8n:`, error);
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 export async function POST(request: NextRequest) {
   const auth = await requireClienteSession();
   if (auth.error) return auth.error;
@@ -141,6 +185,11 @@ export async function POST(request: NextRequest) {
       });
       return nuevo;
     });
+
+    // El pedido ya está guardado. Avisamos a n8n (WhatsApp de confirmación)
+    // en modo best-effort: si falla, el pedido igual queda creado y el cliente
+    // igual recibe su respuesta de éxito.
+    await notificarPedidoN8n(pedido.id, cliente.telefono);
 
     const sedeElegida = sedeIdFinal
       ? sedesActivas.find((s) => s.id === sedeIdFinal)

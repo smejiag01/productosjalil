@@ -40,3 +40,4 @@ next-env.d.ts
 
 # Secreto de produccion generado localmente (no commitear)
 tienda-secret-prod.txt
+n8n-pedido-secret-prod.txt
