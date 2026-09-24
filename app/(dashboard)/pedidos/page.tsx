@@ -45,13 +45,17 @@ export default async function PedidosPage({
   const hoy = fechaBogota();
   const manana = sumarDias(hoy, 1);
   const vistaActual =
-    searchParams.vista === "todos"
-      ? "todos"
+    searchParams.vista === "fecha"
+      ? "fecha"
       : searchParams.vista === "rango"
         ? "rango"
         : searchParams.vista === "informes"
           ? "informes"
-          : "fecha";
+          : searchParams.vista === "todos"
+            ? "todos"
+            : searchParams.fecha
+              ? "fecha" // llegó por el selector de fecha o el botón "Hoy" (solo ?fecha=)
+              : "todos"; // vista por defecto: todos los pedidos
   const fechaSeleccionada = searchParams.fecha || formatDateStr(hoy);
   const fechaValida = (s?: string) => /^\d{4}-\d{2}-\d{2}$/.test(s ?? "");
   const desdeSeleccionada = fechaValida(searchParams.desde) ? searchParams.desde! : formatDateStr(hoy);
@@ -191,7 +195,7 @@ export default async function PedidosPage({
         {/* Tabs Por fecha / Todos */}
         <div className="flex bg-gray-100 rounded-lg p-0.5">
           <a
-            href="/pedidos"
+            href="/pedidos?vista=fecha"
             className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
               vistaActual === "fecha"
                 ? "bg-white shadow-sm text-gray-900"
@@ -237,7 +241,7 @@ export default async function PedidosPage({
             <SelectorFecha fechaActual={fechaSeleccionada} />
             {!esManana && (
               <a
-                href="/pedidos"
+                href="/pedidos?vista=fecha"
                 className="h-10 px-3 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 flex items-center"
               >
                 Mañana
