@@ -26,6 +26,7 @@ interface Props {
   clientes: ClienteFila[];
   rutas: Ruta[];
   contadores: { todos: number; activos: number; inactivos: number };
+  sinRutaInicial?: boolean;
 }
 
 const FILTROS_ESTADO = [
@@ -38,19 +39,21 @@ export default function TablaClientes({
   clientes,
   rutas,
   contadores,
+  sinRutaInicial = false,
 }: Props) {
   const [filtroEstado, setFiltroEstado] = useState("todos");
   const [filtroRuta, setFiltroRuta] = useState("");
-  const [soloSinRuta, setSoloSinRuta] = useState(false);
+  const [soloSinRuta, setSoloSinRuta] = useState(sinRutaInicial);
   const [busqueda, setBusqueda] = useState("");
   const [modalAbierto, setModalAbierto] = useState(false);
 
-  const contadorSinRuta = clientes.filter((c) => !c.ruta_id).length;
+  // Solo cuentan los clientes ACTIVOS: uno archivado sin ruta no necesita atención.
+  const contadorSinRuta = clientes.filter((c) => c.activo && !c.ruta_id).length;
 
   const clientesFiltrados = clientes.filter((c) => {
     if (filtroEstado === "activos" && !c.activo) return false;
     if (filtroEstado === "inactivos" && c.activo) return false;
-    if (soloSinRuta && c.ruta_id) return false;
+    if (soloSinRuta && (c.ruta_id || !c.activo)) return false;
     if (!soloSinRuta && filtroRuta && c.ruta_id !== filtroRuta) return false;
     if (busqueda) {
       const q = busqueda.toLowerCase();
@@ -87,6 +90,33 @@ export default function TablaClientes({
           Agregar cliente
         </button>
       </div>
+
+      {/* Aviso dinámico: clientes activos sin ruta */}
+      {contadorSinRuta > 0 && (
+        <div className="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-start gap-3">
+            <span className="text-xl leading-none" aria-hidden="true">📍</span>
+            <div>
+              <p className="text-sm font-semibold text-amber-900">
+                {contadorSinRuta === 1
+                  ? "Hay 1 cliente activo sin ruta asignada"
+                  : `Hay ${contadorSinRuta} clientes activos sin ruta asignada`}
+              </p>
+              <p className="text-xs text-amber-700 mt-0.5">
+                {soloSinRuta
+                  ? "Abre cada cliente y usa \"Editar cliente\" para asignarle una ruta."
+                  : "No reciben recordatorios de WhatsApp ni pueden hacer pedidos en la tienda en línea hasta que les asignes una ruta."}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setSoloSinRuta((v) => !v)}
+            className="px-4 py-2 bg-amber-500 text-white rounded-lg text-sm font-medium hover:bg-amber-600 transition-colors whitespace-nowrap flex-shrink-0"
+          >
+            {soloSinRuta ? "Ver todos los clientes" : "Ver y asignar"}
+          </button>
+        </div>
+      )}
 
       {/* Filtros + buscador */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 gap-3">

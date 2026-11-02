@@ -3,7 +3,10 @@ import TablaClientes from "./TablaClientes";
 
 export const dynamic = "force-dynamic";
 
-export default async function ClientesPage() {
+export default async function ClientesPage(props: {
+  searchParams: Promise<{ sinruta?: string }>;
+}) {
+  const searchParams = await props.searchParams;
   const [clientes, rutas, contactos] = await Promise.all([
     prisma.clientes.findMany({
       include: { ruta: true },
@@ -55,6 +58,7 @@ export default async function ClientesPage() {
       clientes={clientesSerializados}
       rutas={rutasSerializadas}
       contadores={contadores}
+      sinRutaInicial={searchParams.sinruta === "1"}
     />
   );
 }

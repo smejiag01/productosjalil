@@ -175,12 +175,14 @@ export default async function HomePage() {
             )}
             {clientesSinRuta > 0 && (
               <Link
-                href="/clientes"
+                href="/clientes?sinruta=1"
                 className="bg-amber-50 border border-amber-200 rounded-xl p-5 hover:bg-amber-100 transition-colors"
               >
                 <p className="text-sm text-amber-700 mb-1">📍 Clientes sin ruta asignada</p>
                 <p className="text-3xl font-bold text-amber-900">{clientesSinRuta}</p>
-                <p className="text-xs text-amber-600 mt-1">no reciben recordatorios de WhatsApp</p>
+                <p className="text-xs text-amber-600 mt-1">
+                  no reciben recordatorios ni pueden pedir en la tienda. Toca para asignarles una ruta
+                </p>
               </Link>
             )}
             {pqrsAbiertas > 0 && (
