@@ -18,8 +18,9 @@ async function obtenerContacto(clienteId: string, contactoId: string) {
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string; contactoId: string } }
+  props: { params: Promise<{ id: string; contactoId: string }> }
 ) {
+  const params = await props.params;
   const auth = await requireAdmin();
   if (auth.error) return auth.error;
 
@@ -78,8 +79,9 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string; contactoId: string } }
+  props: { params: Promise<{ id: string; contactoId: string }> }
 ) {
+  const params = await props.params;
   const auth = await requireAdmin();
   if (auth.error) return auth.error;
 

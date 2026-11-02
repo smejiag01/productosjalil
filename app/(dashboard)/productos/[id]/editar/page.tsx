@@ -5,11 +5,12 @@ import FormularioProducto from "../../FormularioProducto";
 
 export const dynamic = "force-dynamic";
 
-export default async function EditarProductoPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default async function EditarProductoPage(
+  props: {
+    params: Promise<{ id: string }>;
+  }
+) {
+  const params = await props.params;
   const [producto, categorias] = await Promise.all([
     prisma.productos.findUnique({ where: { id: params.id } }),
     prisma.categorias.findMany({

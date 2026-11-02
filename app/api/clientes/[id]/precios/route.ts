@@ -3,10 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { esquemaPrecioCliente } from "@/lib/validaciones";
 import { requireAdmin } from "@/lib/auth-guard";
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const auth = await requireAdmin();
   if (auth.error) return auth.error;
 
@@ -63,10 +61,8 @@ export async function POST(
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const auth = await requireAdmin();
   if (auth.error) return auth.error;
 

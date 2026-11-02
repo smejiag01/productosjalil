@@ -30,10 +30,8 @@ const esquemaEstado = z
 // repartidor). Al pasar a en_reparto notifica por WhatsApp vía n8n (ver
 // lib/notificaciones/notificarDespacho.ts); el despacho masivo por ruta
 // (app/api/pedidos/despachar) notifica por su cuenta ya que no pasa por aquí.
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {

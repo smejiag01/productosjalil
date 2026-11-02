@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { formatearPrecio } from "@/lib/formato";
@@ -37,11 +38,12 @@ function formatearFechaColombia(fecha: Date | string): string {
   });
 }
 
-export default async function PedidosPage({
-  searchParams,
-}: {
-  searchParams: { fecha?: string; vista?: string; pagina?: string; desde?: string; hasta?: string };
-}) {
+export default async function PedidosPage(
+  props: {
+    searchParams: Promise<{ fecha?: string; vista?: string; pagina?: string; desde?: string; hasta?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const hoy = fechaBogota();
   const manana = sumarDias(hoy, 1);
   const vistaActual =
@@ -194,7 +196,7 @@ export default async function PedidosPage({
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
         {/* Tabs Por fecha / Todos */}
         <div className="flex bg-gray-100 rounded-lg p-0.5">
-          <a
+          <Link
             href="/pedidos?vista=fecha"
             className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
               vistaActual === "fecha"
@@ -203,8 +205,8 @@ export default async function PedidosPage({
             }`}
           >
             Por fecha
-          </a>
-          <a
+          </Link>
+          <Link
             href="/pedidos?vista=todos"
             className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
               vistaActual === "todos"
@@ -213,8 +215,8 @@ export default async function PedidosPage({
             }`}
           >
             Todos
-          </a>
-          <a
+          </Link>
+          <Link
             href={`/pedidos?vista=rango&desde=${desdeSeleccionada}&hasta=${hastaSeleccionada}`}
             className={`px-4 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
               vistaActual === "rango"
@@ -223,8 +225,8 @@ export default async function PedidosPage({
             }`}
           >
             Rango
-          </a>
-          <a
+          </Link>
+          <Link
             href="/pedidos?vista=informes"
             className={`px-4 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
               vistaActual === "informes"
@@ -233,27 +235,27 @@ export default async function PedidosPage({
             }`}
           >
             Informes
-          </a>
+          </Link>
         </div>
 
         {vistaActual === "fecha" && (
           <div className="flex items-center gap-2">
             <SelectorFecha fechaActual={fechaSeleccionada} />
             {!esManana && (
-              <a
+              <Link
                 href="/pedidos?vista=fecha"
                 className="h-10 px-3 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 flex items-center"
               >
                 Mañana
-              </a>
+              </Link>
             )}
             {!esHoy && (
-              <a
+              <Link
                 href={`/pedidos?fecha=${formatDateStr(hoy)}`}
                 className="h-10 px-3 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 flex items-center"
               >
                 Hoy
-              </a>
+              </Link>
             )}
           </div>
         )}
@@ -294,23 +296,23 @@ export default async function PedidosPage({
       {vistaActual === "todos" && totalPaginas > 1 && (
         <div className="flex items-center justify-center gap-2 mt-6">
           {pagina > 1 && (
-            <a
+            <Link
               href={`/pedidos?vista=todos&pagina=${pagina - 1}`}
               className="h-10 px-4 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 flex items-center"
             >
               Anterior
-            </a>
+            </Link>
           )}
           <span className="text-sm text-gray-500">
             Página {pagina} de {totalPaginas}
           </span>
           {pagina < totalPaginas && (
-            <a
+            <Link
               href={`/pedidos?vista=todos&pagina=${pagina + 1}`}
               className="h-10 px-4 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 flex items-center"
             >
               Siguiente
-            </a>
+            </Link>
           )}
         </div>
       )}

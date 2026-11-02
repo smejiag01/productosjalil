@@ -17,7 +17,8 @@ const LABEL_TIPO: Record<string, string> = {
   producto_terminado: "Producto terminado",
 };
 
-export default async function DetalleReconteoPage({ params }: { params: { id: string } }) {
+export default async function DetalleReconteoPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   if (!INVENTARIO_MATERIA_PRIMA_HABILITADO) notFound();
 
   const reconteo = await prisma.inventario_reconteos.findUnique({

@@ -12,11 +12,12 @@ const LABELS_TIPO: Record<string, string> = {
   producto_terminado: "Prod. terminado",
 };
 
-export default async function MovimientosPage({
-  searchParams,
-}: {
-  searchParams: { tipo_inventario?: string; tipo_movimiento?: string; desde?: string; hasta?: string; pagina?: string };
-}) {
+export default async function MovimientosPage(
+  props: {
+    searchParams: Promise<{ tipo_inventario?: string; tipo_movimiento?: string; desde?: string; hasta?: string; pagina?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   if (!INVENTARIO_MATERIA_PRIMA_HABILITADO) notFound();
 
   const pagina = Math.max(1, parseInt(searchParams.pagina || "1"));

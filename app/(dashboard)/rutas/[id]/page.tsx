@@ -5,11 +5,12 @@ import OrdenClientesRuta from "./OrdenClientesRuta";
 
 export const dynamic = "force-dynamic";
 
-export default async function RutaDetallePage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default async function RutaDetallePage(
+  props: {
+    params: Promise<{ id: string }>;
+  }
+) {
+  const params = await props.params;
   const ruta = await prisma.rutas.findUnique({
     where: { id: params.id },
     include: {

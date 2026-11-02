@@ -11,11 +11,12 @@ import SeccionContactos from "./SeccionContactos";
 
 export const dynamic = "force-dynamic";
 
-export default async function DetalleClientePage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default async function DetalleClientePage(
+  props: {
+    params: Promise<{ id: string }>;
+  }
+) {
+  const params = await props.params;
   const [cliente, productos, pedidos, totalPedidos, totalPqrs, rutas, sedes, contactos] = await Promise.all([
     prisma.clientes.findUnique({
       where: { id: params.id },

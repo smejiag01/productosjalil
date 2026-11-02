@@ -1,11 +1,9 @@
 import Link from "next/link";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { obtenerClienteSesion } from "@/lib/tienda-auth";
+import { leerCarritoCookie, obtenerClienteSesion } from "@/lib/tienda-auth";
 import { precioEfectivo } from "@/lib/precios";
 import { proximasFechasEntrega } from "@/lib/fechas-entrega";
-import { COOKIE_CARRITO } from "@/lib/tienda-session";
 import CarritoCliente, {
   type LineaHidratada,
   type FechaOpcion,
@@ -13,26 +11,6 @@ import CarritoCliente, {
 } from "./CarritoCliente";
 
 export const dynamic = "force-dynamic";
-
-function leerCarrito(): { producto_id: string; cantidad: number }[] {
-  try {
-    const raw = cookies().get(COOKIE_CARRITO)?.value;
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed
-      .filter(
-        (i) =>
-          i &&
-          typeof i.producto_id === "string" &&
-          typeof i.cantidad === "number" &&
-          i.cantidad > 0
-      )
-      .map((i) => ({ producto_id: i.producto_id, cantidad: i.cantidad }));
-  } catch {
-    return [];
-  }
-}
 
 function etiquetaFecha(fechaStr: string): string {
   const [y, m, d] = fechaStr.split("-").map(Number);
@@ -70,7 +48,7 @@ export default async function CarritoPage() {
   const cliente = await obtenerClienteSesion();
   if (!cliente) redirect("/tienda/login");
 
-  const itemsCarrito = leerCarrito();
+  const itemsCarrito = await leerCarritoCookie();
 
   // Hidratar líneas con producto + precio del cliente (solo productos activos).
   let lineas: LineaHidratada[] = [];

@@ -21,10 +21,8 @@ function redondear(n: number): number {
   return Math.round(n * 100) / 100;
 }
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const auth = await requireAdmin();
   if (auth.error) return auth.error;
 

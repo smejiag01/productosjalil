@@ -89,17 +89,18 @@ function diffDias(a: string, b: string): number {
   return (toDbDate(b).getTime() - toDbDate(a).getTime()) / 86400000;
 }
 
-export default async function AnaliticasPage({
-  searchParams,
-}: {
-  searchParams: {
-    periodo?: string;
-    fecha?: string;
-    tab?: string;
-    desde?: string;
-    hasta?: string;
-  };
-}) {
+export default async function AnaliticasPage(
+  props: {
+    searchParams: Promise<{
+      periodo?: string;
+      fecha?: string;
+      tab?: string;
+      desde?: string;
+      hasta?: string;
+    }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const periodo = (
     ["diario", "semanal", "quincenal", "mensual"].includes(searchParams.periodo ?? "")
       ? searchParams.periodo

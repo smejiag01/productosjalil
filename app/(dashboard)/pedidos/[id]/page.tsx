@@ -13,11 +13,12 @@ import { EdicionPedidoProvider } from "./EdicionPedidoContext";
 
 export const dynamic = "force-dynamic";
 
-export default async function DetallePedidoPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default async function DetallePedidoPage(
+  props: {
+    params: Promise<{ id: string }>;
+  }
+) {
+  const params = await props.params;
   const pedido = await prisma.pedidos.findUnique({
     where: { id: params.id },
     include: {

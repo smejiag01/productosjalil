@@ -16,11 +16,12 @@ const LABEL_MOTIVO: Record<string, string> = {
   reconteo: "Reconteo",
 };
 
-export default async function DetalleProductoTerminadoPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default async function DetalleProductoTerminadoPage(
+  props: {
+    params: Promise<{ id: string }>;
+  }
+) {
+  const params = await props.params;
   const item = await prisma.inventario_items.findUnique({
     where: { id: params.id },
     include: { producto: { select: { id: true, nombre: true } } },

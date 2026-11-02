@@ -16,7 +16,8 @@ function nombreArchivo(url: string): string {
   return partes[partes.length - 1] || "archivo";
 }
 
-export default async function DetallePqrPage({ params }: { params: { id: string } }) {
+export default async function DetallePqrPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const pqr = await prisma.pqr.findUnique({
     where: { id: params.id },
     include: { cliente: { include: { ruta: true } } },
