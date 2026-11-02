@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { put } from "@vercel/blob";
 import sharp from "sharp";
+import { esApiKeyValida } from "@/lib/auth-guard";
 
 const TAMANO_MAXIMO = 10 * 1024 * 1024; // 10MB
 
@@ -16,8 +17,7 @@ const EXTENSIONES: Record<string, string> = {
 };
 
 export async function POST(request: NextRequest) {
-  const apiKey = request.headers.get("x-api-key");
-  if (!apiKey || apiKey !== process.env.N8N_UPLOAD_SECRET) {
+  if (!esApiKeyValida(request, "N8N_UPLOAD_SECRET")) {
     return NextResponse.json(
       { success: false, error: "Token inválido o faltante" },
       { status: 401 }

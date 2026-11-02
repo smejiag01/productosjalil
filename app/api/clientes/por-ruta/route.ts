@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { esApiKeyValida } from "@/lib/auth-guard";
 
 export async function GET(request: NextRequest) {
-  const apiKey = request.headers.get("x-api-key");
-  if (!apiKey || apiKey !== process.env.API_SECRET_KEY) {
+  if (!esApiKeyValida(request, "API_SECRET_KEY")) {
     return NextResponse.json(
       { success: false, error: "API key inválida o faltante" },
       { status: 401 }

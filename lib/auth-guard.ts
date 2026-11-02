@@ -1,3 +1,4 @@
+import { timingSafeEqual } from "node:crypto";
 import { getServerSession, type Session } from "next-auth";
 import { NextResponse } from "next/server";
 import { authOptions } from "./auth";
@@ -45,9 +46,22 @@ export async function requireAdmin(): Promise<ResultadoGuardia> {
   return { session, error: null };
 }
 
+/**
+ * Compara un secreto recibido contra el esperado en tiempo constante, para no
+ * filtrar por tiempo de respuesta cuántos caracteres iniciales coinciden.
+ */
+export function secretosIguales(
+  recibido: string | null | undefined,
+  esperado: string | undefined
+): boolean {
+  if (!recibido || !esperado) return false;
+  const a = Buffer.from(recibido);
+  const b = Buffer.from(esperado);
+  if (a.length !== b.length) return false;
+  return timingSafeEqual(a, b);
+}
+
 /** Header + variable de entorno usados por n8n para llamar endpoints sin sesión de dashboard. */
 export function esApiKeyValida(request: Request, envVar: string): boolean {
-  const apiKey = request.headers.get("x-api-key");
-  const esperado = process.env[envVar];
-  return !!apiKey && !!esperado && apiKey === esperado;
+  return secretosIguales(request.headers.get("x-api-key"), process.env[envVar]);
 }
