@@ -12,7 +12,7 @@ Sistema de automatización de pedidos vía WhatsApp para una **carnicería** lla
 - **Moneda:** Pesos colombianos (COP) — siempre formatear precios con símbolo `$` y separador de miles con punto (ej: $1.250.000)
 - **Idioma del sistema:** Español (UI, variables, comentarios, mensajes de error, todo)
 
-El cliente maneja ~150 clientes organizados por rutas de entrega. Cada día se les envía un mensaje recordatorio por WhatsApp para que hagan su pedido; el cliente arma el pedido seleccionando opciones (no texto libre), y el pedido queda registrado en el dashboard. El sistema exporta facturas diarias en Excel/CSV para importarlas al software contable Mekano.
+El cliente maneja ~150 clientes organizados por rutas de entrega. Cada día se les envía un mensaje recordatorio por WhatsApp para que hagan su pedido; el cliente arma el pedido seleccionando opciones (no texto libre), y el pedido queda registrado en el dashboard. El sistema exporta los pedidos del día en Excel (detalle, matriz por ruta, resumen por cliente) y un PDF de despacho.
 
 **Desarrollado por:** SMEJIA (Gustavo Upegui Gómez y Sebastián Mejía Garcés)
 
@@ -30,7 +30,7 @@ Respetar el estilo visual, paleta de colores y estructura de esas pantallas al i
 
 ## Stack técnico
 
-- **Framework:** Next.js 14 (App Router) + TypeScript
+- **Framework:** Next.js 15 (App Router) + TypeScript
 - **ORM:** Prisma
 - **Base de datos:** Neon PostgreSQL (serverless)
 - **Autenticación:** NextAuth / Auth.js (con credenciales contra tabla `usuarios`)
@@ -79,7 +79,7 @@ Tablas:
 - **conversaciones_wpp** — estado del flujo de WhatsApp por cliente (estado_flujo, carrito JSONB)
 - **configuracion** — parámetros generales del negocio (un solo registro siempre). Incluye: datos del negocio (nombre, NIT, dirección, teléfono), configuración de mensajes WhatsApp (hora_recordatorio, horas_espera_followup, mensaje_recordatorio, mensaje_followup)
 
-Estados de pedido: `pendiente`, `en_proceso`, `confirmado`, `cancelado`, `entregado`
+Estados de pedido: `pendiente`, `en_proceso`, `confirmado`, `en_reparto`, `entregado`, `devuelto`, `cancelado` (ver `lib/pedidos.ts`)
 
 ---
 
@@ -91,7 +91,7 @@ Estados de pedido: `pendiente`, `en_proceso`, `confirmado`, `cancelado`, `entreg
 4. **Módulo de clientes** — CRUD de clientes, asignación de precios individuales por producto.
 5. **Módulo de rutas** — crear/editar rutas, asignar clientes y día.
 6. **Módulo de empleados** — CRUD del personal.
-7. **Exportación Mekano** — botón para exportar facturas diarias en Excel/CSV compatible con Mekano. (El formato exacto de columnas está pendiente de confirmar con el cliente.)
+7. **Exportaciones** — Excel de pedidos, matriz por ruta, resumen por cliente, informes por rango y PDF de despacho. (La integración específica con Mekano quedó fuera de alcance.)
 8. **Módulo de configuración** — parámetros generales del negocio editables por el cliente: datos del negocio, textos y horarios de mensajes WhatsApp, cambio de contraseña del admin. Las credenciales sensibles (tokens Meta, API keys) van SOLO en variables de entorno, nunca en este módulo.
 
 ---
@@ -103,7 +103,7 @@ Estados de pedido: `pendiente`, `en_proceso`, `confirmado`, `cancelado`, `entreg
 - **Flujo de WhatsApp:** todo por SELECCIÓN de opciones (botones/listas interactivas), nunca texto libre ni audios. Esto reduce errores y mantiene el alcance controlado.
 - **pedido_items** guarda nombre y precio históricos para que los pedidos viejos no cambien si se editan los productos.
 - **Imágenes de producto** se muestran en el catálogo de WhatsApp durante la selección.
-- **codigo_mekano** en la tabla `clientes` es el identificador que usa el software contable Mekano. Se incluye en la exportación de facturas para que Mekano asocie cada factura al cliente correcto. El formato exacto (numérico/alfanumérico, longitud) está pendiente de confirmar con el cliente.
+- **codigo_mekano** en la tabla `clientes` es el identificador que usa el software contable Mekano. Se incluye en la exportación de facturas para que Mekano asocie cada factura al cliente correcto.
 
 ---
 
@@ -114,7 +114,7 @@ Estados de pedido: `pendiente`, `en_proceso`, `confirmado`, `cancelado`, `entreg
 - Route Handlers en `app/api/` para los endpoints que consume n8n.
 - Validar inputs con Zod en los endpoints.
 - Respuestas de API consistentes: `{ success, data, error }`.
-- Variables sensibles en `.env` (nunca commitear): `DATABASE_URL`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, `BLOB_READ_WRITE_TOKEN`.
+- Variables sensibles en `.env` (nunca commitear): `DATABASE_URL`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, `BLOB_READ_WRITE_TOKEN`, `API_SECRET_KEY`, `N8N_UPLOAD_SECRET`, `TIENDA_SESSION_SECRET`, `N8N_PEDIDO_WEBHOOK_URL`, `N8N_PEDIDO_WEBHOOK_SECRET`.
 - Nombres de variables y comentarios en español (es el idioma del equipo y del cliente).
 
 ---
@@ -131,9 +131,28 @@ Estos endpoints deben poder autenticarse con un API key o token de servicio (no 
 
 ---
 
+## Tienda en línea para clientes (`/tienda`)
+
+Los clientes hacen su pedido en la web (reemplaza el flujo de pedidos por WhatsApp). Vive en este mismo repo.
+
+- **Sesión independiente del admin**: cookie `tienda_session` (httpOnly, secure, sameSite=lax) firmada con `TIENDA_SESSION_SECRET` usando `encode/decode` de `next-auth/jwt`. `middleware.ts` resuelve la rama `/tienda` con return temprano, ANTES de la lógica admin (que se preserva igual).
+- **Login**: NIT (normalizado: sin puntos, espacios ni dígito de verificación) **más** celular registrado (el del cliente o uno de sus contactos). Mensaje de error genérico, y límite de intentos en BD (`tienda_login_intentos`: 5 fallos por NIT / 20 por IP en 15 min).
+- **Botón "Soy cliente nuevo"** en el login: abre WhatsApp al número de `configuracion.whatsapp_atencion` (editable en Configuración → Negocio; vacío = se oculta).
+- **Catálogo y carrito**: precios por cliente (`lib/precios.ts`); el carrito persiste en la cookie httpOnly `tienda_carrito` (solo producto_id + cantidad, sin precios).
+- **Pedido** (`POST /api/tienda/pedidos`): transaccional; el servidor recalcula TODO (precios, subtotales, total) y valida que `fecha_entrega` esté entre las fechas reales de la ruta del cliente (`lib/fechas-entrega.ts`), que `sede_id` sea del cliente y esté activa, que el cliente tenga ruta y que los productos sigan activos. Máximo 10 pedidos por hora por cliente.
+- **Aviso a n8n**: tras crear el pedido se hace un POST best-effort (nunca afecta al pedido) a `N8N_PEDIDO_WEBHOOK_URL` con `{ pedido_id, telefono }` y el header `x-internal-secret` (`N8N_PEDIDO_WEBHOOK_SECRET`) para que n8n envíe el WhatsApp de confirmación.
+
+## Pruebas, base de datos y dependencias
+
+- `npm test` (Jest, funciones puras en `lib/__tests__/`) y `npm run build` (corre ESLint y tipos como Vercel) antes de subir.
+- **Cambios de BD**: el proyecto NO usa Prisma Migrate (usa introspección). Se escribe SQL idempotente en `prisma/sql/`, se aplica con `npx prisma db execute --schema prisma/schema.prisma --file prisma/sql/<archivo>.sql`, se refleja en `schema.prisma` y se corre `npx prisma generate`. Solo cambios aditivos sin confirmar antes.
+- **Seguridad de dependencias**: `npm audit --omit=dev` debe dar 0. `xlsx` se instala desde el CDN oficial de SheetJS (la versión de npm está sin parche) y hay `overrides` en `package.json` para `postcss` (dentro de Next) y `zod` (dentro de `@vercel/cli-config`). El resto de avisos de `npm audit` son de herramientas de desarrollo (ESLint/Jest) por `minimatch`, sin versión corregida disponible en esas herramientas.
+- Los secretos de producción nunca se pegan en el chat ni se commitean: se generan a un archivo local ignorado por git y se copian a Vercel.
+
+---
+
 ## Pendientes / por confirmar con el cliente
 
-- Formato exacto de columnas que pide Mekano para importar facturas
 - Catálogo real de productos con sus variantes y precios
 - Listado real de clientes con teléfonos y rutas
 - Horario exacto para enviar los mensajes recordatorios
@@ -143,7 +162,7 @@ Estos endpoints deben poder autenticarse con un API key o token de servicio (no 
 
 ## Primeros pasos sugeridos para Codex
 
-1. Inicializar proyecto Next.js 14 + TypeScript + Tailwind.
+1. Inicializar proyecto Next.js 15 + TypeScript + Tailwind.
 2. Instalar y configurar Prisma, hacer `prisma db pull` contra Neon.
 3. Configurar NextAuth con provider de credenciales contra tabla `usuarios`.
 4. Crear un script de seed para insertar el primer usuario admin (con hash bcrypt).

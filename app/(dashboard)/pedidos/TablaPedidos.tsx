@@ -153,7 +153,7 @@ export default function TablaPedidos({
           ? "No hay pedidos"
           : `No hay pedidos "${ESTADOS[filtro as EstadoPedido]?.label}"`}
       </p>
-      <p className="text-xs text-gray-300 mt-1">Los pedidos aparecerán aquí cuando los clientes los realicen por WhatsApp</p>
+      <p className="text-xs text-gray-300 mt-1">Los pedidos aparecerán aquí cuando los clientes los realicen en la tienda en línea o por WhatsApp</p>
     </div>
   );
 
