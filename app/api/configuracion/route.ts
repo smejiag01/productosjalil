@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin, esApiKeyValida } from "@/lib/auth-guard";
+import { normalizarWhatsapp } from "@/lib/validaciones-tienda";
 
 // n8n consume la configuración (horarios/mensajes de recordatorio) sin sesión
 // de dashboard; si no trae la API key válida, exigimos sesión de admin.
@@ -28,6 +29,7 @@ export async function GET(request: NextRequest) {
         nit: config.nit,
         direccion: config.direccion,
         telefono: config.telefono,
+        whatsapp_atencion: config.whatsapp_atencion,
         hora_recordatorio: config.hora_recordatorio,
         horas_espera_followup: config.horas_espera_followup,
         mensaje_recordatorio: config.mensaje_recordatorio,
@@ -73,6 +75,29 @@ export async function PATCH(request: NextRequest) {
     for (const campo of campos) {
       if (campo in body) {
         camposPermitidos[campo] = body[campo];
+      }
+    }
+
+    // WhatsApp de atención al cliente (botón "Soy cliente nuevo" de la tienda):
+    // se valida y se guarda normalizado (solo dígitos con prefijo 57). Vacío =
+    // se oculta el botón.
+    if ("whatsapp_atencion" in body) {
+      const crudo = body.whatsapp_atencion;
+      if (crudo === null || (typeof crudo === "string" && crudo.trim() === "")) {
+        camposPermitidos.whatsapp_atencion = null;
+      } else {
+        const normalizado = typeof crudo === "string" ? normalizarWhatsapp(crudo) : null;
+        if (!normalizado) {
+          return NextResponse.json(
+            {
+              success: false,
+              error:
+                "El WhatsApp de atención debe ser un celular colombiano de 10 dígitos (ej: 316 333 2739).",
+            },
+            { status: 400 }
+          );
+        }
+        camposPermitidos.whatsapp_atencion = normalizado;
       }
     }
 

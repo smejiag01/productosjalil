@@ -18,6 +18,7 @@ export default async function ConfiguracionPage() {
         nit: config.nit,
         direccion: config.direccion,
         telefono: config.telefono,
+        whatsapp_atencion: config.whatsapp_atencion,
         hora_recordatorio: config.hora_recordatorio
           ? new Date(config.hora_recordatorio).toISOString().slice(11, 16)
           : "07:00",

@@ -9,6 +9,7 @@ import { calcularLineas, type LineaPrecio } from "@/lib/pedido-calculo";
 import { toDbDate } from "@/lib/analiticas/periodos";
 
 const TIMEOUT_WEBHOOK_MS = 5000;
+const MAX_PEDIDOS_POR_HORA = 10;
 
 /**
  * Best-effort: avisa a n8n que se creó un pedido en la tienda para que dispare
@@ -81,6 +82,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { success: false, error: "No autenticado" },
         { status: 401 }
+      );
+    }
+
+    // Tope anti-abuso: un cliente real no crea más de unos pocos pedidos por hora.
+    const pedidosRecientes = await prisma.pedidos.count({
+      where: {
+        cliente_id: clienteId,
+        created_at: { gte: new Date(Date.now() - 60 * 60 * 1000) },
+      },
+    });
+    if (pedidosRecientes >= MAX_PEDIDOS_POR_HORA) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "Has creado varios pedidos en poco tiempo. Comunícate con nosotros si necesitas hacer otro.",
+        },
+        { status: 429 }
       );
     }
 

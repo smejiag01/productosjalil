@@ -11,6 +11,7 @@ interface Config {
   nit: string | null;
   direccion: string | null;
   telefono: string | null;
+  whatsapp_atencion: string | null;
   hora_recordatorio: string;
   horas_espera_followup: number;
   mensaje_recordatorio: string;

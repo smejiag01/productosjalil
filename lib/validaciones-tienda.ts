@@ -12,22 +12,66 @@ export function normalizarNit(valor: string): string {
   return guion >= 0 ? limpio.slice(0, guion) : limpio;
 }
 
-export const esquemaLoginNit = z.object({
+/** Deja solo los dígitos de un teléfono ("+57 312 722-1364" → "573127221364"). */
+export function soloDigitos(valor: string): string {
+  return valor.replace(/\D/g, "");
+}
+
+/**
+ * ¿Es el mismo celular? Se comparan los últimos 10 dígitos, así da igual si
+ * viene con o sin el prefijo de país (57) o con espacios/guiones.
+ */
+export function telefonosCoinciden(a: string, b: string): boolean {
+  const da = soloDigitos(a);
+  const db = soloDigitos(b);
+  if (da.length < 10 || db.length < 10) return false;
+  return da.slice(-10) === db.slice(-10);
+}
+
+/**
+ * Normaliza un número de WhatsApp colombiano al formato de wa.me: solo dígitos
+ * con prefijo de país. Acepta "316 333 2739", "3163332739" o "+57 316 333 2739".
+ * Devuelve null si no es un celular colombiano válido (10 dígitos que
+ * empiezan por 3, con o sin el 57 adelante).
+ */
+export function normalizarWhatsapp(valor: string): string | null {
+  const digitos = soloDigitos(valor);
+  if (/^3\d{9}$/.test(digitos)) return `57${digitos}`;
+  if (/^573\d{9}$/.test(digitos)) return digitos;
+  return null;
+}
+
+export const esquemaLoginTienda = z.object({
   nit: z
     .string()
     .min(1, "Ingresa tu NIT o número de documento")
+    .max(40)
     .transform(normalizarNit)
     .refine((v) => v.length > 0, "Ingresa tu NIT o número de documento"),
+  celular: z
+    .string()
+    .min(1, "Ingresa tu número de celular")
+    .max(30)
+    .transform(soloDigitos)
+    .refine((v) => v.length >= 10, "Ingresa tu número de celular (10 dígitos)"),
 });
+
+// Límites defensivos: el navegador es opcional-confiable, así que se acota el
+// tamaño de lo que se acepta (el servidor igual recalcula todo).
+const MAX_CANTIDAD_POR_PRODUCTO = 9999;
+const MAX_PRODUCTOS_DISTINTOS = 100;
 
 export const esquemaItemCarrito = z.object({
   producto_id: z.string().uuid(),
-  cantidad: z.number().positive("La cantidad debe ser mayor a 0"),
+  cantidad: z
+    .number()
+    .positive("La cantidad debe ser mayor a 0")
+    .max(MAX_CANTIDAD_POR_PRODUCTO, "Cantidad demasiado grande"),
 });
 
 /** Snapshot mínimo del carrito que se persiste en cookie (sin precios). */
 export const esquemaCarrito = z.object({
-  items: z.array(esquemaItemCarrito),
+  items: z.array(esquemaItemCarrito).max(MAX_PRODUCTOS_DISTINTOS),
 });
 
 export const esquemaCrearPedido = z.object({
@@ -35,5 +79,8 @@ export const esquemaCrearPedido = z.object({
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/, "Fecha de entrega inválida"),
   sede_id: z.string().uuid().optional().nullable(),
-  items: z.array(esquemaItemCarrito).min(1, "El carrito está vacío"),
+  items: z
+    .array(esquemaItemCarrito)
+    .min(1, "El carrito está vacío")
+    .max(MAX_PRODUCTOS_DISTINTOS),
 });

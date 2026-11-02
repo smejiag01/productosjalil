@@ -221,7 +221,16 @@ model configuracion {
   horas_espera_followup Int      @default(3) @db.SmallInt
   mensaje_recordatorio  String   @default("¡Hola! 👋 Es momento de hacer tu pedido para mañana. ¿Deseas realizar tu pedido hoy?")
   mensaje_followup      String   @default("🔔 Recordatorio: aún no hemos recibido tu pedido. ¿Deseas realizarlo ahora?")
+  whatsapp_atencion     String?  @db.VarChar(20)
   updated_at            DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model tienda_login_intentos {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clave      String   @db.VarChar(120)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([clave, created_at], map: "idx_tienda_login_intentos_clave")
 }
 
 model inventario_items {

@@ -1,56 +1,78 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { esquemaLoginNit } from "@/lib/validaciones-tienda";
+import { esquemaLoginTienda, telefonosCoinciden } from "@/lib/validaciones-tienda";
+import {
+  limpiarFallosNit,
+  loginBloqueado,
+  obtenerIp,
+  registrarFalloLogin,
+} from "@/lib/tienda-rate-limit";
 import {
   COOKIE_SESION_TIENDA,
   crearTokenSesion,
   opcionesCookieSesion,
 } from "@/lib/tienda-session";
 
+// Mensaje único para cualquier fallo de validación: no revela si el NIT
+// existe, si el celular no coincide ni si hay datos ambiguos.
+const ERROR_CREDENCIALES =
+  "No pudimos validar tus datos. Revisa tu NIT y tu celular, o escríbenos por WhatsApp.";
+
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const resultado = esquemaLoginNit.safeParse(body);
+    const body = await request.json().catch(() => null);
+    const resultado = esquemaLoginTienda.safeParse(body);
 
     if (!resultado.success) {
       return NextResponse.json(
-        { success: false, error: "Ingresa tu NIT o número de documento" },
+        { success: false, error: "Ingresa tu NIT y tu número de celular." },
         { status: 400 }
       );
     }
 
-    const { nit } = resultado.data;
+    const { nit, celular } = resultado.data;
+    const ip = obtenerIp(request);
 
-    // Los NIT se guardan ya normalizados (sin dígito de verificación, sin
-    // puntos ni espacios), así que se compara contra el valor normalizado.
-    const clientes = await prisma.clientes.findMany({
-      where: { activo: true, nit },
-      select: { id: true },
-    });
-
-    if (clientes.length === 0) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "No encontramos ese documento. Comunícate con nosotros.",
-        },
-        { status: 404 }
-      );
-    }
-
-    if (clientes.length > 1) {
-      // Dato ambiguo: no adivinamos cuál cliente es.
+    if (await loginBloqueado(ip, nit)) {
       return NextResponse.json(
         {
           success: false,
           error:
-            "Encontramos más de una cuenta con ese documento. Comunícate con nosotros.",
+            "Demasiados intentos. Espera unos minutos e inténtalo de nuevo, o escríbenos por WhatsApp.",
         },
-        { status: 409 }
+        { status: 429 }
       );
     }
 
-    const token = await crearTokenSesion(clientes[0].id);
+    // El NIT se guarda ya normalizado (sin dígito de verificación, puntos ni
+    // espacios). Segundo factor: el celular debe ser uno de los números
+    // registrados del cliente (principal o contactos autorizados).
+    const candidatos = await prisma.clientes.findMany({
+      where: { activo: true, nit },
+      select: {
+        id: true,
+        telefono: true,
+        cliente_contactos: { select: { telefono: true } },
+      },
+    });
+
+    const coincidentes = candidatos.filter((c) =>
+      [c.telefono, ...c.cliente_contactos.map((x) => x.telefono)].some((t) =>
+        telefonosCoinciden(celular, t)
+      )
+    );
+
+    if (coincidentes.length !== 1) {
+      await registrarFalloLogin(ip, nit);
+      return NextResponse.json(
+        { success: false, error: ERROR_CREDENCIALES },
+        { status: 401 }
+      );
+    }
+
+    await limpiarFallosNit(nit);
+
+    const token = await crearTokenSesion(coincidentes[0].id);
     const respuesta = NextResponse.json({ success: true, data: { ok: true } });
     respuesta.cookies.set(COOKIE_SESION_TIENDA, token, opcionesCookieSesion());
     return respuesta;

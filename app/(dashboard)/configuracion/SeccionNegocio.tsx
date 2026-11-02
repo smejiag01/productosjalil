@@ -2,6 +2,7 @@
 
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { formatearCelularCO } from "@/lib/formato";
 
 interface Props {
   config: {
@@ -9,6 +10,7 @@ interface Props {
     nit: string | null;
     direccion: string | null;
     telefono: string | null;
+    whatsapp_atencion: string | null;
   };
   onGuardado: (msg: string) => void;
 }
@@ -19,6 +21,9 @@ export default function SeccionNegocio({ config, onGuardado }: Props) {
   const [nit, setNit] = useState(config.nit ?? "");
   const [direccion, setDireccion] = useState(config.direccion ?? "");
   const [telefono, setTelefono] = useState(config.telefono ?? "");
+  const [whatsappAtencion, setWhatsappAtencion] = useState(
+    config.whatsapp_atencion ? formatearCelularCO(config.whatsapp_atencion) : ""
+  );
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState("");
 
@@ -36,12 +41,16 @@ export default function SeccionNegocio({ config, onGuardado }: Props) {
           nit: nit || null,
           direccion: direccion || null,
           telefono: telefono || null,
+          whatsapp_atencion: whatsappAtencion.trim() || null,
         }),
       });
       const data = await res.json();
       if (!data.success) {
         setError(data.error);
       } else {
+        if (data.data?.whatsapp_atencion) {
+          setWhatsappAtencion(formatearCelularCO(data.data.whatsapp_atencion));
+        }
         onGuardado("Datos del negocio actualizados");
         router.refresh();
       }
@@ -58,7 +67,7 @@ export default function SeccionNegocio({ config, onGuardado }: Props) {
         Datos del negocio
       </h2>
       <p className="text-sm text-gray-500 mb-6">
-        Estos datos aparecerán en los archivos Excel exportados a Mekano
+        Datos generales del negocio y su canal de atención al cliente
       </p>
 
       {error && (
@@ -92,6 +101,19 @@ export default function SeccionNegocio({ config, onGuardado }: Props) {
           <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono del negocio</label>
           <input type="text" value={telefono} onChange={(e) => setTelefono(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand" />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            WhatsApp de atención al cliente
+          </label>
+          <input type="text" inputMode="tel" value={whatsappAtencion}
+            onChange={(e) => setWhatsappAtencion(e.target.value)} placeholder="Ej: 316 333 2739"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand" />
+          <p className="text-xs text-gray-500 mt-1">
+            A este número llega el botón &quot;Soy cliente nuevo&quot; del inicio de sesión de la tienda en línea.
+            Déjalo vacío para ocultar el botón.
+          </p>
         </div>
 
         <div className="pt-2">
