@@ -2,6 +2,7 @@
 
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import UbicacionMapa from "@/components/UbicacionMapa";
 
 interface Ruta {
   id: string;
@@ -15,6 +16,8 @@ interface DatosCliente {
   nit?: string | null;
   telefono?: string;
   direccion?: string | null;
+  latitud?: number | null;
+  longitud?: number | null;
   codigo_mekano?: string | null;
   ruta_id?: string | null;
   activo?: boolean;
@@ -40,6 +43,8 @@ export default function ModalCliente({
   const [nit, setNit] = useState(clienteInicial?.nit ?? "");
   const [telefono, setTelefono] = useState(clienteInicial?.telefono ?? "");
   const [direccion, setDireccion] = useState(clienteInicial?.direccion ?? "");
+  const [latitud, setLatitud] = useState<number | null>(clienteInicial?.latitud ?? null);
+  const [longitud, setLongitud] = useState<number | null>(clienteInicial?.longitud ?? null);
   const [codigoMekano, setCodigoMekano] = useState(
     clienteInicial?.codigo_mekano ?? ""
   );
@@ -62,6 +67,8 @@ export default function ModalCliente({
       nit: nit || null,
       telefono: telefono.replace(/[\s\-\(\)]/g, ""),
       direccion: direccion || null,
+      latitud,
+      longitud,
       codigo_mekano: codigoMekano || null,
       ruta_id: rutaId || null,
       activo,
@@ -229,19 +236,17 @@ export default function ModalCliente({
             )}
           </div>
 
-          {/* Dirección */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Dirección
-            </label>
-            <input
-              type="text"
-              value={direccion}
-              onChange={(e) => setDireccion(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
-              placeholder="Dirección de entrega"
-            />
-          </div>
+          {/* Dirección y ubicación en Google Maps */}
+          <UbicacionMapa
+            direccion={direccion}
+            onDireccion={setDireccion}
+            latitud={latitud}
+            longitud={longitud}
+            onUbicacion={(c) => {
+              setLatitud(c?.lat ?? null);
+              setLongitud(c?.lng ?? null);
+            }}
+          />
 
           {/* Ruta */}
           <div>

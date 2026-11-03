@@ -73,6 +73,7 @@ export default async function RepartidorPage(props: {
   const entregas = ordenados.map((p) => {
     // Sede de entrega: la del pedido si quedó vinculada, si no la principal del cliente
     const sedeEntrega = p.sede ?? p.cliente.sedes[0] ?? null;
+    const usaUbicacionCliente = !sedeEntrega || sedeEntrega.es_principal;
 
     return {
       id: p.id,
@@ -87,8 +88,9 @@ export default async function RepartidorPage(props: {
         telefono: p.cliente.telefono,
         sedeNombre: sedeEntrega?.nombre_sede ?? null,
         direccion: sedeEntrega?.direccion ?? p.cliente.direccion,
-        latitud: sedeEntrega?.latitud ?? null,
-        longitud: sedeEntrega?.longitud ?? null,
+        // Sin sede, o en la principal, vale la ubicación fijada en el cliente
+        latitud: sedeEntrega?.latitud ?? (usaUbicacionCliente ? p.cliente.latitud : null),
+        longitud: sedeEntrega?.longitud ?? (usaUbicacionCliente ? p.cliente.longitud : null),
       },
       items: p.items.map((i) => ({
         id: i.id,

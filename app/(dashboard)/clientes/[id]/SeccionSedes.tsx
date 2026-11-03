@@ -105,7 +105,14 @@ export default function SeccionSedes({ clienteId, sedesIniciales }: { clienteId:
                 </div>
                 {s.direccion && <p className="text-xs text-gray-500 mt-0.5">{s.direccion}</p>}
                 {s.latitud != null && s.longitud != null && (
-                  <p className="text-xs text-gray-400 mt-0.5">{s.latitud}, {s.longitud}</p>
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${s.latitud},${s.longitud}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-0.5 inline-block text-xs font-medium text-brand-700 hover:underline"
+                  >
+                    Ver en Google Maps
+                  </a>
                 )}
               </div>
               <div className="flex flex-col sm:flex-row items-end sm:items-center gap-1.5 sm:gap-3 flex-shrink-0">

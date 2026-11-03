@@ -151,6 +151,8 @@ export default async function DetalleClientePage(
             nit: cliente.nit,
             telefono: cliente.telefono,
             direccion: cliente.direccion,
+            latitud: cliente.latitud,
+            longitud: cliente.longitud,
             codigo_mekano: cliente.codigo_mekano,
             ruta_id: cliente.ruta_id,
             activo: cliente.activo,

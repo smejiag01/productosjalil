@@ -17,7 +17,7 @@ export default function Error({
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-paper px-4 text-center">
-      <MarcaPJ size={56} />
+      <MarcaPJ size={72} />
       <h1 className="mt-6 font-display text-3xl font-semibold text-ink-900">Algo salió mal</h1>
       <p className="mt-2 max-w-md text-ink-700">
         Ocurrió un error inesperado. Puedes intentarlo de nuevo; si sigue pasando, avísanos.

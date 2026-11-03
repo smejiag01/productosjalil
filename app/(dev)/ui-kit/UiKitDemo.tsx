@@ -11,6 +11,7 @@ import EmptyState from "@/components/ui/EmptyState";
 import Field from "@/components/ui/Field";
 import IconButton from "@/components/ui/IconButton";
 import Logo from "@/components/ui/Logo";
+import UbicacionMapa from "@/components/UbicacionMapa";
 import Modal from "@/components/ui/Modal";
 import PageHeader from "@/components/ui/PageHeader";
 import ProductImage from "@/components/ui/ProductImage";
@@ -49,6 +50,8 @@ function Muestra({ nombre, hex }: { nombre: string; hex: string }) {
 
 export default function UiKitDemo() {
   const [modal, setModal] = useState(false);
+  const [dirDemo, setDirDemo] = useState("");
+  const [ubicacionDemo, setUbicacionDemo] = useState<{ lat: number; lng: number } | null>(null);
   const [confirmar, setConfirmar] = useState(false);
   const [hoja, setHoja] = useState(false);
   const [cant, setCant] = useState(2);
@@ -83,6 +86,18 @@ export default function UiKitDemo() {
         count="v1"
         actions={<Button leftIcon={<ShoppingCart className="h-4 w-4" />}>Acción</Button>}
       />
+
+      <Seccion titulo="Dirección y ubicación (Google Maps)">
+        <div className="max-w-lg rounded-card bg-white p-6 shadow-card">
+          <UbicacionMapa
+            direccion={dirDemo}
+            onDireccion={setDirDemo}
+            latitud={ubicacionDemo?.lat ?? null}
+            longitud={ubicacionDemo?.lng ?? null}
+            onUbicacion={setUbicacionDemo}
+          />
+        </div>
+      </Seccion>
 
       <Seccion titulo="Marca">
         <div className="flex flex-wrap items-center gap-8 rounded-card bg-white p-6 shadow-card">

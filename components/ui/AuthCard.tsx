@@ -32,7 +32,7 @@ export default function AuthCard({
 
       <div className="relative w-full max-w-md">
         <div className="mb-8 flex flex-col items-center gap-3">
-          <Logo variant="stacked" tone="cream" size={64} />
+          <Logo size={112} />
           {etiqueta && (
             <span className="rounded-full bg-accent px-3 py-1 text-xs font-bold uppercase tracking-wider text-ink-900">
               {etiqueta}

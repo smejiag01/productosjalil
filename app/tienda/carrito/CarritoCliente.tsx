@@ -108,7 +108,7 @@ function EncabezadoPedido() {
         >
           <ChevronLeft aria-hidden="true" className="h-6 w-6" />
         </Link>
-        <MarcaPJ size={32} tone="cream" />
+        <MarcaPJ size={40} />
         <h1 className="font-display text-xl font-semibold">Tu pedido</h1>
       </div>
     </header>

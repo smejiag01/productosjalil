@@ -114,7 +114,7 @@ Estados de pedido: `pendiente`, `en_proceso`, `confirmado`, `en_reparto`, `entre
 - Route Handlers en `app/api/` para los endpoints que consume n8n.
 - Validar inputs con Zod en los endpoints.
 - Respuestas de API consistentes: `{ success, data, error }`.
-- Variables sensibles en `.env` (nunca commitear): `DATABASE_URL`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, `BLOB_READ_WRITE_TOKEN`, `API_SECRET_KEY`, `N8N_UPLOAD_SECRET`, `TIENDA_SESSION_SECRET`, `N8N_PEDIDO_WEBHOOK_URL`, `N8N_PEDIDO_WEBHOOK_SECRET`.
+- Variables sensibles en `.env` (nunca commitear): `DATABASE_URL`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, `BLOB_READ_WRITE_TOKEN`, `API_SECRET_KEY`, `N8N_UPLOAD_SECRET`, `TIENDA_SESSION_SECRET`, `N8N_PEDIDO_WEBHOOK_URL`, `N8N_PEDIDO_WEBHOOK_SECRET`, `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` (opcional, pública).
 - Nombres de variables y comentarios en español (es el idioma del equipo y del cliente).
 
 ---
@@ -141,6 +141,13 @@ Los clientes hacen su pedido en la web (reemplaza el flujo de pedidos por WhatsA
 - **Catálogo y carrito**: precios por cliente (`lib/precios.ts`); el carrito persiste en la cookie httpOnly `tienda_carrito` (solo producto_id + cantidad, sin precios).
 - **Pedido** (`POST /api/tienda/pedidos`): transaccional; el servidor recalcula TODO (precios, subtotales, total) y valida que `fecha_entrega` esté entre las fechas reales de la ruta del cliente (`lib/fechas-entrega.ts`), que `sede_id` sea del cliente y esté activa, que el cliente tenga ruta y que los productos sigan activos. Máximo 10 pedidos por hora por cliente.
 - **Aviso a n8n**: tras crear el pedido se hace un POST best-effort (nunca afecta al pedido) a `N8N_PEDIDO_WEBHOOK_URL` con `{ pedido_id, telefono }` y el header `x-internal-secret` (`N8N_PEDIDO_WEBHOOK_SECRET`) para que n8n envíe el WhatsApp de confirmación.
+
+## Ubicación en Google Maps (clientes y sedes)
+
+- `components/UbicacionMapa.tsx` reemplaza los campos manuales de latitud/longitud: dirección + buscador de lugares + mapa con pin arrastrable. Lo usan `ModalCliente` y `ModalSede`; `clientes` y `sedes` guardan `latitud`/`longitud` (la pantalla solo muestra "Ver en Google Maps").
+- Variable pública `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` (en `.env` y en Vercel): clave de Google Cloud con **Maps JavaScript API** y **Places API (New)** habilitadas, restringida por dominio (HTTP referrer). Es opcional: sin ella el formulario funciona en modo alterno (se pega un enlace de Google Maps o `lat, lng` y se ve una vista previa).
+- `POST /api/ubicacion/resolver` (solo admin) convierte enlaces de Google Maps, incluidos los cortos `maps.app.goo.gl`, en coordenadas; solo sigue redirecciones hacia dominios de Google (`lib/ubicacion.ts`, con tests).
+- El repartidor navega con las coordenadas de la sede; si no hay sede o es la principal, usa las del cliente.
 
 ## Pruebas, base de datos y dependencias
 

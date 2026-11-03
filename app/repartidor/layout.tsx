@@ -1,6 +1,7 @@
 "use client";
 
 import { signOut, useSession } from "next-auth/react";
+import { MarcaPJ } from "@/components/ui/Logo";
 
 export default function RepartidorLayout({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession();
@@ -9,9 +10,7 @@ export default function RepartidorLayout({ children }: { children: React.ReactNo
     <div className="min-h-screen bg-gray-50">
       <header className="sticky top-0 z-40 bg-sidebar text-white px-4 py-3 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 bg-brand rounded-lg flex items-center justify-center font-bold text-sm flex-shrink-0">
-            PJ
-          </div>
+          <MarcaPJ size={40} />
           <div className="min-w-0">
             <p className="text-sm font-semibold leading-tight truncate">
               {session?.user?.name || "Repartidor"}

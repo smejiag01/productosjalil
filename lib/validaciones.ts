@@ -20,6 +20,8 @@ export const esquemaCliente = z.object({
     .max(40)
     .transform((val) => val.replace(/[\s\-\(\)]/g, "")),
   direccion: z.string().optional().nullable(),
+  latitud: z.number().min(-90).max(90).optional().nullable(),
+  longitud: z.number().min(-180).max(180).optional().nullable(),
   codigo_mekano: z.string().max(40).optional().nullable(),
   ruta_id: z.string().uuid("Ruta inválida").optional().nullable(),
   activo: z.boolean().optional(),

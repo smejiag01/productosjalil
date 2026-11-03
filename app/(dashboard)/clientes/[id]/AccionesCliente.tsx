@@ -12,6 +12,8 @@ interface Props {
     nit: string | null;
     telefono: string;
     direccion: string | null;
+    latitud: number | null;
+    longitud: number | null;
     codigo_mekano: string | null;
     ruta_id: string | null;
     activo: boolean;

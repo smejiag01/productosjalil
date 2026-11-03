@@ -91,6 +91,8 @@ export async function POST(request: NextRequest) {
         nit: datos.nit ?? null,
         telefono: datos.telefono,
         direccion: datos.direccion ?? null,
+        latitud: datos.latitud ?? null,
+        longitud: datos.longitud ?? null,
         codigo_mekano: datos.codigo_mekano ?? null,
         ruta_id: datos.ruta_id ?? null,
         activo: datos.activo ?? true,

@@ -24,7 +24,7 @@ export default function EncabezadoTienda({
     <header className="bg-espresso text-white">
       <div className="mx-auto flex h-16 max-w-4xl items-center justify-between gap-3 px-4">
         <div className="flex min-w-0 items-center gap-3">
-          <MarcaPJ size={36} tone="cream" />
+          <MarcaPJ size={48} />
           <div className="min-w-0">
             <p className="truncate font-display text-base font-semibold leading-tight">
               {nombreCliente}

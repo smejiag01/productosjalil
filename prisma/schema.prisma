@@ -68,6 +68,8 @@ model clientes {
   orden_ruta        Int?
   razon_social      String?              @db.VarChar(200)
   nit               String?              @db.VarChar(30)
+  latitud           Float?
+  longitud          Float?
   cliente_contactos cliente_contactos[]
   ruta              rutas?               @relation(fields: [ruta_id], references: [id], onUpdate: NoAction)
   conversaciones    conversaciones_wpp[]
