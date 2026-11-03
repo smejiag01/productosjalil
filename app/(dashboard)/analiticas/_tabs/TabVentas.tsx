@@ -65,7 +65,7 @@ export default async function TabVentas({ ctx }: { ctx: ContextoAnalitica }) {
               <div className="bg-white rounded-card border border-ink-200 shadow-card p-5">
                 <p className="text-sm text-ink-600 mb-1">Periodo anterior</p>
                 <p className="text-3xl font-bold text-ink-500">{formatearPrecio(totalAnterior)}</p>
-                <p className="text-xs text-ink-500 mt-1 capitalize">
+                <p className="text-xs text-ink-500 mt-1 first-letter:uppercase">
                   {esPersonalizado
                     ? `${fmtShort(rango.inicioAnterior)} – ${fmtShort(rango.finAnterior)}`
                     : calcularRango(periodo, rango.inicioAnterior).navLabel}

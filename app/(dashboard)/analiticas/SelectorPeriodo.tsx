@@ -85,7 +85,7 @@ export default function SelectorPeriodo({ periodo, fecha, navLabel, tab, esPerso
           >
             <ChevronLeft aria-hidden="true" className="w-4 h-4 text-ink-700" />
           </button>
-          <span className="text-sm text-ink-800 font-medium min-w-0 truncate max-w-[200px] sm:max-w-xs capitalize">
+          <span className="text-sm text-ink-800 font-medium min-w-0 truncate max-w-[200px] sm:max-w-xs first-letter:uppercase">
             {navLabel}
           </span>
           <button

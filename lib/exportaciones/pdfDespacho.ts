@@ -27,7 +27,7 @@ export function generarPdfDespacho(fecha: string, pedidos: PedidoExportable[]): 
     doc.on("end", () => resolve(Buffer.concat(chunks)));
     doc.on("error", reject);
 
-    doc.fontSize(16).font("Helvetica-Bold").fillColor("#8B1A1A").text("Despacho de pedidos");
+    doc.fontSize(16).font("Helvetica-Bold").fillColor("#BC4220").text("Despacho de pedidos");
     doc.fillColor("#000000").fontSize(10).font("Helvetica").text(`Productos Jalil — ${fecha}`);
     doc.moveDown(1);
 
@@ -41,12 +41,12 @@ export function generarPdfDespacho(fecha: string, pedidos: PedidoExportable[]): 
     for (const { nombre, pedidos: pedidosRuta } of rutas) {
       if (doc.y > 700) doc.addPage();
 
-      doc.fontSize(13).font("Helvetica-Bold").fillColor("#8B1A1A").text(nombre);
+      doc.fontSize(13).font("Helvetica-Bold").fillColor("#BC4220").text(nombre);
       doc.fillColor("#000000");
       doc
         .moveTo(MARGEN, doc.y + 2)
         .lineTo(MARGEN + ANCHO_UTIL, doc.y + 2)
-        .strokeColor("#8B1A1A")
+        .strokeColor("#BC4220")
         .stroke();
       doc.moveDown(0.6);
 
