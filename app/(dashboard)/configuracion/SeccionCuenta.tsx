@@ -2,6 +2,8 @@
 
 import { useState, FormEvent } from "react";
 
+import Spinner from "@/components/ui/Spinner";
+import { buttonClass, inputClass } from "@/components/ui/clases";
 interface Props {
   correoActual: string;
   onGuardado: (msg: string) => void;
@@ -99,66 +101,66 @@ export default function SeccionCuenta({ correoActual, onGuardado }: Props) {
   return (
     <div className="space-y-6 max-w-2xl">
       {/* Cambiar correo */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-1">
+      <div className="bg-white rounded-card border border-ink-200 shadow-card p-6">
+        <h2 className="text-lg font-semibold text-ink-900 mb-1">
           Correo electrónico
         </h2>
-        <p className="text-sm text-gray-500 mb-4">
-          Correo actual: <span className="font-medium text-gray-700">{correoActual}</span>
+        <p className="text-sm text-ink-600 mb-4">
+          Correo actual: <span className="font-medium text-ink-800">{correoActual}</span>
         </p>
 
         {errorCorreo && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">{errorCorreo}</div>
+          <div className="mb-4 p-3 bg-danger-soft border border-danger/30 rounded-control text-danger text-sm">{errorCorreo}</div>
         )}
 
         <form onSubmit={handleCambiarCorreo} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nuevo correo electrónico</label>
+            <label className="block text-sm font-medium text-ink-800 mb-1.5">Nuevo correo electrónico</label>
             <input type="email" value={nuevoCorreo} onChange={(e) => setNuevoCorreo(e.target.value)}
               placeholder="nuevo@correo.com"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand" />
+              className={inputClass()} />
           </div>
           <button type="submit" disabled={cargandoCorreo}
-            className="px-4 py-2 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-light transition-colors disabled:opacity-50 flex items-center gap-2">
-            {cargandoCorreo && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+            className={buttonClass()}>
+            {cargandoCorreo && <Spinner size="sm" />}
             Cambiar correo
           </button>
         </form>
       </div>
 
       {/* Cambiar contraseña */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-1">
+      <div className="bg-white rounded-card border border-ink-200 shadow-card p-6">
+        <h2 className="text-lg font-semibold text-ink-900 mb-1">
           Cambiar contraseña
         </h2>
-        <p className="text-sm text-gray-500 mb-4">
+        <p className="text-sm text-ink-600 mb-4">
           Ingresa tu contraseña actual para verificar tu identidad
         </p>
 
         {errorPassword && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">{errorPassword}</div>
+          <div className="mb-4 p-3 bg-danger-soft border border-danger/30 rounded-control text-danger text-sm">{errorPassword}</div>
         )}
 
         <form onSubmit={handleCambiarPassword} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña actual</label>
+            <label className="block text-sm font-medium text-ink-800 mb-1.5">Contraseña actual</label>
             <input type="password" value={passwordActual} onChange={(e) => setPasswordActual(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand" />
+              className={inputClass()} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nueva contraseña</label>
+            <label className="block text-sm font-medium text-ink-800 mb-1.5">Nueva contraseña</label>
             <input type="password" value={passwordNueva} onChange={(e) => setPasswordNueva(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand" />
-            <p className="text-xs text-gray-400 mt-1">Mínimo 6 caracteres</p>
+              className={inputClass()} />
+            <p className="text-xs text-ink-500 mt-1">Mínimo 6 caracteres</p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Confirmar nueva contraseña</label>
+            <label className="block text-sm font-medium text-ink-800 mb-1.5">Confirmar nueva contraseña</label>
             <input type="password" value={passwordConfirmar} onChange={(e) => setPasswordConfirmar(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand" />
+              className={inputClass()} />
           </div>
           <button type="submit" disabled={cargandoPassword}
-            className="px-4 py-2 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-light transition-colors disabled:opacity-50 flex items-center gap-2">
-            {cargandoPassword && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+            className={buttonClass()}>
+            {cargandoPassword && <Spinner size="sm" />}
             Cambiar contraseña
           </button>
         </form>

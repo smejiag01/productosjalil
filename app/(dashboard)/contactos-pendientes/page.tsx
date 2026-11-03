@@ -27,10 +27,10 @@ export default async function ContactosPendientesPage() {
     <div>
       <div className="mb-6">
         <div className="flex items-center gap-2 flex-wrap">
-          <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Por contactar</h1>
-          <span className="text-sm text-gray-400 font-medium">{contactosSerializados.length} registros</span>
+          <h1 className="font-display text-2xl font-semibold text-ink-900 lg:text-3xl">Por contactar</h1>
+          <span className="text-sm text-ink-500 font-medium">{contactosSerializados.length} registros</span>
         </div>
-        <p className="text-gray-500 text-sm mt-1">
+        <p className="text-ink-600 text-sm mt-1">
           Personas que hay que contactar
           {pendientes > 0 && ` — ${pendientes} pendiente${pendientes === 1 ? "" : "s"}`}
         </p>

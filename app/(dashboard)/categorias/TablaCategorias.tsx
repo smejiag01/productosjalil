@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import FormularioCategoria from "./FormularioCategoria";
 
+import { Plus } from "@/components/ui/icons";
+import { buttonClass } from "@/components/ui/clases";
 interface Categoria {
   id: string;
   nombre: string;
@@ -52,14 +54,14 @@ export default function TablaCategorias({
       <div className="flex items-start justify-between mb-6 gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-xl lg:text-2xl font-bold text-gray-900">
+            <h1 className="font-display text-2xl font-semibold text-ink-900 lg:text-3xl">
               Categorías
             </h1>
-            <span className="text-sm text-gray-400">
+            <span className="text-sm text-ink-500">
               {categorias.length} categorías
             </span>
           </div>
-          <p className="text-gray-500 text-sm mt-1">
+          <p className="text-ink-600 text-sm mt-1">
             Organización de productos por categoría
           </p>
         </div>
@@ -68,28 +70,16 @@ export default function TablaCategorias({
             setEditando(null);
             setModalAbierto(true);
           }}
-          className="h-11 px-3 lg:px-4 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-light transition-colors flex items-center gap-2 flex-shrink-0"
+          className={buttonClass({ className: "flex-shrink-0" })}
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-4 h-4"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <line x1="12" y1="5" x2="12" y2="19" />
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
+          <Plus aria-hidden="true" className="w-4 h-4" />
           <span className="hidden sm:inline">Nueva categoría</span>
           <span className="sm:hidden">Nueva</span>
         </button>
       </div>
 
       {errorEliminar && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+        <div className="mb-4 p-3 bg-danger-soft border border-danger/30 rounded-control text-danger text-sm">
           {errorEliminar}
         </div>
       )}
@@ -97,9 +87,9 @@ export default function TablaCategorias({
       {/* Cards móvil y tablet */}
       <div className="lg:hidden space-y-3">
         {categorias.length === 0 ? (
-          <div className="bg-white rounded-xl border border-gray-200 py-16 text-center text-gray-400">
+          <div className="bg-white rounded-card border border-ink-200 shadow-card py-16 text-center text-ink-500">
             <p className="text-sm">No hay categorías creadas</p>
-            <p className="text-xs text-gray-300 mt-1">
+            <p className="text-xs text-ink-300 mt-1">
               Crea categorías para organizar tus productos
             </p>
           </div>
@@ -107,7 +97,7 @@ export default function TablaCategorias({
           categorias.map((c) => (
             <div
               key={c.id}
-              className="bg-white rounded-xl border border-gray-200 p-4"
+              className="bg-white rounded-card border border-ink-200 shadow-card p-4"
             >
               <div className="flex items-start justify-between mb-2">
                 <div className="flex items-center gap-2 min-w-0">
@@ -115,10 +105,10 @@ export default function TablaCategorias({
                     <span className="text-xl flex-shrink-0">{c.emoji}</span>
                   )}
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-gray-900 truncate">
+                    <p className="text-sm font-semibold text-ink-900 truncate">
                       {c.nombre}
                     </p>
-                    <p className="text-xs text-gray-400 font-mono">
+                    <p className="text-xs text-ink-500 font-mono">
                       {c.slug}
                     </p>
                   </div>
@@ -126,15 +116,15 @@ export default function TablaCategorias({
                 <span
                   className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border flex-shrink-0 ml-2 ${
                     c.activa
-                      ? "bg-green-50 border-green-200 text-green-800"
-                      : "bg-red-50 border-red-200 text-red-800"
+                      ? "bg-ok-soft border-ok/30 text-ok"
+                      : "bg-danger-soft border-danger/30 text-danger"
                   }`}
                 >
                   {c.activa ? "Activa" : "Inactiva"}
                 </span>
               </div>
-              <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                <div className="flex items-center gap-3 text-xs text-gray-500">
+              <div className="flex items-center justify-between pt-3 border-t border-ink-100">
+                <div className="flex items-center gap-3 text-xs text-ink-600">
                   <span>Orden: {c.orden}</span>
                   <span>{c.num_productos} productos</span>
                 </div>
@@ -144,14 +134,14 @@ export default function TablaCategorias({
                       setEditando(c);
                       setModalAbierto(true);
                     }}
-                    className="h-9 px-3 bg-gray-50 border border-gray-200 rounded-lg text-xs font-medium text-brand hover:bg-gray-100 transition-colors"
+                    className="h-9 px-3 bg-ink-50 border border-ink-200 rounded-lg text-xs font-medium text-brand hover:bg-ink-100 transition-colors"
                   >
                     Editar
                   </button>
                   <button
                     onClick={() => handleEliminar(c.id)}
                     disabled={eliminando === c.id}
-                    className="h-9 px-3 bg-gray-50 border border-gray-200 rounded-lg text-xs font-medium text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
+                    className="h-9 px-3 bg-ink-50 border border-ink-200 rounded-lg text-xs font-medium text-danger hover:bg-danger-soft transition-colors disabled:opacity-50"
                   >
                     Eliminar
                   </button>
@@ -163,37 +153,37 @@ export default function TablaCategorias({
       </div>
 
       {/* Tabla desktop */}
-      <div className="hidden lg:block bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="hidden lg:block bg-white rounded-card border border-ink-200 shadow-card overflow-hidden">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-gray-100">
-              <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider w-12"></th>
-              <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <tr className="border-b border-ink-100">
+              <th className="text-left py-3 px-4 text-xs font-medium text-ink-600 uppercase tracking-wider w-12"></th>
+              <th className="text-left py-3 px-4 text-xs font-medium text-ink-600 uppercase tracking-wider">
                 Nombre
               </th>
-              <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="text-left py-3 px-4 text-xs font-medium text-ink-600 uppercase tracking-wider">
                 Slug
               </th>
-              <th className="text-center py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="text-center py-3 px-4 text-xs font-medium text-ink-600 uppercase tracking-wider">
                 Orden
               </th>
-              <th className="text-center py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="text-center py-3 px-4 text-xs font-medium text-ink-600 uppercase tracking-wider">
                 Productos
               </th>
-              <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="text-left py-3 px-4 text-xs font-medium text-ink-600 uppercase tracking-wider">
                 Estado
               </th>
-              <th className="text-right py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="text-right py-3 px-4 text-xs font-medium text-ink-600 uppercase tracking-wider">
                 Acciones
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50">
+          <tbody className="divide-y divide-ink-50">
             {categorias.length === 0 ? (
               <tr>
                 <td
                   colSpan={7}
-                  className="py-16 text-center text-gray-400"
+                  className="py-16 text-center text-ink-500"
                 >
                   <p className="text-sm">No hay categorías creadas</p>
                 </td>
@@ -202,22 +192,22 @@ export default function TablaCategorias({
               categorias.map((c) => (
                 <tr
                   key={c.id}
-                  className="hover:bg-gray-50/50 transition-colors"
+                  className="hover:bg-ink-50/50 transition-colors"
                 >
                   <td className="py-3 px-4 text-center text-xl">
                     {c.emoji || "—"}
                   </td>
-                  <td className="py-3 px-4 text-sm font-medium text-gray-900">
+                  <td className="py-3 px-4 text-sm font-medium text-ink-900">
                     {c.nombre}
                   </td>
-                  <td className="py-3 px-4 text-sm text-gray-500 font-mono">
+                  <td className="py-3 px-4 text-sm text-ink-600 font-mono">
                     {c.slug}
                   </td>
-                  <td className="py-3 px-4 text-sm text-gray-600 text-center">
+                  <td className="py-3 px-4 text-sm text-ink-700 text-center">
                     {c.orden}
                   </td>
                   <td className="py-3 px-4 text-center">
-                    <span className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full text-sm font-medium text-gray-700">
+                    <span className="inline-flex items-center justify-center w-8 h-8 bg-ink-100 rounded-full text-sm font-medium text-ink-800">
                       {c.num_productos}
                     </span>
                   </td>
@@ -225,13 +215,13 @@ export default function TablaCategorias({
                     <span
                       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${
                         c.activa
-                          ? "bg-green-50 border-green-200 text-green-800"
-                          : "bg-red-50 border-red-200 text-red-800"
+                          ? "bg-ok-soft border-ok/30 text-ok"
+                          : "bg-danger-soft border-danger/30 text-danger"
                       }`}
                     >
                       <span
                         className={`w-1.5 h-1.5 rounded-full ${
-                          c.activa ? "bg-green-500" : "bg-red-500"
+                          c.activa ? "bg-ok" : "bg-danger"
                         }`}
                       />
                       {c.activa ? "Activa" : "Inactiva"}
@@ -251,7 +241,7 @@ export default function TablaCategorias({
                       <button
                         onClick={() => handleEliminar(c.id)}
                         disabled={eliminando === c.id}
-                        className="text-sm text-red-500 hover:text-red-700 font-medium transition-colors disabled:opacity-50"
+                        className="text-sm text-danger hover:text-danger font-medium transition-colors disabled:opacity-50"
                       >
                         {eliminando === c.id ? "..." : "Eliminar"}
                       </button>

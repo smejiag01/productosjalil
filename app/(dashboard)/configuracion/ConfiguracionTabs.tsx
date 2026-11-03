@@ -5,6 +5,8 @@ import SeccionNegocio from "./SeccionNegocio";
 import SeccionWhatsApp from "./SeccionWhatsApp";
 import SeccionCuenta from "./SeccionCuenta";
 
+import { Check } from "@/components/ui/icons";
+import { House, MessageSquareText, UserRound } from "@/components/ui/icons";
 interface Config {
   id: string;
   nombre_negocio: string;
@@ -20,19 +22,13 @@ interface Config {
 
 const TABS = [
   { key: "negocio", label: "Negocio", icono: (
-    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" />
-    </svg>
+    <House aria-hidden="true" className="w-4 h-4" />
   )},
   { key: "whatsapp", label: "Mensajes WhatsApp", icono: (
-    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-    </svg>
+    <MessageSquareText aria-hidden="true" className="w-4 h-4" />
   )},
   { key: "cuenta", label: "Mi cuenta", icono: (
-    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
-    </svg>
+    <UserRound aria-hidden="true" className="w-4 h-4" />
   )},
 ];
 
@@ -54,22 +50,22 @@ export default function ConfiguracionTabs({
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Configuración</h1>
-        <p className="text-gray-500 text-sm mt-1">
+        <h1 className="text-2xl font-bold text-ink-900">Configuración</h1>
+        <p className="text-ink-600 text-sm mt-1">
           Administra los datos del negocio, mensajes y tu cuenta
         </p>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-gray-100 rounded-lg p-1 mb-6 w-full sm:w-fit overflow-x-auto">
+      <div className="flex gap-1 bg-ink-100 rounded-lg p-1 mb-6 w-full sm:w-fit overflow-x-auto">
         {TABS.map((tab) => (
           <button
             key={tab.key}
             onClick={() => setTabActiva(tab.key)}
             className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
               tabActiva === tab.key
-                ? "bg-white shadow-sm text-gray-900"
-                : "text-gray-500 hover:text-gray-700"
+                ? "bg-white shadow-sm text-ink-900"
+                : "text-ink-600 hover:text-ink-800"
             }`}
           >
             {tab.icono}
@@ -90,8 +86,8 @@ export default function ConfiguracionTabs({
       )}
 
       {!config && tabActiva !== "cuenta" && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6 text-center">
-          <p className="text-yellow-800 text-sm">
+        <div className="bg-warn-soft border border-warn/30 rounded-xl p-6 text-center">
+          <p className="text-warn-soft-text text-sm">
             No se encontró registro de configuración. Contacta al administrador.
           </p>
         </div>
@@ -99,10 +95,8 @@ export default function ConfiguracionTabs({
 
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-6 right-6 bg-gray-900 text-white px-4 py-3 rounded-lg shadow-lg text-sm flex items-center gap-2 animate-in z-50">
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-green-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
+        <div className="fixed bottom-6 right-6 bg-ink-900 text-white px-4 py-3 rounded-lg shadow-lg text-sm flex items-center gap-2 animate-in z-50">
+          <Check aria-hidden="true" className="w-4 h-4 text-ok" />
           {toast}
         </div>
       )}

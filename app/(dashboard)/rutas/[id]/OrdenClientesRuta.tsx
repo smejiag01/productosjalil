@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { ChevronDown, ChevronUp } from "@/components/ui/icons";
 interface Cliente {
   id: string;
   nombre: string;
@@ -42,48 +43,44 @@ export default function OrdenClientesRuta({
 
   if (clientes.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-gray-200 py-16 text-center text-gray-400">
+      <div className="bg-white rounded-card border border-ink-200 shadow-card py-16 text-center text-ink-500">
         <p className="text-sm">Esta ruta no tiene clientes asignados</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 divide-y divide-gray-50">
+    <div className="bg-white rounded-card border border-ink-200 shadow-card divide-y divide-ink-50">
       {clientes.map((c, i) => (
         <div key={c.id} className="flex items-center justify-between gap-3 p-4">
           <div className="flex items-center gap-3 min-w-0">
-            <span className="flex-shrink-0 w-7 h-7 bg-gray-100 rounded-full flex items-center justify-center text-xs font-semibold text-gray-600">
+            <span className="flex-shrink-0 w-7 h-7 bg-ink-100 rounded-full flex items-center justify-center text-xs font-semibold text-ink-700">
               {i + 1}
             </span>
             <div className="min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">
+              <p className="text-sm font-medium text-ink-900 truncate">
                 {c.nombre}
-                {!c.activo && <span className="ml-2 text-xs text-gray-400">(inactivo)</span>}
+                {!c.activo && <span className="ml-2 text-xs text-ink-500">(inactivo)</span>}
               </p>
-              {c.direccion && <p className="text-xs text-gray-400 truncate">{c.direccion}</p>}
+              {c.direccion && <p className="text-xs text-ink-500 truncate">{c.direccion}</p>}
             </div>
           </div>
           <div className="flex items-center gap-1 flex-shrink-0">
             <button
               onClick={() => mover(i, "arriba")}
               disabled={guardando || i === 0}
-              className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded disabled:opacity-30"
+              className="p-1.5 text-ink-500 hover:text-ink-800 hover:bg-ink-100 rounded disabled:opacity-30"
               title="Subir"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="18 15 12 9 6 15" />
-              </svg>
+              <ChevronUp aria-hidden="true" className="w-4 h-4" />
             </button>
             <button
               onClick={() => mover(i, "abajo")}
               disabled={guardando || i === clientes.length - 1}
-              className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded disabled:opacity-30"
+              className="p-1.5 text-ink-500 hover:text-ink-800 hover:bg-ink-100 rounded disabled:opacity-30"
               title="Bajar"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="6 9 12 15 18 9" />
-              </svg>
+              <ChevronDown aria-hidden="true" className="w-4 h-4" />
             </button>
           </div>
         </div>

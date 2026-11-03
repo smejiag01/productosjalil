@@ -61,37 +61,37 @@ export default async function PqrsPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-xl lg:text-2xl font-bold text-gray-900">PQR&apos;s</h1>
-        <p className="text-gray-500 text-sm mt-1">Peticiones, quejas y reclamos de los clientes</p>
+        <h1 className="font-display text-2xl font-semibold text-ink-900 lg:text-3xl">PQR&apos;s</h1>
+        <p className="text-ink-600 text-sm mt-1">Peticiones, quejas y reclamos de los clientes</p>
       </div>
 
       {/* Estadísticas */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <p className="text-sm text-gray-500 mb-1">Abiertas</p>
-          <p className="text-3xl font-bold text-gray-900">{abiertas}</p>
-          <p className="text-xs text-gray-400 mt-1">pendientes + en revisión</p>
+        <div className="bg-white rounded-card border border-ink-200 shadow-card p-5">
+          <p className="text-sm text-ink-600 mb-1">Abiertas</p>
+          <p className="text-3xl font-bold text-ink-900">{abiertas}</p>
+          <p className="text-xs text-ink-500 mt-1">pendientes + en revisión</p>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <p className="text-sm text-gray-500 mb-1">Resueltas</p>
-          <p className="text-3xl font-bold text-gray-900">{resueltas}</p>
-          <p className="text-xs text-gray-400 mt-1">de {contadores.todos} en total</p>
+        <div className="bg-white rounded-card border border-ink-200 shadow-card p-5">
+          <p className="text-sm text-ink-600 mb-1">Resueltas</p>
+          <p className="text-3xl font-bold text-ink-900">{resueltas}</p>
+          <p className="text-xs text-ink-500 mt-1">de {contadores.todos} en total</p>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <p className="text-sm text-gray-500 mb-1">Tiempo promedio de resolución</p>
-          <p className="text-3xl font-bold text-gray-900">
+        <div className="bg-white rounded-card border border-ink-200 shadow-card p-5">
+          <p className="text-sm text-ink-600 mb-1">Tiempo promedio de resolución</p>
+          <p className="text-3xl font-bold text-ink-900">
             {horasPromedioResolucion != null
               ? horasPromedioResolucion < 24
                 ? `${Math.round(horasPromedioResolucion * 10) / 10} h`
                 : `${Math.round((horasPromedioResolucion / 24) * 10) / 10} d`
               : "—"}
           </p>
-          <p className="text-xs text-gray-400 mt-1">entre reportada y resuelta</p>
+          <p className="text-xs text-ink-500 mt-1">entre reportada y resuelta</p>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-5 mb-6">
-        <h2 className="font-semibold text-gray-900 mb-4">Tendencia — últimas 8 semanas</h2>
+      <div className="bg-white rounded-card border border-ink-200 shadow-card p-5 mb-6">
+        <h2 className="font-semibold text-ink-900 mb-4">Tendencia — últimas 8 semanas</h2>
         <GraficoBarras
           datos={tendenciaSemanal}
           claves={[{ key: "total", color: "#BC4220", label: "PQR's" }]}

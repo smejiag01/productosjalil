@@ -41,12 +41,12 @@ export default function SelectorEstadoPqr({ pqrId, estadoActual }: Props) {
 
   return (
     <div className="flex items-center gap-2">
-      {error && <span className="text-red-500 text-xs">{error}</span>}
+      {error && <span className="text-danger text-xs">{error}</span>}
       <select
         value={estadoActual}
         disabled={cargando}
         onChange={(e) => cambiarEstado(e.target.value)}
-        className="h-11 px-3 border border-gray-300 rounded-lg text-sm font-medium bg-white outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand disabled:opacity-50"
+        className="h-11 px-3 border border-ink-300 rounded-lg text-sm font-medium bg-white outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand disabled:opacity-50"
       >
         {(Object.keys(ESTADOS_PQR) as EstadoPqr[]).map((key) => (
           <option key={key} value={key}>
@@ -54,7 +54,7 @@ export default function SelectorEstadoPqr({ pqrId, estadoActual }: Props) {
           </option>
         ))}
       </select>
-      {cargando && <div className="w-4 h-4 border-2 border-gray-300 border-t-brand rounded-full animate-spin" />}
+      {cargando && <div className="w-4 h-4 border-2 border-ink-300 border-t-brand rounded-full animate-spin" />}
     </div>
   );
 }

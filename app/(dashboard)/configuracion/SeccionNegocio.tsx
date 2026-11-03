@@ -4,6 +4,8 @@ import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { formatearCelularCO } from "@/lib/formato";
 
+import Spinner from "@/components/ui/Spinner";
+import { buttonClass, inputClass } from "@/components/ui/clases";
 interface Props {
   config: {
     nombre_negocio: string;
@@ -62,55 +64,55 @@ export default function SeccionNegocio({ config, onGuardado }: Props) {
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-6 max-w-2xl">
-      <h2 className="text-lg font-semibold text-gray-900 mb-1">
+    <div className="bg-white rounded-card border border-ink-200 shadow-card p-6 max-w-2xl">
+      <h2 className="text-lg font-semibold text-ink-900 mb-1">
         Datos del negocio
       </h2>
-      <p className="text-sm text-gray-500 mb-6">
+      <p className="text-sm text-ink-600 mb-6">
         Datos generales del negocio y su canal de atención al cliente
       </p>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+        <div className="mb-4 p-3 bg-danger-soft border border-danger/30 rounded-control text-danger text-sm">
           {error}
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-ink-800 mb-1.5">
             Nombre del negocio
           </label>
           <input type="text" value={nombre} onChange={(e) => setNombre(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand" />
+            className={inputClass()} />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">NIT</label>
+          <label className="block text-sm font-medium text-ink-800 mb-1.5">NIT</label>
           <input type="text" value={nit} onChange={(e) => setNit(e.target.value)} placeholder="Ej: 900.123.456-7"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand" />
+            className={inputClass()} />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
+          <label className="block text-sm font-medium text-ink-800 mb-1.5">Dirección</label>
           <input type="text" value={direccion} onChange={(e) => setDireccion(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand" />
+            className={inputClass()} />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono del negocio</label>
+          <label className="block text-sm font-medium text-ink-800 mb-1.5">Teléfono del negocio</label>
           <input type="text" value={telefono} onChange={(e) => setTelefono(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand" />
+            className={inputClass()} />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-ink-800 mb-1.5">
             WhatsApp de atención al cliente
           </label>
           <input type="text" inputMode="tel" value={whatsappAtencion}
             onChange={(e) => setWhatsappAtencion(e.target.value)} placeholder="Ej: 316 333 2739"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand" />
-          <p className="text-xs text-gray-500 mt-1">
+            className={inputClass()} />
+          <p className="text-xs text-ink-600 mt-1">
             A este número llega el botón &quot;Soy cliente nuevo&quot; del inicio de sesión de la tienda en línea.
             Déjalo vacío para ocultar el botón.
           </p>
@@ -118,8 +120,8 @@ export default function SeccionNegocio({ config, onGuardado }: Props) {
 
         <div className="pt-2">
           <button type="submit" disabled={cargando}
-            className="px-4 py-2 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-light transition-colors disabled:opacity-50 flex items-center gap-2">
-            {cargando && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+            className={buttonClass()}>
+            {cargando && <Spinner size="sm" />}
             Guardar cambios
           </button>
         </div>

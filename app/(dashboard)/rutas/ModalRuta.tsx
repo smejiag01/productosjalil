@@ -4,6 +4,10 @@ import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { DIAS_OPCIONES } from "@/lib/dias-semana";
 
+
+import Spinner from "@/components/ui/Spinner";
+import { buttonClass, inputClass } from "@/components/ui/clases";
+import Modal from "@/components/ui/Modal";
 interface Empleado {
   id: string;
   nombre: string;
@@ -83,38 +87,29 @@ export default function ModalRuta({ rutaInicial, empleados, onCerrar }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-[95vw] max-w-md max-h-[90vh] overflow-y-auto">
-        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-gray-900">{esEdicion ? "Editar ruta" : "Nueva ruta"}</h2>
-          <button onClick={onCerrar} className="p-1 hover:bg-gray-100 rounded-lg transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
-        </div>
+    <Modal open onClose={onCerrar} title={esEdicion ? "Editar ruta" : "Nueva ruta"} size="md">
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           {errorGeneral && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">{errorGeneral}</div>
+            <div role="alert" className="p-3 bg-danger-soft border border-danger/30 rounded-control text-danger text-sm">{errorGeneral}</div>
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nombre de la ruta <span className="text-red-500">*</span></label>
+            <label className="block text-sm font-medium text-ink-800 mb-1.5">Nombre de la ruta <span className="text-danger">*</span></label>
             <input type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+              className={inputClass()}
               placeholder="Ej: Ruta Centro, Ruta Norte..." />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+            <label className="block text-sm font-medium text-ink-800 mb-1.5">Descripción</label>
             <input type="text" value={descripcion} onChange={(e) => setDescripcion(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+              className={inputClass()}
               placeholder="Descripción de la zona o área" />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Días de la semana <span className="text-red-500">*</span></label>
+            <label className="block text-sm font-medium text-ink-800 mb-2">Días de la semana <span className="text-danger">*</span></label>
             <div className="flex flex-wrap gap-2">
               {DIAS_OPCIONES.map((d) => {
                 const seleccionado = diasSeleccionados.includes(d.valor);
@@ -126,7 +121,7 @@ export default function ModalRuta({ rutaInicial, empleados, onCerrar }: Props) {
                     className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border ${
                       seleccionado
                         ? "bg-brand text-white border-brand"
-                        : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+                        : "bg-white text-ink-700 border-ink-200 hover:bg-ink-50"
                     }`}
                   >
                     {d.label}
@@ -137,9 +132,9 @@ export default function ModalRuta({ rutaInicial, empleados, onCerrar }: Props) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Repartidor asignado</label>
+            <label className="block text-sm font-medium text-ink-800 mb-1.5">Repartidor asignado</label>
             <select value={empleadoId} onChange={(e) => setEmpleadoId(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand">
+              className={inputClass()}>
               <option value="">Sin repartidor asignado</option>
               {empleados.map((emp) => (
                 <option key={emp.id} value={emp.id}>{emp.nombre}</option>
@@ -149,25 +144,24 @@ export default function ModalRuta({ rutaInicial, empleados, onCerrar }: Props) {
 
           {esEdicion && (
             <div className="flex items-center gap-3">
-              <label className="text-sm font-medium text-gray-700">Estado</label>
+              <label className="text-sm font-medium text-ink-800">Estado</label>
               <button type="button" onClick={() => setActiva(!activa)}
-                className={`relative w-10 h-5 rounded-full transition-colors ${activa ? "bg-green-500" : "bg-gray-300"}`}>
+                className={`relative w-10 h-5 rounded-full transition-colors ${activa ? "bg-ok" : "bg-ink-300"}`}>
                 <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform ${activa ? "translate-x-5" : ""}`} />
               </button>
-              <span className="text-sm text-gray-600">{activa ? "Activa" : "Inactiva"}</span>
+              <span className="text-sm text-ink-700">{activa ? "Activa" : "Inactiva"}</span>
             </div>
           )}
 
           <div className="flex justify-end gap-3 pt-2">
-            <button type="button" onClick={onCerrar} className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Cancelar</button>
+            <button type="button" onClick={onCerrar} className={buttonClass({ variant: "secondary" })}>Cancelar</button>
             <button type="submit" disabled={cargando}
-              className="px-4 py-2 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-light transition-colors disabled:opacity-50 flex items-center gap-2">
-              {cargando && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+              className={buttonClass()}>
+              {cargando && <Spinner size="sm" />}
               {esEdicion ? "Guardar cambios" : "Crear ruta"}
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 }

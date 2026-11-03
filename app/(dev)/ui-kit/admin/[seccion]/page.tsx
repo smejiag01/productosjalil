@@ -39,6 +39,50 @@ async function resolver(seccion: string): Promise<React.ReactNode> {
       const Pagina = (await import("@/app/(dashboard)/pedidos/[id]/page")).default as Pagina;
       return Pagina({ ...sinParametros, params: Promise.resolve({ id: primero.id }) });
     }
+    case "categorias": {
+      const Pagina = (await import("@/app/(dashboard)/categorias/page")).default as Pagina;
+      return Pagina(sinParametros);
+    }
+    case "contactos-pendientes": {
+      const Pagina = (await import("@/app/(dashboard)/contactos-pendientes/page")).default as Pagina;
+      return Pagina(sinParametros);
+    }
+    case "usuarios": {
+      const Pagina = (await import("@/app/(dashboard)/usuarios/page")).default as Pagina;
+      return Pagina(sinParametros);
+    }
+    case "rutas": {
+      const Pagina = (await import("@/app/(dashboard)/rutas/page")).default as Pagina;
+      return Pagina(sinParametros);
+    }
+    case "repartidores": {
+      const Pagina = (await import("@/app/(dashboard)/repartidores/page")).default as Pagina;
+      return Pagina(sinParametros);
+    }
+    case "pqrs": {
+      const Pagina = (await import("@/app/(dashboard)/pqrs/page")).default as Pagina;
+      return Pagina(sinParametros);
+    }
+    case "configuracion": {
+      const Pagina = (await import("@/app/(dashboard)/configuracion/page")).default as Pagina;
+      return Pagina(sinParametros);
+    }
+    case "empleados": {
+      const Pagina = (await import("@/app/(dashboard)/empleados/page")).default as Pagina;
+      return Pagina(sinParametros);
+    }
+    case "ruta": {
+      const primero = await prisma.rutas.findFirst({ select: { id: true } });
+      if (!primero) return <p>No hay rutas.</p>;
+      const Pagina = (await import("@/app/(dashboard)/rutas/[id]/page")).default as Pagina;
+      return Pagina({ ...sinParametros, params: Promise.resolve({ id: primero.id }) });
+    }
+    case "pqr": {
+      const primero = await prisma.pqr.findFirst({ select: { id: true } });
+      if (!primero) return <p>No hay PQR's.</p>;
+      const Pagina = (await import("@/app/(dashboard)/pqrs/[id]/page")).default as Pagina;
+      return Pagina({ ...sinParametros, params: Promise.resolve({ id: primero.id }) });
+    }
     default:
       return null;
   }

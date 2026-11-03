@@ -35,6 +35,7 @@ export {
   MapPin,
   Menu,
   MessageCircle,
+  MessageSquareText,
   MessageSquareWarning,
   Minus,
   Navigation,
