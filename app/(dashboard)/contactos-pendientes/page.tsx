@@ -31,7 +31,7 @@ export default async function ContactosPendientesPage() {
           <span className="text-sm text-gray-400 font-medium">{contactosSerializados.length} registros</span>
         </div>
         <p className="text-gray-500 text-sm mt-1">
-          Personas que el bot de WhatsApp no pudo atender y hay que llamar
+          Personas que hay que contactar
           {pendientes > 0 && ` — ${pendientes} pendiente${pendientes === 1 ? "" : "s"}`}
         </p>
       </div>
