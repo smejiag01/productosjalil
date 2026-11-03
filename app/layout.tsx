@@ -1,14 +1,31 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Fraunces, Public_Sans } from "next/font/google";
 import "./globals.css";
 import SessionProvider from "@/components/SessionProvider";
 
-const inter = Inter({ subsets: ["latin"] });
+// Texto: Public Sans (muy legible, acentos en español, números tabulares).
+const textoFuente = Public_Sans({
+  subsets: ["latin"],
+  variable: "--font-text",
+  display: "swap",
+});
+
+// Display: Fraunces (serif suave con aire artesanal) solo para marca, títulos y precios.
+const displayFuente = Fraunces({
+  subsets: ["latin"],
+  variable: "--font-display",
+  display: "swap",
+  axes: ["opsz"],
+});
 
 export const metadata: Metadata = {
   title: "Productos Jalil — Panel Administrativo",
   description:
     "Sistema de gestión de pedidos y clientes para Productos Jalil",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#BC4220",
 };
 
 export default function RootLayout({
@@ -17,8 +34,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es">
-      <body className={`${inter.className} antialiased`}>
+    <html lang="es" className={`${textoFuente.variable} ${displayFuente.variable}`}>
+      <body className="font-sans antialiased">
         <SessionProvider>{children}</SessionProvider>
       </body>
     </html>
