@@ -1,5 +1,8 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
+import Button from "@/components/ui/Button";
+import Card from "@/components/ui/Card";
+import EmptyState from "@/components/ui/EmptyState";
+import { ChevronLeft, MapPin } from "@/components/ui/icons";
 import { prisma } from "@/lib/prisma";
 import { leerCarritoCookie, obtenerClienteSesion } from "@/lib/tienda-auth";
 import { precioEfectivo } from "@/lib/precios";
@@ -11,6 +14,8 @@ import CarritoCliente, {
 } from "./CarritoCliente";
 
 export const dynamic = "force-dynamic";
+
+export const metadata = { title: "Tu pedido" };
 
 function etiquetaFecha(fechaStr: string): string {
   const [y, m, d] = fechaStr.split("-").map(Number);
@@ -110,19 +115,22 @@ export default async function CarritoPage() {
 
   if (sinRuta) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-3xl mx-auto px-4 py-6">
-          <Link href="/tienda" className="text-sm text-gray-400 hover:text-gray-600">
-            ← Volver a la tienda
-          </Link>
-          <div className="mt-6 bg-white rounded-xl border border-amber-200 p-6 text-center">
-            <p className="text-gray-900 font-medium mb-1">
-              Tu cuenta no tiene una ruta de entrega asignada
-            </p>
-            <p className="text-sm text-gray-500">
-              Comunícate con nosotros para poder programar tu entrega.
-            </p>
-          </div>
+      <div className="min-h-screen bg-paper">
+        <div className="mx-auto max-w-3xl px-4 py-6">
+          <Button
+            href="/tienda"
+            variant="secondary"
+            leftIcon={<ChevronLeft aria-hidden="true" className="h-4 w-4" />}
+          >
+            Volver a la tienda
+          </Button>
+          <Card padding="none" className="mt-6">
+            <EmptyState
+              icon={<MapPin className="h-6 w-6" />}
+              title="Tu cuenta no tiene una ruta de entrega asignada"
+              description="Comunícate con nosotros para poder programar tu entrega."
+            />
+          </Card>
         </div>
       </div>
     );
