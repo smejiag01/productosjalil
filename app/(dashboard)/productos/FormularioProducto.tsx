@@ -340,7 +340,7 @@ export default function FormularioProducto({ productoInicial, categorias = [] }:
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
               />
               <p className="text-xs text-gray-400 mt-1">
-                Orden en que aparece en WhatsApp
+                Orden en que aparece en el catálogo (tienda en línea y WhatsApp)
               </p>
             </div>
 

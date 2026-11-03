@@ -62,7 +62,7 @@ export default async function PqrsPage() {
     <div>
       <div className="mb-6">
         <h1 className="text-xl lg:text-2xl font-bold text-gray-900">PQR&apos;s</h1>
-        <p className="text-gray-500 text-sm mt-1">Peticiones, quejas y reclamos recibidos por WhatsApp</p>
+        <p className="text-gray-500 text-sm mt-1">Peticiones, quejas y reclamos de los clientes</p>
       </div>
 
       {/* Estadísticas */}

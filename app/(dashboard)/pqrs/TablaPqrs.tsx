@@ -43,7 +43,7 @@ export default function TablaPqrs({
           ? "No hay PQR's"
           : `No hay PQR's "${ESTADOS_PQR[filtro as EstadoPqr]?.label}"`}
       </p>
-      <p className="text-xs text-gray-300 mt-1">Aparecerán aquí cuando los clientes escriban por WhatsApp</p>
+      <p className="text-xs text-gray-300 mt-1">Aparecerán aquí cuando los clientes envíen una petición, queja o reclamo</p>
     </div>
   );
 

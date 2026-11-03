@@ -160,7 +160,7 @@ export default function ModalCliente({
               placeholder="Razón social para facturación"
             />
             <p className="text-xs text-gray-400 mt-1">
-              Se usa al exportar a Mekano; el nombre se sigue usando para WhatsApp
+              Se usa en facturación y exportaciones; el nombre es el que se muestra en pantallas y mensajes
             </p>
             {errores.razon_social && (
               <p className="text-red-500 text-xs mt-1">{errores.razon_social}</p>

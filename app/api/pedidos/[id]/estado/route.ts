@@ -37,6 +37,10 @@ export async function PATCH(request: NextRequest, props: { params: Promise<{ id:
     if (!session?.user) {
       return NextResponse.json({ success: false, error: "No autenticado" }, { status: 401 });
     }
+    // Solo admin o repartidor; cualquier otro rol no debe poder cambiar estados.
+    if (session.user.rol !== "admin" && session.user.rol !== "repartidor") {
+      return NextResponse.json({ success: false, error: "No autorizado" }, { status: 403 });
+    }
 
     const body = await request.json();
     const resultado = esquemaEstado.safeParse(body);
