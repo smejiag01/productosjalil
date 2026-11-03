@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { formatearFechaHora } from "@/lib/fechas";
 import { INVENTARIO_MATERIA_PRIMA_HABILITADO } from "@/lib/inventario-flags";
 import SeccionReceta from "./SeccionReceta";
-
+
 import { ChevronLeft } from "@/components/ui/icons";
 export const dynamic = "force-dynamic";
 
@@ -159,7 +159,7 @@ export default async function DetalleProductoTerminadoPage(
                     </span>
                     <span className="text-sm text-ink-800">{LABEL_MOTIVO[m.motivo] ?? m.motivo}</span>
                     {m.pedido && (
-                      <Link href={`/pedidos/${m.pedido.id}`} className="text-xs text-brand hover:text-brand-light font-medium">
+                      <Link href={`/pedidos/${m.pedido.id}`} className="text-xs text-brand hover:text-brand-700 font-medium">
                         {m.pedido.numero} — {m.pedido.clienteNombre}
                       </Link>
                     )}

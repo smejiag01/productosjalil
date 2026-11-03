@@ -91,7 +91,7 @@ export default function ModalMovimiento({ itemId, itemNombre, itemUnidad, stockA
     <Modal open onClose={onCerrar} title={"Registrar movimiento"} size="md">
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="p-3 bg-ink-50 rounded-lg">
+          <div className="p-3 bg-ink-50 rounded-control">
             <p className="text-sm font-medium text-ink-900">{itemNombre}</p>
             <p className="text-xs text-ink-600">Stock actual: {stockActual} {itemUnidad}</p>
           </div>
@@ -106,7 +106,7 @@ export default function ModalMovimiento({ itemId, itemNombre, itemUnidad, stockA
                   key={t.valor}
                   type="button"
                   onClick={() => handleTipoChange(t.valor)}
-                  className={`flex-1 h-10 rounded-lg text-sm font-medium transition-colors border ${
+                  className={`flex-1 h-10 rounded-control text-sm font-medium transition-colors border ${
                     tipo === t.valor
                       ? t.valor === "entrada" ? "bg-ok-soft border-ok/30 text-ok"
                         : t.valor === "salida" ? "bg-danger-soft border-danger/30 text-danger"

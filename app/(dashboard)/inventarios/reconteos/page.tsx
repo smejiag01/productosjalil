@@ -104,7 +104,7 @@ export default async function ReconteosPage() {
                   <td className="py-3 px-4 text-sm text-right font-medium text-ink-900">{r._count.detalles}</td>
                   <td className="py-3 px-4 text-sm text-ink-600 truncate max-w-xs">{r.nota_general || "—"}</td>
                   <td className="py-3 px-4 text-right">
-                    <Link href={`/inventarios/reconteos/${r.id}`} className="text-sm text-brand hover:text-brand-light font-medium">Ver detalle</Link>
+                    <Link href={`/inventarios/reconteos/${r.id}`} className="text-sm text-brand hover:text-brand-700 font-medium">Ver detalle</Link>
                   </td>
                 </tr>
               );

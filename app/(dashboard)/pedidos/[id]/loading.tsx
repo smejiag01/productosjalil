@@ -8,8 +8,8 @@ export default function DetallePedidoLoading() {
           <div className="h-6 bg-ink-100 rounded-full w-24" />
         </div>
         <div className="flex gap-2">
-          <div className="h-10 bg-ink-200 rounded-lg w-28" />
-          <div className="h-10 bg-ink-200 rounded-lg w-28" />
+          <div className="h-10 bg-ink-200 rounded-control w-28" />
+          <div className="h-10 bg-ink-200 rounded-control w-28" />
         </div>
       </div>
       <div className="grid grid-cols-2 gap-6 mb-8">

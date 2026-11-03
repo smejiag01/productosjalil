@@ -122,7 +122,7 @@ export default function ModalRepartidor({ repartidorInicial, rutas, onCerrar }: 
             {rutas.length === 0 ? (
               <p className="text-xs text-ink-500">No hay rutas activas para asignar</p>
             ) : (
-              <div className="border border-ink-200 rounded-lg divide-y divide-ink-50 max-h-40 overflow-y-auto">
+              <div className="border border-ink-200 rounded-control divide-y divide-ink-50 max-h-40 overflow-y-auto">
                 {rutas.map((r) => (
                   <label key={r.id} className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-ink-50">
                     <input type="checkbox" checked={rutaIds.has(r.id)} onChange={() => toggleRuta(r.id)} className="w-4 h-4 accent-brand" />

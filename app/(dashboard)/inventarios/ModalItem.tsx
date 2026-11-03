@@ -160,7 +160,7 @@ export default function ModalItem({ tipo, itemInicial, onCerrar }: Props) {
               <button
                 type="button"
                 onClick={() => setMostrarSelectorProducto(true)}
-                className="w-full px-3 py-2 border border-ink-300 rounded-lg text-sm text-left outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand hover:bg-ink-50 transition-colors flex items-center justify-between"
+                className="w-full px-3 py-2 border border-ink-300 rounded-control text-sm text-left outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand hover:bg-ink-50 transition-colors flex items-center justify-between"
               >
                 <span className={productoSeleccionado ? "text-ink-900" : "text-ink-500"}>
                   {productoSeleccionado ? productoSeleccionado.nombre : "Selecciona un producto..."}
@@ -184,7 +184,7 @@ export default function ModalItem({ tipo, itemInicial, onCerrar }: Props) {
               <label className="block text-sm font-medium text-ink-800 mb-1.5">Unidad</label>
               {tipo === "producto_terminado" ? (
                 <input type="text" value={unidad} disabled
-                  className="w-full px-3 py-2 border border-ink-200 bg-ink-50 rounded-lg text-sm text-ink-600" />
+                  className="w-full px-3 py-2 border border-ink-200 bg-ink-50 rounded-control text-sm text-ink-600" />
               ) : (
                 <select value={unidad} onChange={(e) => setUnidad(e.target.value)}
                   className={inputClass()}>

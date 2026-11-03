@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "seed:admin": "tsx scripts/seed-admin.ts",
+    "check:ui": "tsx scripts/check-ui.ts",
     "prisma:generate": "prisma generate",
     "prisma:pull": "prisma db pull",
     "test": "jest"

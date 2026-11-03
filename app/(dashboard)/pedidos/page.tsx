@@ -151,7 +151,7 @@ export default async function PedidosPage(
           <div className="flex items-center gap-2 flex-shrink-0">
             <a
               href={`/api/pedidos/exportar-pdf?fecha=${fechaSeleccionada}`}
-              className="h-11 px-3 lg:px-4 bg-white border border-ink-200 text-ink-800 rounded-lg text-sm font-medium hover:bg-ink-50 transition-colors flex items-center gap-2"
+              className="h-11 px-3 lg:px-4 bg-white border border-ink-200 text-ink-800 rounded-control text-sm font-medium hover:bg-ink-50 transition-colors flex items-center gap-2"
               title="PDF simple para quien despacha la ruta"
             >
               <FileIcon aria-hidden="true" className="w-4 h-4" />
@@ -159,7 +159,7 @@ export default async function PedidosPage(
             </a>
             <a
               href={`/api/pedidos/exportar?fecha=${fechaSeleccionada}`}
-              className="h-11 px-3 lg:px-4 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-light transition-colors flex items-center gap-2"
+              className="h-11 px-3 lg:px-4 bg-brand text-white rounded-control text-sm font-medium hover:bg-brand-700 transition-colors flex items-center gap-2"
               title="Excel detallado (una fila por producto) para Mekano"
             >
               <Download aria-hidden="true" className="w-4 h-4" />
@@ -167,7 +167,7 @@ export default async function PedidosPage(
             </a>
             <a
               href={`/api/pedidos/exportar-matriz?fecha=${fechaSeleccionada}`}
-              className="h-11 px-3 lg:px-4 bg-white border border-ink-200 text-ink-800 rounded-lg text-sm font-medium hover:bg-ink-50 transition-colors flex items-center gap-2"
+              className="h-11 px-3 lg:px-4 bg-white border border-ink-200 text-ink-800 rounded-control text-sm font-medium hover:bg-ink-50 transition-colors flex items-center gap-2"
               title="Excel con una hoja por ruta, cliente x producto (para saber qué preparar)"
             >
               <TableIcon aria-hidden="true" className="w-4 h-4" />
@@ -175,7 +175,7 @@ export default async function PedidosPage(
             </a>
             <a
               href={`/api/pedidos/exportar-por-cliente?fecha=${fechaSeleccionada}`}
-              className="h-11 px-3 lg:px-4 bg-white border border-ink-200 text-ink-800 rounded-lg text-sm font-medium hover:bg-ink-50 transition-colors flex items-center gap-2"
+              className="h-11 px-3 lg:px-4 bg-white border border-ink-200 text-ink-800 rounded-control text-sm font-medium hover:bg-ink-50 transition-colors flex items-center gap-2"
               title="Excel con una fila por cliente y el detalle de lo que pidió"
             >
               <Users aria-hidden="true" className="w-4 h-4" />
@@ -188,10 +188,10 @@ export default async function PedidosPage(
       {/* Toggle vista + date picker */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
         {/* Tabs Por fecha / Todos */}
-        <div className="flex bg-ink-100 rounded-lg p-0.5">
+        <div className="flex bg-ink-100 rounded-control p-0.5">
           <Link
             href="/pedidos?vista=fecha"
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+            className={`px-4 py-2 rounded-control text-sm font-medium transition-colors ${
               vistaActual === "fecha"
                 ? "bg-white shadow-sm text-ink-900"
                 : "text-ink-600 hover:text-ink-800"
@@ -201,7 +201,7 @@ export default async function PedidosPage(
           </Link>
           <Link
             href="/pedidos?vista=todos"
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+            className={`px-4 py-2 rounded-control text-sm font-medium transition-colors ${
               vistaActual === "todos"
                 ? "bg-white shadow-sm text-ink-900"
                 : "text-ink-600 hover:text-ink-800"
@@ -211,7 +211,7 @@ export default async function PedidosPage(
           </Link>
           <Link
             href={`/pedidos?vista=rango&desde=${desdeSeleccionada}&hasta=${hastaSeleccionada}`}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
+            className={`px-4 py-2 rounded-control text-sm font-medium transition-colors whitespace-nowrap ${
               vistaActual === "rango"
                 ? "bg-white shadow-sm text-ink-900"
                 : "text-ink-600 hover:text-ink-800"
@@ -221,7 +221,7 @@ export default async function PedidosPage(
           </Link>
           <Link
             href="/pedidos?vista=informes"
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
+            className={`px-4 py-2 rounded-control text-sm font-medium transition-colors whitespace-nowrap ${
               vistaActual === "informes"
                 ? "bg-white shadow-sm text-ink-900"
                 : "text-ink-600 hover:text-ink-800"
@@ -237,7 +237,7 @@ export default async function PedidosPage(
             {!esManana && (
               <Link
                 href="/pedidos?vista=fecha"
-                className="h-10 px-3 bg-white border border-ink-200 rounded-lg text-sm text-ink-700 hover:bg-ink-50 flex items-center"
+                className="h-10 px-3 bg-white border border-ink-200 rounded-control text-sm text-ink-700 hover:bg-ink-50 flex items-center"
               >
                 Mañana
               </Link>
@@ -245,7 +245,7 @@ export default async function PedidosPage(
             {!esHoy && (
               <Link
                 href={`/pedidos?fecha=${formatDateStr(hoy)}`}
-                className="h-10 px-3 bg-white border border-ink-200 rounded-lg text-sm text-ink-700 hover:bg-ink-50 flex items-center"
+                className="h-10 px-3 bg-white border border-ink-200 rounded-control text-sm text-ink-700 hover:bg-ink-50 flex items-center"
               >
                 Hoy
               </Link>
@@ -291,7 +291,7 @@ export default async function PedidosPage(
           {pagina > 1 && (
             <Link
               href={`/pedidos?vista=todos&pagina=${pagina - 1}`}
-              className="h-10 px-4 bg-white border border-ink-200 rounded-lg text-sm text-ink-700 hover:bg-ink-50 flex items-center"
+              className="h-10 px-4 bg-white border border-ink-200 rounded-control text-sm text-ink-700 hover:bg-ink-50 flex items-center"
             >
               Anterior
             </Link>
@@ -302,7 +302,7 @@ export default async function PedidosPage(
           {pagina < totalPaginas && (
             <Link
               href={`/pedidos?vista=todos&pagina=${pagina + 1}`}
-              className="h-10 px-4 bg-white border border-ink-200 rounded-lg text-sm text-ink-700 hover:bg-ink-50 flex items-center"
+              className="h-10 px-4 bg-white border border-ink-200 rounded-control text-sm text-ink-700 hover:bg-ink-50 flex items-center"
             >
               Siguiente
             </Link>

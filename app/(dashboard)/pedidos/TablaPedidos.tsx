@@ -63,7 +63,7 @@ function ControlEstado({
           onClick={() => onCambiarEstado(pedido.id, pedido.estado, anterior)}
           disabled={cargando}
           title={`Volver a "${ESTADOS[anterior].label}"`}
-          className="h-8 w-8 flex items-center justify-center rounded-lg border border-ink-200 text-ink-600 hover:bg-ink-50 disabled:opacity-50 flex-shrink-0"
+          className="h-8 w-8 flex items-center justify-center rounded-control border border-ink-200 text-ink-600 hover:bg-ink-50 disabled:opacity-50 flex-shrink-0"
         >
           <IconoDeshacer />
         </button>
@@ -72,7 +72,7 @@ function ControlEstado({
         <button
           onClick={() => onCambiarEstado(pedido.id, pedido.estado, siguiente.estado)}
           disabled={cargando}
-          className="h-8 px-3 rounded-lg text-xs font-medium bg-brand text-white hover:bg-brand-light disabled:opacity-50 whitespace-nowrap flex-shrink-0"
+          className="h-8 px-3 rounded-control text-xs font-medium bg-brand text-white hover:bg-brand-700 disabled:opacity-50 whitespace-nowrap flex-shrink-0"
         >
           {siguiente.label}
         </button>
@@ -213,7 +213,7 @@ export default function TablaPedidos({
                   <ControlEstado pedido={p} cargando={cargandoId === p.id} onCambiarEstado={cambiarEstado} />
                   <Link
                     href={`/pedidos/${p.id}`}
-                    className="h-10 px-4 bg-ink-50 border border-ink-200 rounded-lg text-sm font-medium text-brand hover:bg-ink-100 transition-colors flex items-center"
+                    className="h-10 px-4 bg-ink-50 border border-ink-200 rounded-control text-sm font-medium text-brand hover:bg-ink-100 transition-colors flex items-center"
                   >
                     Ver
                   </Link>
@@ -269,7 +269,7 @@ export default function TablaPedidos({
                   <td className="py-3 px-4">
                     <div className="flex items-center justify-end gap-3">
                       <ControlEstado pedido={p} cargando={cargandoId === p.id} onCambiarEstado={cambiarEstado} />
-                      <Link href={`/pedidos/${p.id}`} className="text-sm text-brand hover:text-brand-light font-medium whitespace-nowrap">Ver detalle</Link>
+                      <Link href={`/pedidos/${p.id}`} className="text-sm text-brand hover:text-brand-700 font-medium whitespace-nowrap">Ver detalle</Link>
                     </div>
                   </td>
                 </tr>
@@ -280,7 +280,7 @@ export default function TablaPedidos({
       </div>
 
       {toast && (
-        <div className="fixed bottom-6 right-6 bg-ink-900 text-white px-4 py-3 rounded-lg shadow-lg text-sm flex items-center gap-2 z-50 max-w-sm">
+        <div className="fixed bottom-6 right-6 bg-ink-900 text-white px-4 py-3 rounded-control shadow-lg text-sm flex items-center gap-2 z-50 max-w-sm">
           <AlertCircle aria-hidden="true" className="w-4 h-4 text-danger flex-shrink-0" />
           {toast}
         </div>

@@ -6,20 +6,20 @@ export const ESTADOS_PQR: Record<
 > = {
   pendiente: {
     label: "Pendiente",
-    color: "text-yellow-800",
-    bg: "bg-yellow-50 border-yellow-200",
-    dot: "bg-yellow-500",
+    color: "text-warn-soft-text",
+    bg: "bg-warn-soft border-warn/50",
+    dot: "bg-warn",
   },
   en_revision: {
     label: "En revisión",
-    color: "text-blue-800",
-    bg: "bg-blue-50 border-blue-200",
-    dot: "bg-blue-500",
+    color: "text-info",
+    bg: "bg-info-soft border-info/30",
+    dot: "bg-info",
   },
   resuelto: {
     label: "Resuelto",
-    color: "text-green-800",
-    bg: "bg-green-50 border-green-200",
-    dot: "bg-green-500",
+    color: "text-ok",
+    bg: "bg-ok-soft border-ok/30",
+    dot: "bg-ok",
   },
 };

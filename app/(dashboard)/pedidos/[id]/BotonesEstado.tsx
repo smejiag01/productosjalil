@@ -103,7 +103,7 @@ export default function BotonesEstado({
             key={t}
             onClick={() => cambiarEstado(t)}
             disabled={cargando !== null}
-            className={`h-11 px-4 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50 ${estilo.clase}`}
+            className={`h-11 px-4 rounded-control text-sm font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50 ${estilo.clase}`}
           >
             {cargando === t ? (
               <Spinner size="sm" />

@@ -186,7 +186,7 @@ export default function TablaClientes({
             placeholder="Buscar por nombre, NIT o tel..."
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
-            className="pl-9 pr-4 py-2 border border-ink-200 rounded-lg text-sm w-full sm:w-72 outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+            className="pl-9 pr-4 py-2 border border-ink-200 rounded-control text-sm w-full sm:w-72 outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
           />
         </div>
       </div>
@@ -223,7 +223,7 @@ export default function TablaClientes({
               </div>
               <Link
                 href={`/clientes/${c.id}`}
-                className="mt-3 h-10 w-full bg-ink-50 border border-ink-200 rounded-lg text-sm font-medium text-brand hover:bg-ink-100 transition-colors flex items-center justify-center"
+                className="mt-3 h-10 w-full bg-ink-50 border border-ink-200 rounded-control text-sm font-medium text-brand hover:bg-ink-100 transition-colors flex items-center justify-center"
               >
                 Ver detalle
               </Link>
@@ -343,7 +343,7 @@ export default function TablaClientes({
                   <td className="py-3 px-4 text-right">
                     <Link
                       href={`/clientes/${c.id}`}
-                      className="text-sm text-brand hover:text-brand-light font-medium transition-colors"
+                      className="text-sm text-brand hover:text-brand-700 font-medium transition-colors"
                     >
                       Ver detalle
                     </Link>

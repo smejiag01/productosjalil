@@ -85,25 +85,25 @@ export default function TablaMovimientos({ movimientos, pagina, totalPaginas, to
       <div className="bg-white rounded-card border border-ink-200 shadow-card p-4 mb-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
           <select value={tipoInv} onChange={(e) => setTipoInv(e.target.value)}
-            className="h-10 px-3 border border-ink-200 rounded-lg text-sm outline-none">
+            className="h-10 px-3 border border-ink-200 rounded-control text-sm outline-none">
             <option value="">Todos los tipos</option>
             <option value="insumo">Insumos</option>
             <option value="materia_prima">Materias primas</option>
             <option value="producto_terminado">Prod. terminado</option>
           </select>
           <select value={tipoMov} onChange={(e) => setTipoMov(e.target.value)}
-            className="h-10 px-3 border border-ink-200 rounded-lg text-sm outline-none">
+            className="h-10 px-3 border border-ink-200 rounded-control text-sm outline-none">
             <option value="">Todos los movimientos</option>
             <option value="entrada">Entradas</option>
             <option value="salida">Salidas</option>
             <option value="ajuste">Ajustes</option>
           </select>
           <input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} placeholder="Desde"
-            className="h-10 px-3 border border-ink-200 rounded-lg text-sm outline-none" />
+            className="h-10 px-3 border border-ink-200 rounded-control text-sm outline-none" />
           <input type="date" value={hasta} onChange={(e) => setHasta(e.target.value)} placeholder="Hasta"
-            className="h-10 px-3 border border-ink-200 rounded-lg text-sm outline-none" />
+            className="h-10 px-3 border border-ink-200 rounded-control text-sm outline-none" />
           <button onClick={aplicarFiltros}
-            className="h-10 px-4 bg-ink-100 rounded-lg text-sm font-medium text-ink-800 hover:bg-ink-200 transition-colors">
+            className="h-10 px-4 bg-ink-100 rounded-control text-sm font-medium text-ink-800 hover:bg-ink-200 transition-colors">
             Filtrar
           </button>
         </div>
@@ -178,9 +178,9 @@ export default function TablaMovimientos({ movimientos, pagina, totalPaginas, to
       {/* Paginación */}
       {totalPaginas > 1 && (
         <div className="flex items-center justify-center gap-2 mt-6">
-          {pagina > 1 && <Link href={buildPageUrl(pagina - 1)} className="h-10 px-4 bg-white border border-ink-200 rounded-lg text-sm text-ink-700 hover:bg-ink-50 flex items-center">Anterior</Link>}
+          {pagina > 1 && <Link href={buildPageUrl(pagina - 1)} className="h-10 px-4 bg-white border border-ink-200 rounded-control text-sm text-ink-700 hover:bg-ink-50 flex items-center">Anterior</Link>}
           <span className="text-sm text-ink-600">Página {pagina} de {totalPaginas}</span>
-          {pagina < totalPaginas && <Link href={buildPageUrl(pagina + 1)} className="h-10 px-4 bg-white border border-ink-200 rounded-lg text-sm text-ink-700 hover:bg-ink-50 flex items-center">Siguiente</Link>}
+          {pagina < totalPaginas && <Link href={buildPageUrl(pagina + 1)} className="h-10 px-4 bg-white border border-ink-200 rounded-control text-sm text-ink-700 hover:bg-ink-50 flex items-center">Siguiente</Link>}
         </div>
       )}
     </div>

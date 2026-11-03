@@ -40,7 +40,7 @@ export default function PanelInformes() {
           <button
             key={a.key}
             onClick={() => setAtajo(a.key)}
-            className={`h-10 px-4 rounded-lg text-sm font-medium transition-colors ${
+            className={`h-10 px-4 rounded-control text-sm font-medium transition-colors ${
               atajo === a.key
                 ? "bg-brand text-white"
                 : "bg-ink-50 border border-ink-200 text-ink-700 hover:bg-ink-100"
@@ -57,28 +57,28 @@ export default function PanelInformes() {
             type="date"
             value={desde}
             onChange={(e) => setDesde(e.target.value)}
-            className="h-10 px-3 border border-ink-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+            className="h-10 px-3 border border-ink-200 rounded-control text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
           />
           <span className="text-ink-500 text-sm">a</span>
           <input
             type="date"
             value={hasta}
             onChange={(e) => setHasta(e.target.value)}
-            className="h-10 px-3 border border-ink-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+            className="h-10 px-3 border border-ink-200 rounded-control text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
           />
         </div>
       )}
 
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-ink-50 border border-ink-100 rounded-lg px-4 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-ink-50 border border-ink-100 rounded-control px-4 py-3">
         <div>
           <p className="text-sm font-medium text-ink-900 capitalize">{etiquetaRango}</p>
           <p className="text-xs text-ink-500">Rango seleccionado</p>
         </div>
         <a
           href={rangoValido ? urlDescarga : undefined}
-          className={`h-10 px-4 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+          className={`h-10 px-4 rounded-control text-sm font-medium transition-colors flex items-center gap-2 ${
             rangoValido
-              ? "bg-brand text-white hover:bg-brand-light"
+              ? "bg-brand text-white hover:bg-brand-700"
               : "bg-ink-200 text-ink-500 pointer-events-none"
           }`}
         >

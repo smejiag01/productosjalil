@@ -46,7 +46,7 @@ export default function SelectorEstadoPqr({ pqrId, estadoActual }: Props) {
         value={estadoActual}
         disabled={cargando}
         onChange={(e) => cambiarEstado(e.target.value)}
-        className="h-11 px-3 border border-ink-300 rounded-lg text-sm font-medium bg-white outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand disabled:opacity-50"
+        className="h-11 px-3 border border-ink-300 rounded-control text-sm font-medium bg-white outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand disabled:opacity-50"
       >
         {(Object.keys(ESTADOS_PQR) as EstadoPqr[]).map((key) => (
           <option key={key} value={key}>

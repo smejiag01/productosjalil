@@ -141,7 +141,7 @@ export default async function DetallePqrPage(props: { params: Promise<{ id: stri
                   href={url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group border border-ink-200 rounded-lg overflow-hidden hover:border-brand/50 transition-colors"
+                  className="group border border-ink-200 rounded-control overflow-hidden hover:border-brand/50 transition-colors"
                 >
                   {esImagen ? (
                     <div className="aspect-square bg-ink-50">

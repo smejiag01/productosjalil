@@ -63,20 +63,3 @@ export const estadosPedido = {
   cancelado: { fondo: "#B3202A", texto: "#FFFFFF" },
 } as const;
 
-/**
- * Alias de compatibilidad: remapea la escala `gray` de Tailwind (azulada) a los
- * neutros cálidos, para que las pantallas aún sin migrar ya mejoren de paleta y
- * de contraste. gray-400 pasa a ser el texto mínimo AA. Se elimina en la fase 7.
- */
-export const grisCompatible = {
-  50: tinta[50],
-  100: tinta[100],
-  200: tinta[200],
-  300: tinta[300],
-  400: tinta[500],
-  500: tinta[600],
-  600: tinta[700],
-  700: tinta[800],
-  800: "#2D201B",
-  900: tinta[900],
-} as const;

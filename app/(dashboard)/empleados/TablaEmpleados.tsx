@@ -50,7 +50,7 @@ export default function TablaEmpleados({ empleados }: { empleados: Empleado[] })
             placeholder="Buscar por nombre..."
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
-            className="pl-9 pr-4 py-2 border border-ink-200 rounded-lg text-sm w-full outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+            className="pl-9 pr-4 py-2 border border-ink-200 rounded-control text-sm w-full outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
           />
         </div>
       </div>
@@ -79,7 +79,7 @@ export default function TablaEmpleados({ empleados }: { empleados: Empleado[] })
                 </div>
               </div>
               <div className="flex justify-end mt-3 pt-3 border-t border-ink-100">
-                <button onClick={() => { setEditando(e); setModalAbierto(true); }} className="h-9 px-4 bg-ink-50 border border-ink-200 rounded-lg text-xs font-medium text-brand hover:bg-ink-100 transition-colors">Editar</button>
+                <button onClick={() => { setEditando(e); setModalAbierto(true); }} className="h-9 px-4 bg-ink-50 border border-ink-200 rounded-control text-xs font-medium text-brand hover:bg-ink-100 transition-colors">Editar</button>
               </div>
             </div>
           ))
@@ -123,7 +123,7 @@ export default function TablaEmpleados({ empleados }: { empleados: Empleado[] })
                   <td className="py-3 px-4 text-right">
                     <button
                       onClick={() => { setEditando(e); setModalAbierto(true); }}
-                      className="text-sm text-brand hover:text-brand-light font-medium transition-colors"
+                      className="text-sm text-brand hover:text-brand-700 font-medium transition-colors"
                     >
                       Editar
                     </button>

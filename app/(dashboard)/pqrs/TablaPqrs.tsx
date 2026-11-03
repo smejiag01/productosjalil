@@ -130,7 +130,7 @@ export default function TablaPqrs({
                   <td className="py-3 px-4 text-sm text-ink-600">{p.fecha} · {p.hora}</td>
                   <td className="py-3 px-4"><BadgeEstadoPqr estado={p.estado} /></td>
                   <td className="py-3 px-4 text-right">
-                    <Link href={`/pqrs/${p.id}`} className="text-sm text-brand hover:text-brand-light font-medium">Ver detalle</Link>
+                    <Link href={`/pqrs/${p.id}`} className="text-sm text-brand hover:text-brand-700 font-medium">Ver detalle</Link>
                   </td>
                 </tr>
               ))

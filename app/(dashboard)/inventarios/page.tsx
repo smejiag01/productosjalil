@@ -53,7 +53,7 @@ export default async function InventariosPage() {
         </div>
         {INVENTARIO_MATERIA_PRIMA_HABILITADO && (
           <Link href="/inventarios/movimientos"
-            className="h-11 px-3 lg:px-4 bg-white border border-ink-200 rounded-lg text-sm font-medium text-ink-800 hover:bg-ink-50 transition-colors flex items-center gap-2 flex-shrink-0">
+            className="h-11 px-3 lg:px-4 bg-white border border-ink-200 rounded-control text-sm font-medium text-ink-800 hover:bg-ink-50 transition-colors flex items-center gap-2 flex-shrink-0">
             Historial de movimientos
           </Link>
         )}

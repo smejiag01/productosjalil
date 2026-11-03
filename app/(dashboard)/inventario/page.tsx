@@ -9,7 +9,7 @@ import { Package } from "@/components/ui/icons";export default function Inventar
             Control de productos y existencias
           </p>
         </div>
-        <button className="px-4 py-2 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-light transition-colors">
+        <button className="px-4 py-2 bg-brand text-white rounded-control text-sm font-medium hover:bg-brand-700 transition-colors">
           + Agregar producto
         </button>
       </div>

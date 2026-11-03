@@ -118,7 +118,7 @@ export default function ModalRuta({ rutaInicial, empleados, onCerrar }: Props) {
                     key={d.valor}
                     type="button"
                     onClick={() => toggleDia(d.valor)}
-                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border ${
+                    className={`px-3 py-1.5 rounded-control text-sm font-medium transition-colors border ${
                       seleccionado
                         ? "bg-brand text-white border-brand"
                         : "bg-white text-ink-700 border-ink-200 hover:bg-ink-50"

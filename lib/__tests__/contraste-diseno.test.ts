@@ -3,7 +3,6 @@ import { cn } from "@/lib/cn";
 import {
   acento,
   estadosPedido,
-  grisCompatible,
   marca,
   semantica,
   superficies,
@@ -30,11 +29,6 @@ describe("contraste de la paleta (WCAG AA = 4,5:1 para texto)", () => {
 
   it.each(fondosClaros)("tinta-500 (texto mínimo) sobre %s", (_n, fondo) => {
     expect(contraste(tinta[500], fondo)).toBeGreaterThanOrEqual(AA);
-  });
-
-  it("gray-400 compatible (texto) cumple AA sobre blanco y papel", () => {
-    expect(contraste(grisCompatible[400], superficies.blanco)).toBeGreaterThanOrEqual(AA);
-    expect(contraste(grisCompatible[400], superficies.papel)).toBeGreaterThanOrEqual(AA);
   });
 
   it("texto de marca (pimentón) sobre blanco y papel", () => {

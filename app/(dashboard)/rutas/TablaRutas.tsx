@@ -79,8 +79,8 @@ export default function TablaRutas({ rutas, empleados }: Props) {
               <div className="flex items-center justify-between pt-3 border-t border-ink-100">
                 <span className="text-xs text-ink-600">{r.num_clientes} clientes</span>
                 <div className="flex items-center gap-2">
-                  <Link href={`/rutas/${r.id}`} className="h-9 px-4 bg-ink-50 border border-ink-200 rounded-lg text-xs font-medium text-brand hover:bg-ink-100 transition-colors flex items-center">Orden de entrega</Link>
-                  <button onClick={() => { setEditando(r); setModalAbierto(true); }} className="h-9 px-4 bg-ink-50 border border-ink-200 rounded-lg text-xs font-medium text-brand hover:bg-ink-100 transition-colors">Editar</button>
+                  <Link href={`/rutas/${r.id}`} className="h-9 px-4 bg-ink-50 border border-ink-200 rounded-control text-xs font-medium text-brand hover:bg-ink-100 transition-colors flex items-center">Orden de entrega</Link>
+                  <button onClick={() => { setEditando(r); setModalAbierto(true); }} className="h-9 px-4 bg-ink-50 border border-ink-200 rounded-control text-xs font-medium text-brand hover:bg-ink-100 transition-colors">Editar</button>
                 </div>
               </div>
             </div>
@@ -140,12 +140,12 @@ export default function TablaRutas({ rutas, empleados }: Props) {
                   </td>
                   <td className="py-3 px-4 text-right">
                     <div className="flex items-center justify-end gap-3">
-                      <Link href={`/rutas/${r.id}`} className="text-sm text-brand hover:text-brand-light font-medium transition-colors">
+                      <Link href={`/rutas/${r.id}`} className="text-sm text-brand hover:text-brand-700 font-medium transition-colors">
                         Orden de entrega
                       </Link>
                       <button
                         onClick={() => { setEditando(r); setModalAbierto(true); }}
-                        className="text-sm text-brand hover:text-brand-light font-medium transition-colors"
+                        className="text-sm text-brand hover:text-brand-700 font-medium transition-colors"
                       >
                         Editar
                       </button>

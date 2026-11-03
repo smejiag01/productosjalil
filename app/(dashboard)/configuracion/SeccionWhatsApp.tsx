@@ -19,7 +19,7 @@ interface Props {
 function PreviewMensaje({ texto }: { texto: string }) {
   const interpolado = texto.replace(/\{nombre\}/g, "Cliente de prueba");
   return (
-    <div className="bg-[#DCF8C6] rounded-lg rounded-tl-none px-3 py-2 text-sm text-ink-800 max-w-[280px] shadow-sm mx-auto">
+    <div className="bg-[#DCF8C6] rounded-control rounded-tl-none px-3 py-2 text-sm text-ink-800 max-w-[280px] shadow-sm mx-auto">
       {interpolado}
       <div className="text-[10px] text-ink-600 text-right mt-1">
         {new Date().toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })}
@@ -76,7 +76,7 @@ export default function SeccionWhatsApp({ config, onGuardado }: Props) {
         Configura los mensajes automáticos que se envían a los clientes
       </p>
 
-      <div className="mb-4 p-3 bg-info-soft border border-info/30 rounded-lg text-info text-xs flex items-start gap-2">
+      <div className="mb-4 p-3 bg-info-soft border border-info/30 rounded-control text-info text-xs flex items-start gap-2">
         <AlertCircle aria-hidden="true" className="w-4 h-4 mt-0.5 flex-shrink-0" />
         Los cambios aquí se aplicarán automáticamente en el próximo envío programado
       </div>
@@ -102,7 +102,7 @@ export default function SeccionWhatsApp({ config, onGuardado }: Props) {
             <div className="flex items-center gap-2">
               <input type="number" value={horasEspera} onChange={(e) => setHorasEspera(e.target.value)}
                 min="1" max="24"
-                className="w-20 px-3 py-2 border border-ink-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand" />
+                className="w-20 px-3 py-2 border border-ink-300 rounded-control text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand" />
               <span className="text-sm text-ink-600">horas</span>
             </div>
           </div>
@@ -115,7 +115,7 @@ export default function SeccionWhatsApp({ config, onGuardado }: Props) {
           </label>
           <textarea value={mensajeRecordatorio} onChange={(e) => setMensajeRecordatorio(e.target.value)}
             rows={3}
-            className="w-full px-3 py-2 border border-ink-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand resize-y min-h-[120px]"
+            className="w-full px-3 py-2 border border-ink-300 rounded-control text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand resize-y min-h-[120px]"
             placeholder="Usa {nombre} para insertar el nombre del cliente" />
           <div className="flex items-center justify-between mt-1">
             <p className="text-xs text-ink-500">
@@ -123,7 +123,7 @@ export default function SeccionWhatsApp({ config, onGuardado }: Props) {
             </p>
             <p className="text-xs text-ink-500">{mensajeRecordatorio.length} caracteres</p>
           </div>
-          <div className="mt-3 p-3 bg-ink-50 rounded-lg">
+          <div className="mt-3 p-3 bg-ink-50 rounded-control">
             <p className="text-xs text-ink-600 mb-2">Vista previa:</p>
             <PreviewMensaje texto={mensajeRecordatorio} />
           </div>
@@ -136,7 +136,7 @@ export default function SeccionWhatsApp({ config, onGuardado }: Props) {
           </label>
           <textarea value={mensajeFollowup} onChange={(e) => setMensajeFollowup(e.target.value)}
             rows={3}
-            className="w-full px-3 py-2 border border-ink-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand resize-y min-h-[120px]"
+            className="w-full px-3 py-2 border border-ink-300 rounded-control text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand resize-y min-h-[120px]"
             placeholder="Usa {nombre} para insertar el nombre del cliente" />
           <div className="flex items-center justify-between mt-1">
             <p className="text-xs text-ink-500">
@@ -144,7 +144,7 @@ export default function SeccionWhatsApp({ config, onGuardado }: Props) {
             </p>
             <p className="text-xs text-ink-500">{mensajeFollowup.length} caracteres</p>
           </div>
-          <div className="mt-3 p-3 bg-ink-50 rounded-lg">
+          <div className="mt-3 p-3 bg-ink-50 rounded-control">
             <p className="text-xs text-ink-600 mb-2">Vista previa:</p>
             <PreviewMensaje texto={mensajeFollowup} />
           </div>

@@ -197,7 +197,7 @@ export default function FormularioProducto({ productoInicial, categorias = [] }:
           </label>
           <div
             onClick={() => inputArchivoRef.current?.click()}
-            className="aspect-square bg-ink-50 border-2 border-dashed border-ink-200 rounded-xl overflow-hidden cursor-pointer hover:border-brand/50 transition-colors flex items-center justify-center"
+            className="aspect-square bg-ink-50 border-2 border-dashed border-ink-200 rounded-card overflow-hidden cursor-pointer hover:border-brand/50 transition-colors flex items-center justify-center"
           >
             {imagenMostrar ? (
               <img
@@ -314,7 +314,7 @@ export default function FormularioProducto({ productoInicial, categorias = [] }:
                   onChange={(e) => setPrecioBase(e.target.value)}
                   required
                   min="1"
-                  className="w-full pl-7 pr-3 py-2 border border-ink-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                  className="w-full pl-7 pr-3 py-2 border border-ink-300 rounded-control text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
                   placeholder="0"
                 />
               </div>
@@ -384,7 +384,7 @@ export default function FormularioProducto({ productoInicial, categorias = [] }:
         <button
           type="submit"
           disabled={cargando || subiendoImagen}
-          className="px-6 py-2 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-light transition-colors disabled:opacity-50 flex items-center gap-2"
+          className="px-6 py-2 bg-brand text-white rounded-control text-sm font-medium hover:bg-brand-700 transition-colors disabled:opacity-50 flex items-center gap-2"
         >
           {(cargando || subiendoImagen) && (
             <Spinner size="sm" />

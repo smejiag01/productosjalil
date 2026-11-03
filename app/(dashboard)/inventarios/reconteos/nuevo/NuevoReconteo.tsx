@@ -201,7 +201,7 @@ export default function NuevoReconteo({ items }: Props) {
               ))}
             </div>
             <input type="text" placeholder="Buscar..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)}
-              className="px-3 py-2 border border-ink-200 rounded-lg text-sm w-full sm:w-56 outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand" />
+              className="px-3 py-2 border border-ink-200 rounded-control text-sm w-full sm:w-56 outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand" />
           </div>
 
           <div className="bg-white rounded-card border border-ink-200 shadow-card overflow-hidden mb-6">
@@ -234,7 +234,7 @@ export default function NuevoReconteo({ items }: Props) {
                           onChange={(e) => actualizarCantidad(item.id, e.target.value)}
                           min="0"
                           step="0.01"
-                          className="w-28 px-2 py-1.5 border border-ink-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                          className="w-28 px-2 py-1.5 border border-ink-300 rounded-control text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
                         />
                         <span className="text-xs text-ink-500 w-14">{item.unidad}</span>
                       </div>
@@ -250,7 +250,7 @@ export default function NuevoReconteo({ items }: Props) {
               Cancelar
             </Link>
             <button onClick={irAPaso2}
-              className="px-4 py-2 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-light transition-colors">
+              className="px-4 py-2 bg-brand text-white rounded-control text-sm font-medium hover:bg-brand-700 transition-colors">
               Continuar
             </button>
           </div>
@@ -291,7 +291,7 @@ export default function NuevoReconteo({ items }: Props) {
                         placeholder="Nota (obligatoria) — motivo de la diferencia"
                         value={r.conteo.nota}
                         onChange={(e) => actualizarNota(r.item.id, e.target.value)}
-                        className={`w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 ${
+                        className={`w-full px-3 py-2 border rounded-control text-sm outline-none focus:ring-2 focus:ring-brand/20 ${
                           r.conteo.nota.trim() ? "border-ink-300 focus:border-brand" : "border-danger/30"
                         }`}
                       />

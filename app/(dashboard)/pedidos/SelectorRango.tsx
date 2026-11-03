@@ -25,18 +25,18 @@ export default function SelectorRango({
         type="date"
         value={desde}
         onChange={(e) => setDesde(e.target.value)}
-        className="h-10 px-3 border border-ink-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+        className="h-10 px-3 border border-ink-200 rounded-control text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
       />
       <span className="text-ink-500 text-sm">a</span>
       <input
         type="date"
         value={hasta}
         onChange={(e) => setHasta(e.target.value)}
-        className="h-10 px-3 border border-ink-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+        className="h-10 px-3 border border-ink-200 rounded-control text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
       />
       <button
         onClick={aplicar}
-        className="h-10 px-4 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-light transition-colors"
+        className="h-10 px-4 bg-brand text-white rounded-control text-sm font-medium hover:bg-brand-700 transition-colors"
       >
         Aplicar
       </button>

@@ -86,7 +86,7 @@ export default function SeccionContactos({ clienteId, contactosIniciales }: { cl
         </div>
         <button
           onClick={() => { setEditando(null); setModalAbierto(true); }}
-          className="h-9 px-3 bg-brand text-white rounded-lg text-xs font-medium hover:bg-brand-light transition-colors flex items-center gap-1.5"
+          className="h-9 px-3 bg-brand text-white rounded-control text-xs font-medium hover:bg-brand-700 transition-colors flex items-center gap-1.5"
         >
           <Plus aria-hidden="true" className="w-3.5 h-3.5" />
           Agregar contacto
@@ -137,7 +137,7 @@ export default function SeccionContactos({ clienteId, contactosIniciales }: { cl
                   <button
                     onClick={() => actualizar(c, { principal: true })}
                     disabled={cargando === c.id}
-                    className="text-xs font-medium text-brand hover:text-brand-light disabled:opacity-50 whitespace-nowrap"
+                    className="text-xs font-medium text-brand hover:text-brand-700 disabled:opacity-50 whitespace-nowrap"
                   >
                     Marcar principal
                   </button>

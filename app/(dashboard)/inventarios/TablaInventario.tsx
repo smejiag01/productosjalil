@@ -83,7 +83,7 @@ export default function TablaInventario({ items, tipo, titulo }: Props) {
         <div className="relative">
           <Search aria-hidden="true" className="w-4 h-4 text-ink-500 absolute left-3 top-1/2 -translate-y-1/2" />
           <input type="text" placeholder="Buscar..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)}
-            className="pl-9 pr-4 py-2 border border-ink-200 rounded-lg text-sm w-full sm:w-56 outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand" />
+            className="pl-9 pr-4 py-2 border border-ink-200 rounded-control text-sm w-full sm:w-56 outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand" />
         </div>
       </div>
 
@@ -112,15 +112,15 @@ export default function TablaInventario({ items, tipo, titulo }: Props) {
                 <>
                   {INVENTARIO_MATERIA_PRIMA_HABILITADO && (
                     <>
-                      <Link href={`/inventarios/producto-terminado/${item.id}`} className="h-9 px-3 bg-ink-50 border border-ink-200 rounded-lg text-xs font-medium text-ink-800 hover:bg-ink-100 flex items-center">Receta</Link>
-                      <button onClick={() => setProduccion(item)} className="h-9 px-3 bg-ink-50 border border-ink-200 rounded-lg text-xs font-medium text-ink-800 hover:bg-ink-100">Producción</button>
+                      <Link href={`/inventarios/producto-terminado/${item.id}`} className="h-9 px-3 bg-ink-50 border border-ink-200 rounded-control text-xs font-medium text-ink-800 hover:bg-ink-100 flex items-center">Receta</Link>
+                      <button onClick={() => setProduccion(item)} className="h-9 px-3 bg-ink-50 border border-ink-200 rounded-control text-xs font-medium text-ink-800 hover:bg-ink-100">Producción</button>
                     </>
                   )}
-                  <Link href={`/inventarios/producto-terminado/${item.id}`} className="h-9 px-3 bg-ink-50 border border-ink-200 rounded-lg text-xs font-medium text-ink-800 hover:bg-ink-100 flex items-center">Historial</Link>
+                  <Link href={`/inventarios/producto-terminado/${item.id}`} className="h-9 px-3 bg-ink-50 border border-ink-200 rounded-control text-xs font-medium text-ink-800 hover:bg-ink-100 flex items-center">Historial</Link>
                 </>
               )}
-              <button onClick={() => setMovimiento(item)} className="h-9 px-3 bg-ink-50 border border-ink-200 rounded-lg text-xs font-medium text-ink-800 hover:bg-ink-100">Movimiento</button>
-              <button onClick={() => { setEditando(item); setModalItem(true); }} className="h-9 px-3 bg-ink-50 border border-ink-200 rounded-lg text-xs font-medium text-brand hover:bg-ink-100">Editar</button>
+              <button onClick={() => setMovimiento(item)} className="h-9 px-3 bg-ink-50 border border-ink-200 rounded-control text-xs font-medium text-ink-800 hover:bg-ink-100">Movimiento</button>
+              <button onClick={() => { setEditando(item); setModalItem(true); }} className="h-9 px-3 bg-ink-50 border border-ink-200 rounded-control text-xs font-medium text-brand hover:bg-ink-100">Editar</button>
             </div>
           </div>
         ))}
@@ -183,7 +183,7 @@ export default function TablaInventario({ items, tipo, titulo }: Props) {
                       </>
                     )}
                     <button onClick={() => setMovimiento(item)} className="text-sm text-ink-700 hover:text-ink-900 font-medium">Movimiento</button>
-                    <button onClick={() => { setEditando(item); setModalItem(true); }} className="text-sm text-brand hover:text-brand-light font-medium">Editar</button>
+                    <button onClick={() => { setEditando(item); setModalItem(true); }} className="text-sm text-brand hover:text-brand-700 font-medium">Editar</button>
                   </div>
                 </td>
               </tr>

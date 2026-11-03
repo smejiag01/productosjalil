@@ -148,7 +148,7 @@ export default function TablaContactos({ contactos: iniciales }: { contactos: Co
                 defaultValue={c.notas ?? ""}
                 placeholder="Notas de la llamada..."
                 onBlur={(e) => guardarNotas(c.id, e.target.value, c.notas)}
-                className="w-full text-xs border border-ink-200 rounded-lg px-2 py-1.5 outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand mb-3"
+                className="w-full text-xs border border-ink-200 rounded-control px-2 py-1.5 outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand mb-3"
                 rows={2}
               />
               <div className="flex items-center justify-between pt-2 border-t border-ink-100 gap-2">
@@ -156,14 +156,14 @@ export default function TablaContactos({ contactos: iniciales }: { contactos: Co
                   href={urlWhatsapp(c.telefono)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="h-9 px-3 bg-ok-soft border border-ok/30 text-ok rounded-lg text-xs font-medium flex items-center gap-1.5"
+                  className="h-9 px-3 bg-ok-soft border border-ok/30 text-ok rounded-control text-xs font-medium flex items-center gap-1.5"
                 >
                   WhatsApp
                 </a>
                 <button
                   onClick={() => actualizar(c.id, { atendido: !c.atendido })}
                   disabled={cargandoId === c.id}
-                  className={`h-9 px-3 rounded-lg text-xs font-medium disabled:opacity-50 ${
+                  className={`h-9 px-3 rounded-control text-xs font-medium disabled:opacity-50 ${
                     c.atendido
                       ? "bg-ink-50 border border-ink-200 text-ink-700"
                       : "bg-brand text-white"
@@ -212,7 +212,7 @@ export default function TablaContactos({ contactos: iniciales }: { contactos: Co
                       defaultValue={c.notas ?? ""}
                       placeholder="Notas de la llamada..."
                       onBlur={(e) => guardarNotas(c.id, e.target.value, c.notas)}
-                      className="w-full text-xs border border-ink-200 rounded-lg px-2 py-1.5 outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                      className="w-full text-xs border border-ink-200 rounded-control px-2 py-1.5 outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
                       rows={2}
                     />
                   </td>
@@ -235,7 +235,7 @@ export default function TablaContactos({ contactos: iniciales }: { contactos: Co
                       <button
                         onClick={() => actualizar(c.id, { atendido: !c.atendido })}
                         disabled={cargandoId === c.id}
-                        className="text-sm text-brand hover:text-brand-light font-medium disabled:opacity-50 whitespace-nowrap"
+                        className="text-sm text-brand hover:text-brand-700 font-medium disabled:opacity-50 whitespace-nowrap"
                       >
                         {c.atendido ? "Marcar pendiente" : "Marcar atendido"}
                       </button>

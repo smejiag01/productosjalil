@@ -90,7 +90,7 @@ export default function TablaUsuarios({
             placeholder="Buscar por nombre o correo..."
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
-            className="pl-9 pr-4 py-2 border border-ink-200 rounded-lg text-sm w-full outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+            className="pl-9 pr-4 py-2 border border-ink-200 rounded-control text-sm w-full outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
           />
         </div>
       </div>
@@ -132,11 +132,11 @@ export default function TablaUsuarios({
                     onClick={() => toggleActivo(u)}
                     disabled={esUnoMismo || cargandoId === u.id}
                     title={esUnoMismo ? "No puedes desactivar tu propia cuenta" : undefined}
-                    className="h-9 px-4 bg-ink-50 border border-ink-200 rounded-lg text-xs font-medium text-ink-800 hover:bg-ink-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="h-9 px-4 bg-ink-50 border border-ink-200 rounded-control text-xs font-medium text-ink-800 hover:bg-ink-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     {u.activo ? "Desactivar" : "Activar"}
                   </button>
-                  <button onClick={() => { setEditando(u); setModalAbierto(true); }} className="h-9 px-4 bg-ink-50 border border-ink-200 rounded-lg text-xs font-medium text-brand hover:bg-ink-100 transition-colors">Editar</button>
+                  <button onClick={() => { setEditando(u); setModalAbierto(true); }} className="h-9 px-4 bg-ink-50 border border-ink-200 rounded-control text-xs font-medium text-brand hover:bg-ink-100 transition-colors">Editar</button>
                 </div>
               </div>
             );
@@ -191,7 +191,7 @@ export default function TablaUsuarios({
                         </button>
                         <button
                           onClick={() => { setEditando(u); setModalAbierto(true); }}
-                          className="text-sm text-brand hover:text-brand-light font-medium transition-colors"
+                          className="text-sm text-brand hover:text-brand-700 font-medium transition-colors"
                         >
                           Editar
                         </button>

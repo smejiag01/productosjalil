@@ -152,6 +152,7 @@ Los clientes hacen su pedido en la web (reemplaza el flujo de pedidos por WhatsA
 ## Pruebas, base de datos y dependencias
 
 - `npm test` (Jest, funciones puras en `lib/__tests__/`) y `npm run build` (corre ESLint y tipos como Vercel) antes de subir.
+- `npm run check:ui` (scripts/check-ui.ts) vigila el sistema de diseño: falla ante `gray-*`, colores crudos de Tailwind, `confirm()`/`alert()` nativos, `<svg` sueltos (los íconos salen de `components/ui/icons.ts`) y radios crudos (usar `rounded-control`/`rounded-card`). Los colores y tokens viven en `lib/design/tokens.ts`; los componentes compartidos en `components/ui/`.
 - **Cambios de BD**: el proyecto NO usa Prisma Migrate (usa introspección). Se escribe SQL idempotente en `prisma/sql/`, se aplica con `npx prisma db execute --schema prisma/schema.prisma --file prisma/sql/<archivo>.sql`, se refleja en `schema.prisma` y se corre `npx prisma generate`. Solo cambios aditivos sin confirmar antes.
 - **Seguridad de dependencias**: `npm audit --omit=dev` debe dar 0. `xlsx` se instala desde el CDN oficial de SheetJS (la versión de npm está sin parche) y hay `overrides` en `package.json` para `postcss` (dentro de Next) y `zod` (dentro de `@vercel/cli-config`). El resto de avisos de `npm audit` son de herramientas de desarrollo (ESLint/Jest) por `minimatch`, sin versión corregida disponible en esas herramientas.
 - Los secretos de producción nunca se pegan en el chat ni se commitean: se generan a un archivo local ignorado por git y se copian a Vercel.

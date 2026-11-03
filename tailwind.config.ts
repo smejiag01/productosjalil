@@ -3,7 +3,6 @@ import plugin from "tailwindcss/plugin";
 import {
   acento,
   estadosPedido,
-  grisCompatible,
   marca,
   semantica,
   superficies,
@@ -26,12 +25,9 @@ const config: Config = {
         background: "var(--background)",
         foreground: "var(--foreground)",
 
-        // Marca: pimentón. light/dark son alias de las pantallas sin migrar:
-        // todos los hover (antes "light" y "dark") ahora oscurecen.
+        // Marca: pimentón
         brand: {
           DEFAULT: marca[600],
-          light: marca[700],
-          dark: marca[800],
           50: marca[50],
           100: marca[100],
           600: marca[600],
@@ -39,17 +35,8 @@ const config: Config = {
           800: marca[800],
         },
         ink: { ...tinta },
-        // Alias de compatibilidad: la escala "gray" (azulada) pasa a neutros
-        // cálidos. Se elimina en la fase de limpieza.
-        gray: { ...grisCompatible },
         paper: superficies.papel,
         espresso: {
-          DEFAULT: superficies.espresso,
-          hover: superficies.espressoHover,
-          active: superficies.espressoActivo,
-        },
-        // Alias del sidebar anterior: ahora es el espresso.
-        sidebar: {
           DEFAULT: superficies.espresso,
           hover: superficies.espressoHover,
           active: superficies.espressoActivo,

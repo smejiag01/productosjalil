@@ -57,12 +57,12 @@ export default function ConfiguracionTabs({
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-ink-100 rounded-lg p-1 mb-6 w-full sm:w-fit overflow-x-auto">
+      <div className="flex gap-1 bg-ink-100 rounded-control p-1 mb-6 w-full sm:w-fit overflow-x-auto">
         {TABS.map((tab) => (
           <button
             key={tab.key}
             onClick={() => setTabActiva(tab.key)}
-            className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
+            className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-control text-sm font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
               tabActiva === tab.key
                 ? "bg-white shadow-sm text-ink-900"
                 : "text-ink-600 hover:text-ink-800"
@@ -86,7 +86,7 @@ export default function ConfiguracionTabs({
       )}
 
       {!config && tabActiva !== "cuenta" && (
-        <div className="bg-warn-soft border border-warn/30 rounded-xl p-6 text-center">
+        <div className="bg-warn-soft border border-warn/30 rounded-card p-6 text-center">
           <p className="text-warn-soft-text text-sm">
             No se encontró registro de configuración. Contacta al administrador.
           </p>
@@ -95,7 +95,7 @@ export default function ConfiguracionTabs({
 
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-6 right-6 bg-ink-900 text-white px-4 py-3 rounded-lg shadow-lg text-sm flex items-center gap-2 animate-in z-50">
+        <div className="fixed bottom-6 right-6 bg-ink-900 text-white px-4 py-3 rounded-control shadow-lg text-sm flex items-center gap-2 animate-in z-50">
           <Check aria-hidden="true" className="w-4 h-4 text-ok" />
           {toast}
         </div>

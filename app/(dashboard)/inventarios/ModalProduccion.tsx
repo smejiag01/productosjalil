@@ -92,7 +92,7 @@ export default function ModalProduccion({ itemId, itemNombre, itemUnidad, stockA
 
         {negativos ? (
           <div className="space-y-4">
-            <div className="p-3 bg-warn-soft border border-warn/30 rounded-lg">
+            <div className="p-3 bg-warn-soft border border-warn/30 rounded-control">
               <p className="text-sm font-medium text-warn-soft-text mb-1">
                 Producción registrada, pero algunos insumos quedaron con stock negativo
               </p>
@@ -100,21 +100,21 @@ export default function ModalProduccion({ itemId, itemNombre, itemUnidad, stockA
             </div>
             <div className="space-y-2">
               {negativos.map((n) => (
-                <div key={n.id} className="flex items-center justify-between px-3 py-2 bg-danger-soft border border-danger/30 rounded-lg">
+                <div key={n.id} className="flex items-center justify-between px-3 py-2 bg-danger-soft border border-danger/30 rounded-control">
                   <span className="text-sm font-medium text-ink-900">{n.nombre}</span>
                   <span className="text-sm font-semibold text-danger">{n.stock_resultante} {n.unidad}</span>
                 </div>
               ))}
             </div>
             <div className="flex justify-end pt-2">
-              <button onClick={onCerrar} className="px-4 py-2 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-light transition-colors">
+              <button onClick={onCerrar} className="px-4 py-2 bg-brand text-white rounded-control text-sm font-medium hover:bg-brand-700 transition-colors">
                 Entendido
               </button>
             </div>
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="p-3 bg-ink-50 rounded-lg">
+            <div className="p-3 bg-ink-50 rounded-control">
               <p className="text-sm font-medium text-ink-900">{itemNombre}</p>
               <p className="text-xs text-ink-600">Stock actual: {stockActual} {itemUnidad}</p>
             </div>
@@ -142,13 +142,13 @@ export default function ModalProduccion({ itemId, itemNombre, itemUnidad, stockA
             {receta === null ? (
               <p className="text-sm text-ink-500">Cargando receta...</p>
             ) : receta.length === 0 ? (
-              <div className="p-3 bg-info-soft border border-info/30 rounded-lg text-info text-sm">
+              <div className="p-3 bg-info-soft border border-info/30 rounded-control text-info text-sm">
                 Este producto no tiene receta asignada. La producción solo sumará stock, sin consumir insumos.
               </div>
             ) : (
               <div>
                 <p className="text-sm font-medium text-ink-800 mb-2">Insumos que se consumirán</p>
-                <div className="border border-ink-200 rounded-lg divide-y divide-ink-50">
+                <div className="border border-ink-200 rounded-control divide-y divide-ink-50">
                   {preview.map((l) => (
                     <div key={l.id} className="px-3 py-2 flex items-center justify-between text-sm">
                       <span className="text-ink-800">{l.insumo.nombre}</span>

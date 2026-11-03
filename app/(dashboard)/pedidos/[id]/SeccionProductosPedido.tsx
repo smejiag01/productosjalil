@@ -183,7 +183,7 @@ export default function SeccionProductosPedido({
           <button
             onClick={abrirSelectorProductos}
             disabled={cargandoProductos}
-            className="h-9 px-3 bg-brand text-white rounded-lg text-xs font-medium hover:bg-brand-light transition-colors flex items-center gap-1.5 disabled:opacity-50"
+            className="h-9 px-3 bg-brand text-white rounded-control text-xs font-medium hover:bg-brand-700 transition-colors flex items-center gap-1.5 disabled:opacity-50"
           >
             <Plus aria-hidden="true" className="w-3.5 h-3.5" />
             {cargandoProductos ? "Cargando..." : "Agregar producto"}
@@ -290,14 +290,14 @@ export default function SeccionProductosPedido({
           <button
             onClick={descartar}
             disabled={guardando}
-            className="h-11 px-4 bg-white border border-ink-200 rounded-lg text-sm font-medium text-ink-800 hover:bg-ink-50 transition-colors disabled:opacity-50"
+            className="h-11 px-4 bg-white border border-ink-200 rounded-control text-sm font-medium text-ink-800 hover:bg-ink-50 transition-colors disabled:opacity-50"
           >
             Descartar
           </button>
           <button
             onClick={guardar}
             disabled={guardando}
-            className="h-11 px-4 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-light transition-colors disabled:opacity-50 flex items-center gap-2"
+            className="h-11 px-4 bg-brand text-white rounded-control text-sm font-medium hover:bg-brand-700 transition-colors disabled:opacity-50 flex items-center gap-2"
           >
             {guardando && <Spinner size="sm" />}
             Guardar cambios

@@ -146,7 +146,7 @@ export default function FormularioCategoria({
               value={slug}
               onChange={(e) => handleSlugChange(e.target.value)}
               required
-              className="w-full px-3 py-2 border border-ink-300 rounded-lg text-sm font-mono outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+              className="w-full px-3 py-2 border border-ink-300 rounded-control text-sm font-mono outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
               placeholder="nombre_de_la_categoria"
             />
             <p className="text-xs text-ink-500 mt-1">
@@ -168,7 +168,7 @@ export default function FormularioCategoria({
                 value={emoji}
                 onChange={(e) => setEmoji(e.target.value.slice(0, 2))}
                 maxLength={2}
-                className="w-full px-3 py-2 border border-ink-300 rounded-lg text-sm text-center text-xl outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                className="w-full px-3 py-2 border border-ink-300 rounded-control text-sm text-center text-xl outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
                 placeholder="🥩"
               />
             </div>

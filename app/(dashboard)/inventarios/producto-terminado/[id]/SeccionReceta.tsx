@@ -189,13 +189,13 @@ export default function SeccionReceta({ productoTerminadoId, recetaInicial, disp
                     onChange={(e) => setCantidadEditada(e.target.value)}
                     min="0"
                     step="0.0001"
-                    className="w-24 px-2 py-1.5 border border-ink-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                    className="w-24 px-2 py-1.5 border border-ink-300 rounded-control text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
                   />
                   <span className="text-xs text-ink-500">{linea.insumo.unidad}</span>
                   <button
                     onClick={() => guardarEdicion(linea.id)}
                     disabled={cargando}
-                    className="text-xs font-medium text-brand hover:text-brand-light disabled:opacity-50"
+                    className="text-xs font-medium text-brand hover:text-brand-700 disabled:opacity-50"
                   >
                     Guardar
                   </button>
@@ -216,7 +216,7 @@ export default function SeccionReceta({ productoTerminadoId, recetaInicial, disp
                       setEditandoId(linea.id);
                       setCantidadEditada(String(linea.cantidad_requerida));
                     }}
-                    className="text-xs font-medium text-brand hover:text-brand-light"
+                    className="text-xs font-medium text-brand hover:text-brand-700"
                   >
                     Editar
                   </button>
@@ -241,7 +241,7 @@ export default function SeccionReceta({ productoTerminadoId, recetaInicial, disp
           <button
             type="button"
             onClick={() => setMostrarSelector(true)}
-            className="flex-1 px-3 py-2 border border-ink-300 rounded-lg text-sm text-left bg-white outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand hover:bg-ink-50 transition-colors flex items-center justify-between"
+            className="flex-1 px-3 py-2 border border-ink-300 rounded-control text-sm text-left bg-white outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand hover:bg-ink-50 transition-colors flex items-center justify-between"
           >
             <span className={insumoSeleccionado ? "text-ink-900" : "text-ink-500"}>
               {insumoSeleccionado ? insumoSeleccionado.nombre : "Buscar insumo o materia prima..."}
@@ -255,12 +255,12 @@ export default function SeccionReceta({ productoTerminadoId, recetaInicial, disp
             onChange={(e) => setCantidadNueva(e.target.value)}
             min="0"
             step="0.0001"
-            className="w-full sm:w-40 px-3 py-2 border border-ink-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+            className="w-full sm:w-40 px-3 py-2 border border-ink-300 rounded-control text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
           />
           <button
             onClick={agregarLinea}
             disabled={cargando || !insumoSeleccionado}
-            className="h-10 px-4 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-light transition-colors disabled:opacity-50 flex-shrink-0"
+            className="h-10 px-4 bg-brand text-white rounded-control text-sm font-medium hover:bg-brand-700 transition-colors disabled:opacity-50 flex-shrink-0"
           >
             Agregar
           </button>

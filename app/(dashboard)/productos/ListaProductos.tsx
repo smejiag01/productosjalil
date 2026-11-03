@@ -126,14 +126,14 @@ export default function ListaProductos({
               placeholder="Buscar producto..."
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
-              className="pl-9 pr-4 py-2 border border-ink-200 rounded-lg text-sm w-full sm:w-56 outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+              className="pl-9 pr-4 py-2 border border-ink-200 rounded-control text-sm w-full sm:w-56 outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
             />
           </div>
           {/* Toggle vista */}
-          <div className="flex bg-ink-100 rounded-lg p-0.5">
+          <div className="flex bg-ink-100 rounded-control p-0.5">
             <button
               onClick={() => setVista("grilla")}
-              className={`p-1.5 rounded-md transition-colors ${
+              className={`p-1.5 rounded-control transition-colors ${
                 vista === "grilla" ? "bg-white shadow-sm" : "text-ink-500"
               }`}
             >
@@ -141,7 +141,7 @@ export default function ListaProductos({
             </button>
             <button
               onClick={() => setVista("tabla")}
-              className={`p-1.5 rounded-md transition-colors ${
+              className={`p-1.5 rounded-control transition-colors ${
                 vista === "tabla" ? "bg-white shadow-sm" : "text-ink-500"
               }`}
             >
@@ -249,7 +249,7 @@ export default function ListaProductos({
                   </td>
                   <td className="py-3 px-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-ink-100 rounded-lg overflow-hidden flex-shrink-0">
+                      <div className="w-10 h-10 bg-ink-100 rounded-control overflow-hidden flex-shrink-0">
                         {p.imagen_url ? (
                           <img
                             src={p.imagen_url}
@@ -322,7 +322,7 @@ export default function ListaProductos({
                   <td className="py-3 px-4 text-right">
                     <Link
                       href={`/productos/${p.id}/editar`}
-                      className="text-sm text-brand hover:text-brand-light font-medium"
+                      className="text-sm text-brand hover:text-brand-700 font-medium"
                     >
                       Editar
                     </Link>

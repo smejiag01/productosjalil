@@ -6,7 +6,7 @@ export default function ClientesLoading() {
           <div className="h-7 bg-ink-200 rounded w-32 mb-2" />
           <div className="h-4 bg-ink-100 rounded w-64" />
         </div>
-        <div className="h-10 bg-ink-200 rounded-lg w-40" />
+        <div className="h-10 bg-ink-200 rounded-control w-40" />
       </div>
       <div className="flex gap-2 mb-6">
         {[1, 2, 3].map((i) => (

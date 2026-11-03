@@ -50,12 +50,12 @@ export default function SelectorPeriodo({ periodo, fecha, navLabel, tab, esPerso
   return (
     <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
       {/* Selector de periodo */}
-      <div className="flex bg-ink-100 rounded-lg p-0.5 flex-wrap w-fit">
+      <div className="flex bg-ink-100 rounded-control p-0.5 flex-wrap w-fit">
         {PERIODOS.map((p) => (
           <button
             key={p.value}
             onClick={() => navegar(p.value, fecha)}
-            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+            className={`px-3 py-1.5 rounded-control text-sm font-medium transition-colors ${
               !esPersonalizado && periodo === p.value
                 ? "bg-white shadow-sm text-ink-900"
                 : "text-ink-600 hover:text-ink-800"
@@ -66,7 +66,7 @@ export default function SelectorPeriodo({ periodo, fecha, navLabel, tab, esPerso
         ))}
         <button
           onClick={activarPersonalizado}
-          className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
+          className={`px-3 py-1.5 rounded-control text-sm font-medium transition-colors whitespace-nowrap ${
             esPersonalizado
               ? "bg-white shadow-sm text-ink-900"
               : "text-ink-600 hover:text-ink-800"
@@ -80,7 +80,7 @@ export default function SelectorPeriodo({ periodo, fecha, navLabel, tab, esPerso
         <div className="flex items-center gap-2">
           <button
             onClick={() => navegar(periodo, anterior)}
-            className="h-9 w-9 flex items-center justify-center rounded-lg border border-ink-200 bg-white hover:bg-ink-50 transition-colors"
+            className="h-9 w-9 flex items-center justify-center rounded-control border border-ink-200 bg-white hover:bg-ink-50 transition-colors"
             title="Periodo anterior"
           >
             <ChevronLeft aria-hidden="true" className="w-4 h-4 text-ink-700" />
@@ -90,7 +90,7 @@ export default function SelectorPeriodo({ periodo, fecha, navLabel, tab, esPerso
           </span>
           <button
             onClick={() => navegar(periodo, siguiente)}
-            className="h-9 w-9 flex items-center justify-center rounded-lg border border-ink-200 bg-white hover:bg-ink-50 transition-colors"
+            className="h-9 w-9 flex items-center justify-center rounded-control border border-ink-200 bg-white hover:bg-ink-50 transition-colors"
             title="Periodo siguiente"
           >
             <ChevronRight aria-hidden="true" className="w-4 h-4" />
@@ -102,18 +102,18 @@ export default function SelectorPeriodo({ periodo, fecha, navLabel, tab, esPerso
             type="date"
             value={desdeInput}
             onChange={(e) => setDesdeInput(e.target.value)}
-            className="h-9 px-3 border border-ink-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+            className="h-9 px-3 border border-ink-200 rounded-control text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
           />
           <span className="text-ink-500 text-sm">a</span>
           <input
             type="date"
             value={hastaInput}
             onChange={(e) => setHastaInput(e.target.value)}
-            className="h-9 px-3 border border-ink-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+            className="h-9 px-3 border border-ink-200 rounded-control text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
           />
           <button
             onClick={aplicarPersonalizado}
-            className="h-9 px-4 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-light transition-colors"
+            className="h-9 px-4 bg-brand text-white rounded-control text-sm font-medium hover:bg-brand-700 transition-colors"
           >
             Aplicar
           </button>

@@ -105,12 +105,12 @@ export default async function AnaliticasPage(
       />
 
       {/* Tabs */}
-      <div className="flex overflow-x-auto gap-1 bg-ink-100 rounded-lg p-0.5 mb-6">
+      <div className="flex overflow-x-auto gap-1 bg-ink-100 rounded-control p-0.5 mb-6">
         {TABS.map((t) => (
           <Link
             key={t.key}
             href={tabUrl(t.key)}
-            className={`flex-shrink-0 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+            className={`flex-shrink-0 px-4 py-2 rounded-control text-sm font-medium transition-colors ${
               tab === t.key
                 ? "bg-white shadow-sm text-ink-900"
                 : "text-ink-600 hover:text-ink-800"

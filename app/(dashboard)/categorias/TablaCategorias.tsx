@@ -134,14 +134,14 @@ export default function TablaCategorias({
                       setEditando(c);
                       setModalAbierto(true);
                     }}
-                    className="h-9 px-3 bg-ink-50 border border-ink-200 rounded-lg text-xs font-medium text-brand hover:bg-ink-100 transition-colors"
+                    className="h-9 px-3 bg-ink-50 border border-ink-200 rounded-control text-xs font-medium text-brand hover:bg-ink-100 transition-colors"
                   >
                     Editar
                   </button>
                   <button
                     onClick={() => handleEliminar(c.id)}
                     disabled={eliminando === c.id}
-                    className="h-9 px-3 bg-ink-50 border border-ink-200 rounded-lg text-xs font-medium text-danger hover:bg-danger-soft transition-colors disabled:opacity-50"
+                    className="h-9 px-3 bg-ink-50 border border-ink-200 rounded-control text-xs font-medium text-danger hover:bg-danger-soft transition-colors disabled:opacity-50"
                   >
                     Eliminar
                   </button>
@@ -234,7 +234,7 @@ export default function TablaCategorias({
                           setEditando(c);
                           setModalAbierto(true);
                         }}
-                        className="text-sm text-brand hover:text-brand-light font-medium transition-colors"
+                        className="text-sm text-brand hover:text-brand-700 font-medium transition-colors"
                       >
                         Editar
                       </button>

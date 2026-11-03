@@ -102,7 +102,7 @@ export default function ModalUsuario({ usuarioInicial, esUnoMismo, onCerrar }: P
               value={rol}
               onChange={(e) => setRol(e.target.value)}
               disabled={esUnoMismo}
-              className="w-full px-3 py-2 border border-ink-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand disabled:bg-ink-50 disabled:text-ink-500"
+              className="w-full px-3 py-2 border border-ink-300 rounded-control text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand disabled:bg-ink-50 disabled:text-ink-500"
             >
               <option value="admin">Administrador</option>
               <option value="repartidor">Repartidor</option>

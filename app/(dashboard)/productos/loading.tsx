@@ -6,7 +6,7 @@ export default function ProductosLoading() {
           <div className="h-7 bg-ink-200 rounded w-36 mb-2" />
           <div className="h-4 bg-ink-100 rounded w-56" />
         </div>
-        <div className="h-10 bg-ink-200 rounded-lg w-44" />
+        <div className="h-10 bg-ink-200 rounded-control w-44" />
       </div>
       <div className="flex gap-2 mb-6">
         {[1, 2, 3].map((i) => (

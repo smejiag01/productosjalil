@@ -8,7 +8,7 @@ import TablaPrecios from "./TablaPrecios";
 import AccionesCliente from "./AccionesCliente";
 import SeccionSedes from "./SeccionSedes";
 import SeccionContactos from "./SeccionContactos";
-
+
 import { ChevronLeft, MapPin, Phone } from "@/components/ui/icons";
 export const dynamic = "force-dynamic";
 
@@ -273,7 +273,7 @@ export default async function DetalleClientePage(
                   <td className="py-3 px-6 text-right">
                     <Link
                       href={`/pedidos/${p.id}`}
-                      className="text-sm text-brand hover:text-brand-light font-medium"
+                      className="text-sm text-brand hover:text-brand-700 font-medium"
                     >
                       Ver
                     </Link>
@@ -287,7 +287,7 @@ export default async function DetalleClientePage(
 
       {/* Notas */}
       {cliente.notas && (
-        <div className="mt-6 bg-warn-soft border border-warn/30 rounded-xl p-5">
+        <div className="mt-6 bg-warn-soft border border-warn/30 rounded-card p-5">
           <h3 className="text-xs font-medium text-warn-soft-text uppercase tracking-wider mb-2">
             Notas internas
           </h3>
