@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { Periodo } from "@/lib/analiticas/periodos";
 import { periodoAnteriorFecha, periodoSiguienteFecha } from "@/lib/analiticas/periodos";
 
+import { ChevronLeft, ChevronRight } from "@/components/ui/icons";
 interface Props {
   periodo: Periodo;
   fecha: string;
@@ -49,15 +50,15 @@ export default function SelectorPeriodo({ periodo, fecha, navLabel, tab, esPerso
   return (
     <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
       {/* Selector de periodo */}
-      <div className="flex bg-gray-100 rounded-lg p-0.5 flex-wrap w-fit">
+      <div className="flex bg-ink-100 rounded-lg p-0.5 flex-wrap w-fit">
         {PERIODOS.map((p) => (
           <button
             key={p.value}
             onClick={() => navegar(p.value, fecha)}
             className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
               !esPersonalizado && periodo === p.value
-                ? "bg-white shadow-sm text-gray-900"
-                : "text-gray-500 hover:text-gray-700"
+                ? "bg-white shadow-sm text-ink-900"
+                : "text-ink-600 hover:text-ink-800"
             }`}
           >
             {p.label}
@@ -67,8 +68,8 @@ export default function SelectorPeriodo({ periodo, fecha, navLabel, tab, esPerso
           onClick={activarPersonalizado}
           className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
             esPersonalizado
-              ? "bg-white shadow-sm text-gray-900"
-              : "text-gray-500 hover:text-gray-700"
+              ? "bg-white shadow-sm text-ink-900"
+              : "text-ink-600 hover:text-ink-800"
           }`}
         >
           Personalizado
@@ -79,24 +80,20 @@ export default function SelectorPeriodo({ periodo, fecha, navLabel, tab, esPerso
         <div className="flex items-center gap-2">
           <button
             onClick={() => navegar(periodo, anterior)}
-            className="h-9 w-9 flex items-center justify-center rounded-lg border border-gray-200 bg-white hover:bg-gray-50 transition-colors"
+            className="h-9 w-9 flex items-center justify-center rounded-lg border border-ink-200 bg-white hover:bg-ink-50 transition-colors"
             title="Periodo anterior"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
+            <ChevronLeft aria-hidden="true" className="w-4 h-4 text-ink-700" />
           </button>
-          <span className="text-sm text-gray-700 font-medium min-w-0 truncate max-w-[200px] sm:max-w-xs capitalize">
+          <span className="text-sm text-ink-800 font-medium min-w-0 truncate max-w-[200px] sm:max-w-xs capitalize">
             {navLabel}
           </span>
           <button
             onClick={() => navegar(periodo, siguiente)}
-            className="h-9 w-9 flex items-center justify-center rounded-lg border border-gray-200 bg-white hover:bg-gray-50 transition-colors"
+            className="h-9 w-9 flex items-center justify-center rounded-lg border border-ink-200 bg-white hover:bg-ink-50 transition-colors"
             title="Periodo siguiente"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
+            <ChevronRight aria-hidden="true" className="w-4 h-4" />
           </button>
         </div>
       ) : (
@@ -105,14 +102,14 @@ export default function SelectorPeriodo({ periodo, fecha, navLabel, tab, esPerso
             type="date"
             value={desdeInput}
             onChange={(e) => setDesdeInput(e.target.value)}
-            className="h-9 px-3 border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+            className="h-9 px-3 border border-ink-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
           />
-          <span className="text-gray-400 text-sm">a</span>
+          <span className="text-ink-500 text-sm">a</span>
           <input
             type="date"
             value={hastaInput}
             onChange={(e) => setHastaInput(e.target.value)}
-            className="h-9 px-3 border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+            className="h-9 px-3 border border-ink-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
           />
           <button
             onClick={aplicarPersonalizado}
