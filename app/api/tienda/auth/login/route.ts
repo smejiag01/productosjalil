@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { esquemaLoginTienda, telefonosCoinciden } from "@/lib/validaciones-tienda";
+import { esquemaLoginTienda } from "@/lib/validaciones-tienda";
 import {
   limpiarFallosNit,
   loginBloqueado,
@@ -13,10 +13,10 @@ import {
   opcionesCookieSesion,
 } from "@/lib/tienda-session";
 
-// Mensaje único para cualquier fallo de validación: no revela si el NIT
-// existe, si el celular no coincide ni si hay datos ambiguos.
+// Mensaje único para cualquier fallo: no revela si el NIT no existe o si hay
+// datos ambiguos (varios clientes con el mismo NIT).
 const ERROR_CREDENCIALES =
-  "No pudimos validar tus datos. Revisa tu NIT y tu celular, o escríbenos por WhatsApp.";
+  "No encontramos ese documento. Revísalo o escríbenos por WhatsApp.";
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,12 +25,12 @@ export async function POST(request: NextRequest) {
 
     if (!resultado.success) {
       return NextResponse.json(
-        { success: false, error: "Ingresa tu NIT y tu número de celular." },
+        { success: false, error: "Ingresa tu NIT o número de documento." },
         { status: 400 }
       );
     }
 
-    const { nit, celular } = resultado.data;
+    const { nit } = resultado.data;
     const ip = obtenerIp(request);
 
     if (await loginBloqueado(ip, nit)) {
@@ -45,22 +45,11 @@ export async function POST(request: NextRequest) {
     }
 
     // El NIT se guarda ya normalizado (sin dígito de verificación, puntos ni
-    // espacios). Segundo factor: el celular debe ser uno de los números
-    // registrados del cliente (principal o contactos autorizados).
-    const candidatos = await prisma.clientes.findMany({
+    // espacios). Debe haber exactamente un cliente activo con ese NIT.
+    const coincidentes = await prisma.clientes.findMany({
       where: { activo: true, nit },
-      select: {
-        id: true,
-        telefono: true,
-        cliente_contactos: { select: { telefono: true } },
-      },
+      select: { id: true },
     });
-
-    const coincidentes = candidatos.filter((c) =>
-      [c.telefono, ...c.cliente_contactos.map((x) => x.telefono)].some((t) =>
-        telefonosCoinciden(celular, t)
-      )
-    );
 
     if (coincidentes.length !== 1) {
       await registrarFalloLogin(ip, nit);

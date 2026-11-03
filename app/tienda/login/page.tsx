@@ -33,7 +33,7 @@ export default async function LoginTiendaPage() {
       <LoginFormTienda whatsappAtencion={whatsapp} />
 
       <p className="mt-8 text-gray-500 text-xs text-center max-w-md">
-        Ingresa con el NIT y el celular registrados en Productos Jalil.
+        Ingresa con el NIT o documento registrado en Productos Jalil.
       </p>
     </div>
   );

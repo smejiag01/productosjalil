@@ -1,7 +1,6 @@
 import {
   normalizarNit,
   soloDigitos,
-  telefonosCoinciden,
   normalizarWhatsapp,
   esquemaLoginTienda,
   esquemaCrearPedido,
@@ -34,23 +33,9 @@ describe("normalizarNit", () => {
   });
 });
 
-describe("soloDigitos / telefonosCoinciden", () => {
+describe("soloDigitos", () => {
   it("deja solo dígitos", () => {
     expect(soloDigitos("+57 (312) 722-1364")).toBe("573127221364");
-  });
-
-  it("coincide con o sin prefijo de país", () => {
-    expect(telefonosCoinciden("3127221364", "573127221364")).toBe(true);
-    expect(telefonosCoinciden("+57 312 722 1364", "3127221364")).toBe(true);
-  });
-
-  it("no coincide con un número distinto", () => {
-    expect(telefonosCoinciden("3127221365", "573127221364")).toBe(false);
-  });
-
-  it("no coincide si falta algún dígito (nunca valida por parte del número)", () => {
-    expect(telefonosCoinciden("1364", "573127221364")).toBe(false);
-    expect(telefonosCoinciden("7221364", "573127221364")).toBe(false);
   });
 });
 
@@ -81,25 +66,15 @@ describe("normalizarWhatsapp", () => {
 });
 
 describe("esquemaLoginTienda", () => {
-  it("normaliza nit y celular al parsear", () => {
-    const r = esquemaLoginTienda.safeParse({
-      nit: "901.234.567-8",
-      celular: "312 722-1364",
-    });
+  it("normaliza el nit al parsear", () => {
+    const r = esquemaLoginTienda.safeParse({ nit: "901.234.567-8" });
     expect(r.success).toBe(true);
-    if (r.success) {
-      expect(r.data.nit).toBe("901234567");
-      expect(r.data.celular).toBe("3127221364");
-    }
+    if (r.success) expect(r.data.nit).toBe("901234567");
   });
 
   it("rechaza un nit vacío", () => {
-    expect(esquemaLoginTienda.safeParse({ nit: "   ", celular: "3127221364" }).success).toBe(false);
-  });
-
-  it("exige celular completo (no basta con los últimos dígitos)", () => {
-    expect(esquemaLoginTienda.safeParse({ nit: "123", celular: "1364" }).success).toBe(false);
-    expect(esquemaLoginTienda.safeParse({ nit: "123" }).success).toBe(false);
+    expect(esquemaLoginTienda.safeParse({ nit: "   " }).success).toBe(false);
+    expect(esquemaLoginTienda.safeParse({}).success).toBe(false);
   });
 });
 

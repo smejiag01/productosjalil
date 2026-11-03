@@ -18,17 +18,6 @@ export function soloDigitos(valor: string): string {
 }
 
 /**
- * ¿Es el mismo celular? Se comparan los últimos 10 dígitos, así da igual si
- * viene con o sin el prefijo de país (57) o con espacios/guiones.
- */
-export function telefonosCoinciden(a: string, b: string): boolean {
-  const da = soloDigitos(a);
-  const db = soloDigitos(b);
-  if (da.length < 10 || db.length < 10) return false;
-  return da.slice(-10) === db.slice(-10);
-}
-
-/**
  * Normaliza un número de WhatsApp colombiano al formato de wa.me: solo dígitos
  * con prefijo de país. Acepta "316 333 2739", "3163332739" o "+57 316 333 2739".
  * Devuelve null si no es un celular colombiano válido (10 dígitos que
@@ -48,12 +37,6 @@ export const esquemaLoginTienda = z.object({
     .max(40)
     .transform(normalizarNit)
     .refine((v) => v.length > 0, "Ingresa tu NIT o número de documento"),
-  celular: z
-    .string()
-    .min(1, "Ingresa tu número de celular")
-    .max(30)
-    .transform(soloDigitos)
-    .refine((v) => v.length >= 10, "Ingresa tu número de celular (10 dígitos)"),
 });
 
 // Límites defensivos: el navegador es opcional-confiable, así que se acota el
