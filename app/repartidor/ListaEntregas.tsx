@@ -4,10 +4,13 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import BadgeEstado from "@/components/BadgeEstado";
 import { formatearPrecio } from "@/lib/formato";
+import { etiquetaDia, textoFechaLarga } from "@/lib/repartidor-fechas";
 import ModalDevolucion from "./ModalDevolucion";
 
 interface Entrega {
   id: string;
+  /** YYYY-MM-DD de la entrega */
+  fecha: string;
   estado: string;
   total: number;
   notas: string | null;
@@ -55,7 +58,18 @@ function urlRutaCompleta(entregasRuta: Entrega[]): string {
     : base;
 }
 
-export default function ListaEntregas({ entregas }: { entregas: Entrega[] }) {
+export default function ListaEntregas({
+  entregas,
+  modo,
+  hoy,
+  truncado,
+}: {
+  entregas: Entrega[];
+  modo: "dia" | "todos";
+  hoy: string;
+  /** true si en "Todos los días" se alcanzó el tope y hay entregas más antiguas sin mostrar */
+  truncado: boolean;
+}) {
   const router = useRouter();
   const [filtro, setFiltro] = useState("todos");
   const [cargando, setCargando] = useState<string | null>(null);
@@ -86,6 +100,17 @@ export default function ListaEntregas({ entregas }: { entregas: Entrega[] }) {
     if (filtro === "devueltos") return e.estado === "devuelto";
     return true;
   });
+
+  // En "Todos los días": las entregas se agrupan por fecha (ya vienen de la más reciente a la más antigua).
+  const porFecha = useMemo(() => {
+    const mapa = new Map<string, Entrega[]>();
+    for (const e of filtradas) {
+      if (!mapa.has(e.fecha)) mapa.set(e.fecha, []);
+      mapa.get(e.fecha)!.push(e);
+    }
+    return Array.from(mapa.entries());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [entregas, filtro]);
 
   async function marcarEntregado(id: string) {
     if (!confirm("¿Confirmas que este pedido fue entregado?")) return;
@@ -133,144 +158,186 @@ export default function ListaEntregas({ entregas }: { entregas: Entrega[] }) {
     }
   }
 
-  return (
-    <div>
-      {/* Resumen de ruta(s) — siempre visible, independiente del filtro activo */}
-      <div className="space-y-2 mb-4">
-        {rutas.map((r) => {
-          const pendientesRuta = r.entregas.filter((e) => e.estado !== "entregado" && e.estado !== "devuelto");
-          return (
-            <div key={r.nombre} className="bg-white rounded-xl border border-gray-200 p-4">
-              <div className="flex items-center justify-between gap-3 mb-2">
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 truncate">🗺️ Ruta {r.nombre}</p>
-                  <p className="text-xs text-gray-400">
-                    {pendientesRuta.length} de {r.entregas.length} paradas pendientes
-                  </p>
-                </div>
-              </div>
-              {pendientesRuta.length > 0 && (
-                <a
-                  href={urlRutaCompleta(pendientesRuta)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full h-11 flex items-center justify-center gap-2 bg-brand text-white rounded-lg text-sm font-medium"
-                >
-                  🗺️ Ver ruta completa
-                </a>
+  function tarjeta(e: Entrega) {
+    // Solo confirmado/en_reparto pueden pasar a entregado o devuelto
+    // (ver TRANSICIONES_VALIDAS en lib/pedidos.ts); pendiente/en_proceso
+    // todavía no están listos para reparto y el PATCH los rechazaría.
+    const puedeActuar = e.estado === "confirmado" || e.estado === "en_reparto";
+    return (
+      <div key={e.id} className="bg-white rounded-xl border border-gray-200 p-4">
+        <div className="flex items-start justify-between gap-3 mb-3">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className="text-base font-semibold text-gray-900 truncate">{e.cliente.nombre}</p>
+              {e.cliente.sedeNombre && (
+                <span className="text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 flex-shrink-0">{e.cliente.sedeNombre}</span>
               )}
             </div>
-          );
-        })}
-      </div>
+            <a href={`tel:${e.cliente.telefono}`} className="text-sm text-brand font-medium flex items-center gap-1.5 mt-0.5">
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
+              {e.cliente.telefono}
+            </a>
+            {e.cliente.direccion && (
+              <p className="text-xs text-gray-500 mt-1">{e.cliente.direccion}</p>
+            )}
+            {rutas.length > 1 && (
+              <p className="text-xs text-gray-400 mt-1">Ruta: {e.rutaNombre}</p>
+            )}
+          </div>
+          <BadgeEstado estado={e.estado} />
+        </div>
 
-      <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-none">
-        {FILTROS.map((f) => {
-          const activo = filtro === f.key;
-          return (
+        <div className="border-t border-gray-100 pt-3 mb-3">
+          <ul className="space-y-1">
+            {e.items.map((it) => (
+              <li key={it.id} className="text-sm text-gray-600 flex justify-between">
+                <span>{it.cantidad} × {it.nombre}</span>
+              </li>
+            ))}
+          </ul>
+          <div className="flex justify-between items-center mt-2 pt-2 border-t border-gray-50">
+            <span className="text-xs text-gray-400">Total</span>
+            <span className="text-base font-bold text-gray-900">{formatearPrecio(e.total)}</span>
+          </div>
+        </div>
+
+        <a
+          href={urlComoLlegar(e.cliente)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full h-11 flex items-center justify-center gap-2 bg-blue-50 border border-blue-200 text-blue-700 rounded-lg text-sm font-medium mb-2"
+        >
+          📍 Cómo llegar
+        </a>
+
+        {puedeActuar && (
+          <div className="grid grid-cols-2 gap-2">
             <button
-              key={f.key}
-              onClick={() => setFiltro(f.key)}
-              className={`h-10 px-3 rounded-full text-sm font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap flex-shrink-0 ${
-                activo ? "bg-brand text-white" : "bg-white border border-gray-200 text-gray-600"
-              }`}
+              onClick={() => marcarEntregado(e.id)}
+              disabled={cargando === e.id}
+              className="h-11 flex items-center justify-center gap-1.5 bg-green-600 text-white rounded-lg text-sm font-medium disabled:opacity-50"
             >
-              {f.label}
-              <span className={`text-xs px-1.5 py-0.5 rounded-full ${activo ? "bg-white/20" : "bg-gray-100 text-gray-500"}`}>
-                {contadores[f.key] ?? 0}
-              </span>
+              {cargando === e.id ? (
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <>✅ Entregado</>
+              )}
             </button>
-          );
-        })}
+            <button
+              onClick={() => setDevolucionPedidoId(e.id)}
+              disabled={cargando === e.id}
+              className="h-11 flex items-center justify-center gap-1.5 bg-white border border-orange-300 text-orange-700 rounded-lg text-sm font-medium disabled:opacity-50"
+            >
+              ↩️ Devolución
+            </button>
+          </div>
+        )}
       </div>
+    );
+  }
+
+  return (
+    <div>
+      {/* Resumen de ruta(s) del día — siempre visible, independiente del filtro activo.
+          Solo en la vista "Por día": "Ver ruta completa" arma el recorrido de un día. */}
+      {modo === "dia" && (
+        <div className="space-y-2 mb-4">
+          {rutas.map((r) => {
+            const pendientesRuta = r.entregas.filter((e) => e.estado !== "entregado" && e.estado !== "devuelto");
+            return (
+              <div key={r.nombre} className="bg-white rounded-xl border border-gray-200 p-4">
+                <div className="flex items-center justify-between gap-3 mb-2">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-gray-900 truncate">🗺️ Ruta {r.nombre}</p>
+                    <p className="text-xs text-gray-400">
+                      {pendientesRuta.length} de {r.entregas.length} paradas pendientes
+                    </p>
+                  </div>
+                </div>
+                {pendientesRuta.length > 0 && (
+                  <a
+                    href={urlRutaCompleta(pendientesRuta)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full h-11 flex items-center justify-center gap-2 bg-brand text-white rounded-lg text-sm font-medium"
+                  >
+                    🗺️ Ver ruta completa
+                  </a>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {entregas.length > 0 && (
+        <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-none">
+          {FILTROS.map((f) => {
+            const activo = filtro === f.key;
+            return (
+              <button
+                key={f.key}
+                onClick={() => setFiltro(f.key)}
+                className={`h-10 px-3 rounded-full text-sm font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap flex-shrink-0 ${
+                  activo ? "bg-brand text-white" : "bg-white border border-gray-200 text-gray-600"
+                }`}
+              >
+                {f.label}
+                <span className={`text-xs px-1.5 py-0.5 rounded-full ${activo ? "bg-white/20" : "bg-gray-100 text-gray-500"}`}>
+                  {contadores[f.key] ?? 0}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">{error}</div>
       )}
 
-      {filtradas.length === 0 ? (
+      {entregas.length === 0 ? (
+        <div className="bg-white rounded-xl border border-gray-200 py-16 px-4 text-center">
+          <p className="text-sm text-ink-800 font-medium">
+            {modo === "dia" ? "No tienes entregas para este día" : "Aún no tienes entregas"}
+          </p>
+          {modo === "dia" && (
+            <p className="text-xs text-ink-600 mt-1">
+              Cambia de día con las flechas o el calendario, o mira &quot;Todos los días&quot;.
+            </p>
+          )}
+        </div>
+      ) : filtradas.length === 0 ? (
         <div className="bg-white rounded-xl border border-gray-200 py-16 text-center text-gray-400">
           <p className="text-sm">No hay entregas en esta categoría</p>
         </div>
+      ) : modo === "dia" ? (
+        <div className="space-y-3">{filtradas.map(tarjeta)}</div>
       ) : (
-        <div className="space-y-3">
-          {filtradas.map((e) => {
-            // Solo confirmado/en_reparto pueden pasar a entregado o devuelto
-            // (ver TRANSICIONES_VALIDAS en lib/pedidos.ts); pendiente/en_proceso
-            // todavía no están listos para reparto y el PATCH los rechazaría.
-            const puedeActuar = e.estado === "confirmado" || e.estado === "en_reparto";
+        <div className="space-y-6">
+          {porFecha.map(([fecha, lista]) => {
+            const etiqueta = etiquetaDia(fecha, hoy);
+            const larga = textoFechaLarga(fecha, hoy);
             return (
-              <div key={e.id} className="bg-white rounded-xl border border-gray-200 p-4">
-                <div className="flex items-start justify-between gap-3 mb-3">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <p className="text-base font-semibold text-gray-900 truncate">{e.cliente.nombre}</p>
-                      {e.cliente.sedeNombre && (
-                        <span className="text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 flex-shrink-0">{e.cliente.sedeNombre}</span>
-                      )}
-                    </div>
-                    <a href={`tel:${e.cliente.telefono}`} className="text-sm text-brand font-medium flex items-center gap-1.5 mt-0.5">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
-                      {e.cliente.telefono}
-                    </a>
-                    {e.cliente.direccion && (
-                      <p className="text-xs text-gray-500 mt-1">{e.cliente.direccion}</p>
-                    )}
-                    {rutas.length > 1 && (
-                      <p className="text-xs text-gray-400 mt-1">Ruta: {e.rutaNombre}</p>
-                    )}
-                  </div>
-                  <BadgeEstado estado={e.estado} />
-                </div>
-
-                <div className="border-t border-gray-100 pt-3 mb-3">
-                  <ul className="space-y-1">
-                    {e.items.map((it) => (
-                      <li key={it.id} className="text-sm text-gray-600 flex justify-between">
-                        <span>{it.cantidad} × {it.nombre}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="flex justify-between items-center mt-2 pt-2 border-t border-gray-50">
-                    <span className="text-xs text-gray-400">Total</span>
-                    <span className="text-base font-bold text-gray-900">{formatearPrecio(e.total)}</span>
-                  </div>
-                </div>
-
-                <a
-                  href={urlComoLlegar(e.cliente)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full h-11 flex items-center justify-center gap-2 bg-blue-50 border border-blue-200 text-blue-700 rounded-lg text-sm font-medium mb-2"
-                >
-                  📍 Cómo llegar
-                </a>
-
-                {puedeActuar && (
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      onClick={() => marcarEntregado(e.id)}
-                      disabled={cargando === e.id}
-                      className="h-11 flex items-center justify-center gap-1.5 bg-green-600 text-white rounded-lg text-sm font-medium disabled:opacity-50"
-                    >
-                      {cargando === e.id ? (
-                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      ) : (
-                        <>✅ Entregado</>
-                      )}
-                    </button>
-                    <button
-                      onClick={() => setDevolucionPedidoId(e.id)}
-                      disabled={cargando === e.id}
-                      className="h-11 flex items-center justify-center gap-1.5 bg-white border border-orange-300 text-orange-700 rounded-lg text-sm font-medium disabled:opacity-50"
-                    >
-                      ↩️ Devolución
-                    </button>
-                  </div>
-                )}
-              </div>
+              <section key={fecha}>
+                <h2 className="mb-2 flex items-baseline gap-2 font-display text-lg font-semibold capitalize text-ink-900">
+                  {etiqueta}
+                  {etiqueta !== larga && (
+                    <span className="font-sans text-sm font-normal text-ink-700">{larga}</span>
+                  )}
+                  <span className="ml-auto font-sans text-xs font-medium text-ink-600">
+                    {lista.length} {lista.length === 1 ? "entrega" : "entregas"}
+                  </span>
+                </h2>
+                <div className="space-y-3">{lista.map(tarjeta)}</div>
+              </section>
             );
           })}
+          {truncado && (
+            <p className="text-center text-xs text-ink-600">
+              Se muestran las {entregas.length} entregas más recientes.
+            </p>
+          )}
         </div>
       )}
 

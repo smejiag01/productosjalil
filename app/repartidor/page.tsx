@@ -3,11 +3,21 @@ import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { hoyStr, toDbDate } from "@/lib/analiticas/periodos";
+import { resolverFecha } from "@/lib/repartidor-fechas";
 import ListaEntregas from "./ListaEntregas";
+import NavegadorDias from "./NavegadorDias";
 
 export const dynamic = "force-dynamic";
 
-export default async function RepartidorPage() {
+export const metadata = { title: "Mis entregas" };
+
+// En "Todos los días" se muestran las más recientes hasta este tope.
+const LIMITE_TODOS = 300;
+
+export default async function RepartidorPage(props: {
+  searchParams: Promise<{ fecha?: string; vista?: string }>;
+}) {
+  const searchParams = await props.searchParams;
   const session = await getServerSession(authOptions);
 
   if (!session?.user || session.user.rol !== "repartidor") {
@@ -22,27 +32,38 @@ export default async function RepartidorPage() {
   const nombreRuta = new Map(rutas.map((r) => [r.id, r.nombre]));
 
   const hoy = hoyStr();
+  const modo: "dia" | "todos" = searchParams.vista === "todos" ? "todos" : "dia";
+  const fecha = resolverFecha(searchParams.fecha, hoy);
 
-  const pedidos = rutaIds.length === 0
-    ? []
-    : await prisma.pedidos.findMany({
-        where: {
-          fecha_pedido: toDbDate(hoy),
-          ruta_id: { in: rutaIds },
-          estado: { not: "cancelado" },
-        },
-        include: {
-          cliente: {
-            include: {
-              sedes: { where: { es_principal: true }, take: 1 },
-            },
+  const pedidos =
+    rutaIds.length === 0
+      ? []
+      : await prisma.pedidos.findMany({
+          where: {
+            ruta_id: { in: rutaIds },
+            estado: { not: "cancelado" },
+            // Por día: solo esa fecha. Todos los días: sin filtro de fecha.
+            ...(modo === "dia" ? { fecha_pedido: toDbDate(fecha) } : {}),
           },
-          sede: true,
-          items: true,
-        },
-      });
+          include: {
+            cliente: {
+              include: {
+                sedes: { where: { es_principal: true }, take: 1 },
+              },
+            },
+            sede: true,
+            items: true,
+          },
+          ...(modo === "todos"
+            ? { orderBy: { fecha_pedido: "desc" as const }, take: LIMITE_TODOS }
+            : {}),
+        });
 
   const ordenados = pedidos.sort((a, b) => {
+    // Más reciente primero cuando se ven todos los días
+    if (modo === "todos" && a.fecha_pedido.getTime() !== b.fecha_pedido.getTime()) {
+      return b.fecha_pedido.getTime() - a.fecha_pedido.getTime();
+    }
     const oa = a.cliente.orden_ruta ?? Number.MAX_SAFE_INTEGER;
     const ob = b.cliente.orden_ruta ?? Number.MAX_SAFE_INTEGER;
     if (oa !== ob) return oa - ob;
@@ -55,6 +76,7 @@ export default async function RepartidorPage() {
 
     return {
       id: p.id,
+      fecha: p.fecha_pedido.toISOString().slice(0, 10),
       estado: p.estado,
       total: Number(p.total),
       notas: p.notas,
@@ -79,27 +101,24 @@ export default async function RepartidorPage() {
   return (
     <div>
       <div className="mb-4">
-        <h1 className="text-lg font-bold text-gray-900">Mis entregas de hoy</h1>
-        <p className="text-sm text-gray-500 capitalize">
-          {(() => {
-            const [y, m, d] = hoy.split("-").map(Number);
-            return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString("es-CO", {
-              weekday: "long",
-              day: "numeric",
-              month: "long",
-              timeZone: "UTC",
-            });
-          })()}
-        </p>
+        <h1 className="font-display text-2xl font-semibold text-ink-900">Mis entregas</h1>
       </div>
 
       {rutaIds.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-200 py-16 text-center text-gray-400 px-4">
-          <p className="text-sm">Aún no tienes rutas asignadas.</p>
-          <p className="text-xs text-gray-300 mt-1">Pídele al administrador que te asigne una ruta.</p>
+        <div className="rounded-card border border-ink-200 bg-white px-4 py-16 text-center">
+          <p className="text-sm text-ink-700">Aún no tienes rutas asignadas.</p>
+          <p className="mt-1 text-xs text-ink-600">Pídele al administrador que te asigne una ruta.</p>
         </div>
       ) : (
-        <ListaEntregas entregas={entregas} />
+        <>
+          <NavegadorDias modo={modo} fecha={fecha} hoy={hoy} />
+          <ListaEntregas
+            entregas={entregas}
+            modo={modo}
+            hoy={hoy}
+            truncado={modo === "todos" && entregas.length >= LIMITE_TODOS}
+          />
+        </>
       )}
     </div>
   );
