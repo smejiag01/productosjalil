@@ -29,9 +29,9 @@ const MOTIVO_COLORES: Record<string, string> = {
 };
 
 const FILTROS: { key: string; label: string }[] = [
+  { key: "todos", label: "Todos" },
   { key: "pendientes", label: "Pendientes" },
   { key: "atendidos", label: "Atendidos" },
-  { key: "todos", label: "Todos" },
 ];
 
 function urlWhatsapp(telefono: string): string {
@@ -42,7 +42,7 @@ function urlWhatsapp(telefono: string): string {
 export default function TablaContactos({ contactos: iniciales }: { contactos: Contacto[] }) {
   const router = useRouter();
   const [contactos, setContactos] = useState(iniciales);
-  const [filtro, setFiltro] = useState("pendientes");
+  const [filtro, setFiltro] = useState("todos");
   const [cargandoId, setCargandoId] = useState<string | null>(null);
   const [error, setError] = useState("");
 
