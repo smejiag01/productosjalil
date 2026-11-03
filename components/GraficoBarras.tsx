@@ -51,13 +51,13 @@ function TooltipPersonalizado({
 }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-white border border-gray-200 rounded-lg shadow-md px-3 py-2 space-y-1">
-      <p className="text-xs text-gray-500">{label}</p>
+    <div className="bg-white border border-ink-200 rounded-control shadow-raised px-3 py-2 space-y-1">
+      <p className="text-xs text-ink-600">{label}</p>
       {payload.map((p) => (
         <div key={p.name} className="flex items-center gap-2 text-xs">
           <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: p.fill }} />
-          <span className="text-gray-600">{p.name}:</span>
-          <span className="font-semibold text-gray-900">{fmt(p.value, formato)}</span>
+          <span className="text-ink-700">{p.name}:</span>
+          <span className="font-semibold text-ink-900">{fmt(p.value, formato)}</span>
         </div>
       ))}
     </div>
@@ -77,7 +77,7 @@ export default function GraficoBarras({
   if (!datos.length || !tieneData) {
     return (
       <div
-        className="flex items-center justify-center text-gray-400 text-sm"
+        className="flex items-center justify-center text-ink-600 text-sm"
         style={{ height: altura }}
       >
         No hay datos para mostrar
@@ -88,16 +88,16 @@ export default function GraficoBarras({
   return (
     <ResponsiveContainer width="100%" height={altura}>
       <BarChart data={datos} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
+        <CartesianGrid strokeDasharray="3 3" stroke="#E6DCCB" vertical={false} />
         <XAxis
           dataKey={labelKey}
-          tick={{ fontSize: 11, fill: "#9ca3af" }}
+          tick={{ fontSize: 11, fill: "#6B5850" }}
           tickLine={false}
           axisLine={false}
           interval="preserveStartEnd"
         />
         <YAxis
-          tick={{ fontSize: 11, fill: "#9ca3af" }}
+          tick={{ fontSize: 11, fill: "#6B5850" }}
           tickLine={false}
           axisLine={false}
           tickFormatter={(v: number) => fmt(v, formato)}

@@ -94,7 +94,7 @@ export default async function PqrsPage() {
         <h2 className="font-semibold text-gray-900 mb-4">Tendencia — últimas 8 semanas</h2>
         <GraficoBarras
           datos={tendenciaSemanal}
-          claves={[{ key: "total", color: "#8B1A1A", label: "PQR's" }]}
+          claves={[{ key: "total", color: "#BC4220", label: "PQR's" }]}
           altura={200}
           formato="numero"
         />

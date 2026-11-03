@@ -13,9 +13,9 @@ export default async function DashboardLayout({
   });
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-paper">
       <Sidebar contactosPendientes={contactosPendientes} />
-      <main className="pt-[72px] px-4 pb-6 lg:pt-8 lg:pb-8 lg:px-8 lg:ml-[240px]">
+      <main className="px-4 pb-8 pt-[72px] lg:ml-[240px] lg:px-8 lg:pb-10 lg:pt-8">
         {children}
       </main>
     </div>

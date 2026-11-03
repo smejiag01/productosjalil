@@ -1008,7 +1008,7 @@ export default async function AnaliticasPage(
             <h2 className="font-semibold text-gray-900 mb-4">Ventas por ruta</h2>
             <GraficoBarras
               datos={ventasPorRuta.map((r) => ({ label: r.ruta, total: r.total }))}
-              claves={[{ key: "total", color: "#8B1A1A", label: "Ventas" }]}
+              claves={[{ key: "total", color: "#BC4220", label: "Ventas" }]}
               altura={220}
               formato="cop"
             />
