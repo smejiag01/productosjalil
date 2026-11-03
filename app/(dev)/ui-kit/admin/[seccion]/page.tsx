@@ -79,7 +79,7 @@ async function resolver(seccion: string): Promise<React.ReactNode> {
     }
     case "pqr": {
       const primero = await prisma.pqr.findFirst({ select: { id: true } });
-      if (!primero) return <p>No hay PQR's.</p>;
+      if (!primero) return <p>No hay PQRs.</p>;
       const Pagina = (await import("@/app/(dashboard)/pqrs/[id]/page")).default as Pagina;
       return Pagina({ ...sinParametros, params: Promise.resolve({ id: primero.id }) });
     }
