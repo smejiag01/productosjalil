@@ -4,6 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import ModalCliente from "./ModalCliente";
 
+import { Phone, Plus, Search, Users, MapPin } from "@/components/ui/icons";
+import { buttonClass } from "@/components/ui/clases";
 interface ClienteFila {
   id: string;
   nit: string | null;
@@ -72,37 +74,34 @@ export default function TablaClientes({
       <div className="flex items-start justify-between mb-6 gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Clientes</h1>
-            <span className="text-sm text-gray-400">{contadores.todos} clientes</span>
+            <h1 className="font-display text-2xl font-semibold text-ink-900 lg:text-3xl">Clientes</h1>
+            <span className="text-sm text-ink-500">{contadores.todos} clientes</span>
           </div>
-          <p className="text-gray-500 text-sm mt-1">
+          <p className="text-ink-600 text-sm mt-1">
             Gestión de clientes y precios personalizados
           </p>
         </div>
         <button
           onClick={() => setModalAbierto(true)}
-          className="h-11 px-3 lg:px-4 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-light transition-colors flex items-center gap-2 flex-shrink-0"
+          className={buttonClass({ className: "flex-shrink-0" })}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19" />
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
+          <Plus aria-hidden="true" className="w-4 h-4" />
           Agregar cliente
         </button>
       </div>
 
       {/* Aviso dinámico: clientes activos sin ruta */}
       {contadorSinRuta > 0 && (
-        <div className="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="mb-6 bg-warn-soft border border-warn/60 rounded-card p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-start gap-3">
-            <span className="text-xl leading-none" aria-hidden="true">📍</span>
+            <MapPin aria-hidden="true" className="mt-0.5 h-5 w-5 flex-shrink-0 text-warn-soft-text" />
             <div>
-              <p className="text-sm font-semibold text-amber-900">
+              <p className="text-sm font-semibold text-ink-900">
                 {contadorSinRuta === 1
                   ? "Hay 1 cliente activo sin ruta asignada"
                   : `Hay ${contadorSinRuta} clientes activos sin ruta asignada`}
               </p>
-              <p className="text-xs text-amber-700 mt-0.5">
+              <p className="text-xs text-ink-700 mt-0.5">
                 {soloSinRuta
                   ? "Abre cada cliente y usa \"Editar cliente\" para asignarle una ruta."
                   : "No reciben recordatorios de WhatsApp ni pueden hacer pedidos en la tienda en línea hasta que les asignes una ruta."}
@@ -111,7 +110,7 @@ export default function TablaClientes({
           </div>
           <button
             onClick={() => setSoloSinRuta((v) => !v)}
-            className="px-4 py-2 bg-amber-500 text-white rounded-lg text-sm font-medium hover:bg-amber-600 transition-colors whitespace-nowrap flex-shrink-0"
+            className="px-4 py-2 bg-warn text-ink-900 rounded-control text-sm font-semibold hover:bg-accent transition-colors whitespace-nowrap flex-shrink-0"
           >
             {soloSinRuta ? "Ver todos los clientes" : "Ver y asignar"}
           </button>
@@ -131,7 +130,7 @@ export default function TablaClientes({
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-1.5 ${
                   activo
                     ? "bg-brand text-white"
-                    : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
+                    : "bg-white border border-ink-200 text-ink-700 hover:bg-ink-50"
                 }`}
               >
                 {f.label}
@@ -139,7 +138,7 @@ export default function TablaClientes({
                   className={`text-xs px-1.5 py-0.5 rounded-full ${
                     activo
                       ? "bg-white/20 text-white"
-                      : "bg-gray-100 text-gray-500"
+                      : "bg-ink-100 text-ink-600"
                   }`}
                 >
                   {count}
@@ -152,7 +151,7 @@ export default function TablaClientes({
               value={filtroRuta}
               disabled={soloSinRuta}
               onChange={(e) => setFiltroRuta(e.target.value)}
-              className="px-3 py-2 bg-white border border-gray-200 rounded-full text-sm text-gray-600 outline-none disabled:opacity-50"
+              className="px-3 py-2 bg-white border border-ink-200 rounded-full text-sm text-ink-700 outline-none disabled:opacity-50"
             >
               <option value="">Todas las rutas</option>
               {rutas.map((r) => (
@@ -166,14 +165,14 @@ export default function TablaClientes({
             onClick={() => setSoloSinRuta((v) => !v)}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap ${
               soloSinRuta
-                ? "bg-amber-500 text-white"
-                : "bg-amber-50 border border-amber-200 text-amber-700 hover:bg-amber-100"
+                ? "bg-warn text-ink-900"
+                : "bg-warn-soft border border-warn/30 text-warn-soft-text hover:bg-warn-soft"
             }`}
           >
             Sin ruta asignada
             <span
               className={`text-xs px-1.5 py-0.5 rounded-full ${
-                soloSinRuta ? "bg-white/20 text-white" : "bg-amber-100 text-amber-700"
+                soloSinRuta ? "bg-white/20 text-white" : "bg-warn-soft text-warn-soft-text"
               }`}
             >
               {contadorSinRuta}
@@ -181,16 +180,13 @@ export default function TablaClientes({
           </button>
         </div>
         <div className="relative">
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="11" cy="11" r="8" />
-            <line x1="21" y1="21" x2="16.65" y2="16.65" />
-          </svg>
+          <Search aria-hidden="true" className="w-4 h-4 text-ink-500 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder="Buscar por nombre, NIT o tel..."
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
-            className="pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm w-full sm:w-72 outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+            className="pl-9 pr-4 py-2 border border-ink-200 rounded-lg text-sm w-full sm:w-72 outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
           />
         </div>
       </div>
@@ -199,37 +195,35 @@ export default function TablaClientes({
       {/* Cards móvil y tablet */}
       <div className="lg:hidden space-y-3">
         {clientesFiltrados.length === 0 ? (
-          <div className="bg-white rounded-xl border border-gray-200 py-16 text-center text-gray-400">
+          <div className="bg-white rounded-card border border-ink-200 shadow-card py-16 text-center text-ink-500">
             <p className="text-sm">{busqueda ? "No se encontraron clientes" : "No hay clientes registrados"}</p>
           </div>
         ) : (
           clientesFiltrados.map((c) => (
-            <div key={c.id} className="bg-white rounded-xl border border-gray-200 p-4">
+            <div key={c.id} className="bg-white rounded-card border border-ink-200 shadow-card p-4">
               <div className="flex items-start justify-between mb-2">
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 truncate">{c.nombre}</p>
-                  <p className="text-xs text-gray-400">{c.nit || "Sin NIT"} · {c.rutaNombre || "Sin ruta"}</p>
+                  <p className="text-sm font-semibold text-ink-900 truncate">{c.nombre}</p>
+                  <p className="text-xs text-ink-500">{c.nit || "Sin NIT"} · {c.rutaNombre || "Sin ruta"}</p>
                 </div>
-                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border flex-shrink-0 ml-2 ${c.activo ? "bg-green-50 border-green-200 text-green-800" : "bg-red-50 border-red-200 text-red-800"}`}>
+                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border flex-shrink-0 ml-2 ${c.activo ? "bg-ok-soft border-ok/30 text-ok" : "bg-danger-soft border-danger/30 text-danger"}`}>
                   {c.activo ? "Activo" : "Inactivo"}
                 </span>
               </div>
-              <div className="flex items-center gap-2 text-xs text-gray-500 mt-2">
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5 text-green-600 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
-                </svg>
+              <div className="flex items-center gap-2 text-xs text-ink-600 mt-2">
+                <Phone aria-hidden="true" className="w-3.5 h-3.5 text-ok flex-shrink-0" />
                 <span>{c.telefono}</span>
-                <span className="text-gray-300">·</span>
+                <span className="text-ink-300">·</span>
                 <span>{c.numContactos} contacto{c.numContactos === 1 ? "" : "s"}</span>
                 {c.contactosSinVerificar > 0 && (
-                  <span className="text-xs px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800 font-medium">
+                  <span className="text-xs px-1.5 py-0.5 rounded-full bg-warn-soft text-warn-soft-text font-medium">
                     {c.contactosSinVerificar} sin verificar
                   </span>
                 )}
               </div>
               <Link
                 href={`/clientes/${c.id}`}
-                className="mt-3 h-10 w-full bg-gray-50 border border-gray-200 rounded-lg text-sm font-medium text-brand hover:bg-gray-100 transition-colors flex items-center justify-center"
+                className="mt-3 h-10 w-full bg-ink-50 border border-ink-200 rounded-lg text-sm font-medium text-brand hover:bg-ink-100 transition-colors flex items-center justify-center"
               >
                 Ver detalle
               </Link>
@@ -239,53 +233,48 @@ export default function TablaClientes({
       </div>
 
       {/* Tabla desktop */}
-      <div className="hidden lg:block bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="hidden lg:block bg-white rounded-card border border-ink-200 shadow-card overflow-hidden">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-gray-100">
-              <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <tr className="border-b border-ink-100">
+              <th className="text-left py-3 px-4 text-xs font-medium text-ink-600 uppercase tracking-wider">
                 NIT / Documento
               </th>
-              <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="text-left py-3 px-4 text-xs font-medium text-ink-600 uppercase tracking-wider">
                 Nombre
               </th>
-              <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="text-left py-3 px-4 text-xs font-medium text-ink-600 uppercase tracking-wider">
                 WhatsApp
               </th>
-              <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="text-left py-3 px-4 text-xs font-medium text-ink-600 uppercase tracking-wider">
                 Dirección
               </th>
-              <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="text-left py-3 px-4 text-xs font-medium text-ink-600 uppercase tracking-wider">
                 Ruta asignada
               </th>
-              <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="text-left py-3 px-4 text-xs font-medium text-ink-600 uppercase tracking-wider">
                 Contactos
               </th>
-              <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="text-left py-3 px-4 text-xs font-medium text-ink-600 uppercase tracking-wider">
                 Estado
               </th>
-              <th className="text-right py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="text-right py-3 px-4 text-xs font-medium text-ink-600 uppercase tracking-wider">
                 Acciones
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50">
+          <tbody className="divide-y divide-ink-50">
             {clientesFiltrados.length === 0 ? (
               <tr>
-                <td colSpan={8} className="py-16 text-center text-gray-400">
+                <td colSpan={8} className="py-16 text-center text-ink-500">
                   <div className="flex flex-col items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-12 h-12 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                      <circle cx="9" cy="7" r="4" />
-                      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                    </svg>
+                    <Users aria-hidden="true" className="w-12 h-12 text-ink-300" />
                     <p className="text-sm">
                       {busqueda
                         ? "No se encontraron clientes con esa búsqueda"
                         : "No hay clientes registrados"}
                     </p>
-                    <p className="text-xs text-gray-300">
+                    <p className="text-xs text-ink-300">
                       {busqueda
                         ? "Prueba con otro término de búsqueda"
                         : "Agrega tu primer cliente para empezar"}
@@ -297,37 +286,37 @@ export default function TablaClientes({
               clientesFiltrados.map((c) => (
                 <tr
                   key={c.id}
-                  className={`hover:bg-gray-50/50 transition-colors ${c.contactosSinVerificar > 0 ? "bg-amber-50/60" : ""}`}
+                  className={`hover:bg-ink-50/50 transition-colors ${c.contactosSinVerificar > 0 ? "bg-warn-soft/60" : ""}`}
                 >
                   <td className="py-3 px-4">
                     {c.nit ? (
-                      <span className="text-sm font-mono text-gray-700">
+                      <span className="text-sm font-mono text-ink-800">
                         {c.nit}
                       </span>
                     ) : (
-                      <span className="text-xs text-yellow-600 bg-yellow-50 px-2 py-0.5 rounded">
+                      <span className="text-xs text-warn-soft-text bg-warn-soft px-2 py-0.5 rounded">
                         Sin NIT
                       </span>
                     )}
                   </td>
-                  <td className="py-3 px-4 text-sm font-medium text-gray-900">
+                  <td className="py-3 px-4 text-sm font-medium text-ink-900">
                     {c.nombre}
                   </td>
-                  <td className="py-3 px-4 text-sm text-gray-600">
+                  <td className="py-3 px-4 text-sm text-ink-700">
                     {c.telefono}
                   </td>
-                  <td className="py-3 px-4 text-sm text-gray-500 max-w-[200px] truncate">
+                  <td className="py-3 px-4 text-sm text-ink-600 max-w-[200px] truncate">
                     {c.direccion || "—"}
                   </td>
-                  <td className="py-3 px-4 text-sm text-gray-600">
+                  <td className="py-3 px-4 text-sm text-ink-700">
                     {c.rutaNombre || "Sin ruta"}
                   </td>
                   <td className="py-3 px-4">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-sm text-gray-600">{c.numContactos}</span>
+                      <span className="text-sm text-ink-700">{c.numContactos}</span>
                       {c.contactosSinVerificar > 0 && (
                         <span
-                          className="text-xs px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800 font-medium whitespace-nowrap"
+                          className="text-xs px-1.5 py-0.5 rounded-full bg-warn-soft text-warn-soft-text font-medium whitespace-nowrap"
                           title="Tiene contactos sin verificar"
                         >
                           {c.contactosSinVerificar} sin verificar
@@ -339,13 +328,13 @@ export default function TablaClientes({
                     <span
                       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${
                         c.activo
-                          ? "bg-green-50 border-green-200 text-green-800"
-                          : "bg-red-50 border-red-200 text-red-800"
+                          ? "bg-ok-soft border-ok/30 text-ok"
+                          : "bg-danger-soft border-danger/30 text-danger"
                       }`}
                     >
                       <span
                         className={`w-1.5 h-1.5 rounded-full ${
-                          c.activo ? "bg-green-500" : "bg-red-500"
+                          c.activo ? "bg-ok" : "bg-danger"
                         }`}
                       />
                       {c.activo ? "Activo" : "Inactivo"}

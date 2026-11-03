@@ -5,6 +5,10 @@ import { useRouter } from "next/navigation";
 import SelectorBusqueda from "@/components/SelectorBusqueda";
 import { formatearPrecio } from "@/lib/formato";
 
+import { Search } from "@/components/ui/icons";
+import Spinner from "@/components/ui/Spinner";
+import { buttonClass, inputClass } from "@/components/ui/clases";
+import Modal from "@/components/ui/Modal";
 interface ProductoOpt {
   id: string;
   nombre: string;
@@ -142,96 +146,84 @@ export default function ModalItem({ tipo, itemInicial, onCerrar }: Props) {
   const LABELS = { insumo: "insumo", materia_prima: "materia prima", producto_terminado: "producto terminado" };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-[95vw] max-w-lg max-h-[90vh] overflow-y-auto">
-        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-gray-900">
-            {esEdicion ? "Editar" : "Nuevo"} {LABELS[tipo]}
-          </h2>
-          <button onClick={onCerrar} className="p-1 hover:bg-gray-100 rounded-lg transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
-        </div>
+    <>
+      <Modal open onClose={onCerrar} title={`${esEdicion ? "Editar" : "Nuevo"} ${LABELS[tipo]}`} size="md" dismissible={!mostrarSelectorProducto}>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {error && <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">{error}</div>}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {error && <div role="alert" className="p-3 bg-danger-soft border border-danger/30 rounded-control text-danger text-sm">{error}</div>}
 
           {tipo === "producto_terminado" ? (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Producto del catálogo <span className="text-red-500">*</span>
+              <label className="block text-sm font-medium text-ink-800 mb-1.5">
+                Producto del catálogo <span className="text-danger">*</span>
               </label>
               <button
                 type="button"
                 onClick={() => setMostrarSelectorProducto(true)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-left outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand hover:bg-gray-50 transition-colors flex items-center justify-between"
+                className="w-full px-3 py-2 border border-ink-300 rounded-lg text-sm text-left outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand hover:bg-ink-50 transition-colors flex items-center justify-between"
               >
-                <span className={productoSeleccionado ? "text-gray-900" : "text-gray-400"}>
+                <span className={productoSeleccionado ? "text-ink-900" : "text-ink-500"}>
                   {productoSeleccionado ? productoSeleccionado.nombre : "Selecciona un producto..."}
                 </span>
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-gray-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-                </svg>
+                <Search aria-hidden="true" className="w-4 h-4 text-ink-500 flex-shrink-0" />
               </button>
-              <p className="text-xs text-gray-400 mt-1">
+              <p className="text-xs text-ink-500 mt-1">
                 El nombre y la unidad se toman del catálogo automáticamente
               </p>
             </div>
           ) : (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nombre <span className="text-red-500">*</span></label>
+              <label className="block text-sm font-medium text-ink-800 mb-1.5">Nombre <span className="text-danger">*</span></label>
               <input type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand" />
+                className={inputClass()} />
             </div>
           )}
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Unidad</label>
+              <label className="block text-sm font-medium text-ink-800 mb-1.5">Unidad</label>
               {tipo === "producto_terminado" ? (
                 <input type="text" value={unidad} disabled
-                  className="w-full px-3 py-2 border border-gray-200 bg-gray-50 rounded-lg text-sm text-gray-500" />
+                  className="w-full px-3 py-2 border border-ink-200 bg-ink-50 rounded-lg text-sm text-ink-600" />
               ) : (
                 <select value={unidad} onChange={(e) => setUnidad(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand">
+                  className={inputClass()}>
                   {UNIDADES.map((u) => <option key={u} value={u}>{u}</option>)}
                 </select>
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Costo unitario (COP)</label>
+              <label className="block text-sm font-medium text-ink-800 mb-1.5">Costo unitario (COP)</label>
               <input type="number" value={costoUnitario} onChange={(e) => setCostoUnitario(e.target.value)} min="0" step="0.01"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand" />
+                className={inputClass()} />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Stock mínimo</label>
+            <label className="block text-sm font-medium text-ink-800 mb-1.5">Stock mínimo</label>
             <input type="number" value={stockMinimo} onChange={(e) => setStockMinimo(e.target.value)} min="0" step="0.01"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand" />
+              className={inputClass()} />
           </div>
 
           {tipo === "insumo" && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Proveedor</label>
+              <label className="block text-sm font-medium text-ink-800 mb-1.5">Proveedor</label>
               <input type="text" value={proveedor} onChange={(e) => setProveedor(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand" />
+                className={inputClass()} />
             </div>
           )}
 
           {tipo === "materia_prima" && (
             <>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de animal</label>
+                <label className="block text-sm font-medium text-ink-800 mb-1.5">Tipo de animal</label>
                 <input type="text" value={tipoAnimal} onChange={(e) => setTipoAnimal(e.target.value)} placeholder="Ej: Res, Cerdo, Pollo..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand" />
+                  className={inputClass()} />
               </div>
               <div className="flex items-center gap-3">
-                <label className="text-sm font-medium text-gray-700">Requiere refrigeración</label>
+                <label className="text-sm font-medium text-ink-800">Requiere refrigeración</label>
                 <button type="button" onClick={() => setRefrigeracion(!refrigeracion)}
-                  className={`relative w-10 h-5 rounded-full transition-colors ${refrigeracion ? "bg-blue-500" : "bg-gray-300"}`}>
+                  className={`relative w-10 h-5 rounded-full transition-colors ${refrigeracion ? "bg-info" : "bg-ink-300"}`}>
                   <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform ${refrigeracion ? "translate-x-5" : ""}`} />
                 </button>
               </div>
@@ -240,33 +232,33 @@ export default function ModalItem({ tipo, itemInicial, onCerrar }: Props) {
 
           {tipo !== "insumo" && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de vencimiento</label>
+              <label className="block text-sm font-medium text-ink-800 mb-1.5">Fecha de vencimiento</label>
               <input type="date" value={fechaVencimiento} onChange={(e) => setFechaVencimiento(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand" />
+                className={inputClass()} />
             </div>
           )}
 
           {esEdicion && (
             <div className="flex items-center gap-3">
-              <label className="text-sm font-medium text-gray-700">Estado</label>
+              <label className="text-sm font-medium text-ink-800">Estado</label>
               <button type="button" onClick={() => setActivo(!activo)}
-                className={`relative w-10 h-5 rounded-full transition-colors ${activo ? "bg-green-500" : "bg-gray-300"}`}>
+                className={`relative w-10 h-5 rounded-full transition-colors ${activo ? "bg-ok" : "bg-ink-300"}`}>
                 <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform ${activo ? "translate-x-5" : ""}`} />
               </button>
-              <span className="text-sm text-gray-600">{activo ? "Activo" : "Inactivo"}</span>
+              <span className="text-sm text-ink-700">{activo ? "Activo" : "Inactivo"}</span>
             </div>
           )}
 
           <div className="flex justify-end gap-3 pt-2">
-            <button type="button" onClick={onCerrar} className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Cancelar</button>
+            <button type="button" onClick={onCerrar} className={buttonClass({ variant: "secondary" })}>Cancelar</button>
             <button type="submit" disabled={cargando}
-              className="px-4 py-2 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-light transition-colors disabled:opacity-50 flex items-center gap-2">
-              {cargando && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+              className={buttonClass()}>
+              {cargando && <Spinner size="sm" />}
               {esEdicion ? "Guardar cambios" : "Crear ítem"}
             </button>
           </div>
         </form>
-      </div>
+      </Modal>
 
       {mostrarSelectorProducto && (
         <SelectorBusqueda
@@ -277,6 +269,6 @@ export default function ModalItem({ tipo, itemInicial, onCerrar }: Props) {
           onCerrar={() => setMostrarSelectorProducto(false)}
         />
       )}
-    </div>
+    </>
   );
 }

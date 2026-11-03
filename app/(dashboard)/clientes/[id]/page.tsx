@@ -8,7 +8,8 @@ import TablaPrecios from "./TablaPrecios";
 import AccionesCliente from "./AccionesCliente";
 import SeccionSedes from "./SeccionSedes";
 import SeccionContactos from "./SeccionContactos";
-
+
+import { ChevronLeft, MapPin, Phone } from "@/components/ui/icons";
 export const dynamic = "force-dynamic";
 
 export default async function DetalleClientePage(
@@ -91,11 +92,9 @@ export default async function DetalleClientePage(
       {/* Breadcrumb */}
       <Link
         href="/clientes"
-        className="text-sm text-gray-400 hover:text-gray-600 transition-colors flex items-center gap-1 mb-3"
+        className="text-sm text-ink-500 hover:text-ink-700 transition-colors flex items-center gap-1 mb-3"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="15 18 9 12 15 6" />
-        </svg>
+        <ChevronLeft aria-hidden="true" className="w-4 h-4" />
         Clientes
       </Link>
 
@@ -112,34 +111,34 @@ export default async function DetalleClientePage(
           </div>
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h1 className="text-2xl font-bold text-ink-900">
                 {cliente.nombre}
               </h1>
               <span
                 className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${
                   cliente.activo
-                    ? "bg-green-50 border-green-200 text-green-800"
-                    : "bg-red-50 border-red-200 text-red-800"
+                    ? "bg-ok-soft border-ok/30 text-ok"
+                    : "bg-danger-soft border-danger/30 text-danger"
                 }`}
               >
                 <span
                   className={`w-1.5 h-1.5 rounded-full ${
-                    cliente.activo ? "bg-green-500" : "bg-red-500"
+                    cliente.activo ? "bg-ok" : "bg-danger"
                   }`}
                 />
                 {cliente.activo ? "Activo" : "Inactivo"}
               </span>
             </div>
             {cliente.razon_social && (
-              <p className="text-sm text-gray-500">{cliente.razon_social}</p>
+              <p className="text-sm text-ink-600">{cliente.razon_social}</p>
             )}
             {cliente.codigo_mekano && (
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-ink-500">
                 Código Mekano: {cliente.codigo_mekano}
               </p>
             )}
             {cliente.nit && (
-              <p className="text-sm text-gray-400">NIT: {cliente.nit}</p>
+              <p className="text-sm text-ink-500">NIT: {cliente.nit}</p>
             )}
           </div>
         </div>
@@ -165,49 +164,44 @@ export default async function DetalleClientePage(
 
       {/* Info del cliente */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
-        <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
-          <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+        <div className="bg-white rounded-card border border-ink-200 shadow-card p-5 space-y-3">
+          <h3 className="text-xs font-medium text-ink-600 uppercase tracking-wider">
             Contacto
           </h3>
-          <div className="flex items-center gap-2 text-sm text-gray-700">
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
-            </svg>
+          <div className="flex items-center gap-2 text-sm text-ink-800">
+            <Phone aria-hidden="true" className="w-4 h-4 text-ink-500" />
             {cliente.telefono}
           </div>
           {cliente.direccion && (
-            <div className="flex items-start gap-2 text-sm text-gray-700">
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-gray-400 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-                <circle cx="12" cy="10" r="3" />
-              </svg>
+            <div className="flex items-start gap-2 text-sm text-ink-800">
+              <MapPin aria-hidden="true" className="w-4 h-4 text-ink-500 mt-0.5" />
               {cliente.direccion}
             </div>
           )}
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
-          <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+        <div className="bg-white rounded-card border border-ink-200 shadow-card p-5 space-y-3">
+          <h3 className="text-xs font-medium text-ink-600 uppercase tracking-wider">
             Ruta
           </h3>
-          <p className="text-sm text-gray-700 font-medium">
+          <p className="text-sm text-ink-800 font-medium">
             {cliente.ruta?.nombre ?? "Sin ruta asignada"}
           </p>
           {cliente.ruta?.descripcion && (
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-ink-500">
               {cliente.ruta.descripcion}
             </p>
           )}
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
-          <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+        <div className="bg-white rounded-card border border-ink-200 shadow-card p-5 space-y-3">
+          <h3 className="text-xs font-medium text-ink-600 uppercase tracking-wider">
             Precios personalizados
           </h3>
           <p className="text-2xl font-bold text-brand">
             {cliente.precios_cliente.length}
           </p>
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-ink-500">
             de {productos.length} productos activos
           </p>
         </div>
@@ -232,45 +226,45 @@ export default async function DetalleClientePage(
       </div>
 
       {/* Historial de pedidos */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100">
-          <h3 className="font-semibold text-gray-900">Últimos pedidos</h3>
+      <div className="bg-white rounded-card border border-ink-200 shadow-card overflow-hidden">
+        <div className="px-6 py-4 border-b border-ink-100">
+          <h3 className="font-semibold text-ink-900">Últimos pedidos</h3>
         </div>
         {pedidos.length === 0 ? (
-          <div className="py-12 text-center text-gray-400">
+          <div className="py-12 text-center text-ink-500">
             <p className="text-sm">Este cliente no tiene pedidos aún</p>
           </div>
         ) : (
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-100">
-                <th className="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase">
+              <tr className="border-b border-ink-100">
+                <th className="text-left py-3 px-6 text-xs font-medium text-ink-600 uppercase">
                   Fecha
                 </th>
-                <th className="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase">
+                <th className="text-left py-3 px-6 text-xs font-medium text-ink-600 uppercase">
                   Ruta
                 </th>
-                <th className="text-right py-3 px-6 text-xs font-medium text-gray-500 uppercase">
+                <th className="text-right py-3 px-6 text-xs font-medium text-ink-600 uppercase">
                   Total
                 </th>
-                <th className="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase">
+                <th className="text-left py-3 px-6 text-xs font-medium text-ink-600 uppercase">
                   Estado
                 </th>
-                <th className="text-right py-3 px-6 text-xs font-medium text-gray-500 uppercase">
+                <th className="text-right py-3 px-6 text-xs font-medium text-ink-600 uppercase">
                   Acción
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-ink-50">
               {pedidos.map((p) => (
-                <tr key={p.id} className="hover:bg-gray-50/50">
-                  <td className="py-3 px-6 text-sm text-gray-700">
+                <tr key={p.id} className="hover:bg-ink-50/50">
+                  <td className="py-3 px-6 text-sm text-ink-800">
                     {formatearFechaHora(p.created_at)}
                   </td>
-                  <td className="py-3 px-6 text-sm text-gray-600">
+                  <td className="py-3 px-6 text-sm text-ink-700">
                     {p.ruta?.nombre ?? "—"}
                   </td>
-                  <td className="py-3 px-6 text-sm font-medium text-gray-900 text-right">
+                  <td className="py-3 px-6 text-sm font-medium text-ink-900 text-right">
                     {formatearPrecio(Number(p.total))}
                   </td>
                   <td className="py-3 px-6">
@@ -293,11 +287,11 @@ export default async function DetalleClientePage(
 
       {/* Notas */}
       {cliente.notas && (
-        <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-xl p-5">
-          <h3 className="text-xs font-medium text-yellow-700 uppercase tracking-wider mb-2">
+        <div className="mt-6 bg-warn-soft border border-warn/30 rounded-xl p-5">
+          <h3 className="text-xs font-medium text-warn-soft-text uppercase tracking-wider mb-2">
             Notas internas
           </h3>
-          <p className="text-sm text-yellow-800">{cliente.notas}</p>
+          <p className="text-sm text-warn-soft-text">{cliente.notas}</p>
         </div>
       )}
     </div>

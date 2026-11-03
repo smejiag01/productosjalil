@@ -5,6 +5,7 @@
  */
 export {
   AlertCircle,
+  Beef,
   AlertTriangle,
   ArrowLeft,
   ArrowRight,
@@ -18,8 +19,11 @@ export {
   ChevronUp,
   Clock,
   Cog,
+  CornerUpLeft,
+  Download,
   Eye,
   EyeOff,
+  Gift,
   House,
   IdCard,
   ImageOff,
@@ -36,6 +40,7 @@ export {
   Navigation,
   Package,
   PackageCheck,
+  Pencil,
   Phone,
   PhoneCall,
   Plus,
@@ -45,6 +50,7 @@ export {
   Settings,
   ShoppingBag,
   ShoppingCart,
+  SquarePen,
   Tag,
   Trash2,
   TriangleAlert,
@@ -54,5 +60,11 @@ export {
   Users,
   X,
   XCircle,
+} from "lucide-react";
+export {
+  File as FileIcon,
+  Image as ImageIcon,
+  List as ListIcon,
+  Table as TableIcon,
 } from "lucide-react";
 export type { LucideIcon, LucideProps } from "lucide-react";

@@ -5,6 +5,7 @@ import Link from "next/link";
 import BadgeEstado from "@/components/BadgeEstado";
 import { ESTADOS, ESTADO_ANTERIOR, type EstadoPedido } from "@/lib/pedidos";
 
+import { AlertCircle, CornerUpLeft, Tag } from "@/components/ui/icons";
 interface PedidoFila {
   id: string;
   clienteNombre: string;
@@ -37,9 +38,7 @@ const SIGUIENTE_ACCION: Partial<Record<EstadoPedido, { estado: EstadoPedido; lab
 
 function IconoDeshacer() {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="9 14 4 9 9 4" /><path d="M20 20v-7a4 4 0 0 0-4-4H4" />
-    </svg>
+    <CornerUpLeft aria-hidden="true" className="w-4 h-4" />
   );
 }
 
@@ -64,7 +63,7 @@ function ControlEstado({
           onClick={() => onCambiarEstado(pedido.id, pedido.estado, anterior)}
           disabled={cargando}
           title={`Volver a "${ESTADOS[anterior].label}"`}
-          className="h-8 w-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-50 flex-shrink-0"
+          className="h-8 w-8 flex items-center justify-center rounded-lg border border-ink-200 text-ink-600 hover:bg-ink-50 disabled:opacity-50 flex-shrink-0"
         >
           <IconoDeshacer />
         </button>
@@ -144,16 +143,14 @@ export default function TablaPedidos({
   }
 
   const estadoVacio = (
-    <div className="py-16 text-center text-gray-400">
-      <svg xmlns="http://www.w3.org/2000/svg" className="w-12 h-12 text-gray-300 mx-auto mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M9 5H2v7l6.29 6.29a1 1 0 0 0 1.42 0l5.58-5.58a1 1 0 0 0 0-1.42L9 5Z" /><path d="M6 9.01V9" />
-      </svg>
+    <div className="py-16 text-center text-ink-500">
+      <Tag aria-hidden="true" className="w-12 h-12 text-ink-300 mx-auto mb-3" />
       <p className="text-sm">
         {filtro === "todos"
           ? "No hay pedidos"
           : `No hay pedidos "${ESTADOS[filtro as EstadoPedido]?.label}"`}
       </p>
-      <p className="text-xs text-gray-300 mt-1">Los pedidos aparecerán aquí cuando los clientes los realicen en la tienda en línea o por WhatsApp</p>
+      <p className="text-xs text-ink-300 mt-1">Los pedidos aparecerán aquí cuando los clientes los realicen en la tienda en línea o por WhatsApp</p>
     </div>
   );
 
@@ -171,11 +168,11 @@ export default function TablaPedidos({
               className={`h-10 px-3 lg:px-4 rounded-full text-sm font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap flex-shrink-0 ${
                 activo
                   ? "bg-brand text-white"
-                  : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
+                  : "bg-white border border-ink-200 text-ink-700 hover:bg-ink-50"
               }`}
             >
               {f.label}
-              <span className={`text-xs px-1.5 py-0.5 rounded-full ${activo ? "bg-white/20" : "bg-gray-100 text-gray-500"}`}>
+              <span className={`text-xs px-1.5 py-0.5 rounded-full ${activo ? "bg-white/20" : "bg-ink-100 text-ink-600"}`}>
                 {count}
               </span>
             </button>
@@ -186,22 +183,22 @@ export default function TablaPedidos({
       {/* Cards móvil/tablet */}
       <div className="lg:hidden space-y-3">
         {pedidosFiltrados.length === 0 ? (
-          <div className="bg-white rounded-xl border border-gray-200">{estadoVacio}</div>
+          <div className="bg-white rounded-card border border-ink-200 shadow-card">{estadoVacio}</div>
         ) : (
           pedidosFiltrados.map((p) => (
-            <div key={p.id} className="bg-white rounded-xl border border-gray-200 p-4">
+            <div key={p.id} className="bg-white rounded-card border border-ink-200 shadow-card p-4">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-xs font-semibold text-gray-600 flex-shrink-0">
+                  <div className="w-10 h-10 bg-ink-100 rounded-full flex items-center justify-center text-xs font-semibold text-ink-700 flex-shrink-0">
                     {p.clienteNombre.split(" ").map((w) => w[0]).join("").substring(0, 2).toUpperCase()}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-gray-900 truncate">{p.clienteNombre}</p>
-                    <p className="text-xs text-gray-400">
+                    <p className="text-sm font-semibold text-ink-900 truncate">{p.clienteNombre}</p>
+                    <p className="text-xs text-ink-500">
                       {p.rutaNombre} · {p.numProductos} productos
                     </p>
                     {p.fechaEntrega && (
-                      <p className="text-xs text-gray-400 mt-0.5">
+                      <p className="text-xs text-ink-500 mt-0.5">
                         Entrega: <span className="capitalize">{p.fechaEntrega}</span>
                         {mostrarFecha && p.creadoEn && <span> · Creado: {p.creadoEn}</span>}
                       </p>
@@ -210,13 +207,13 @@ export default function TablaPedidos({
                 </div>
                 <BadgeEstado estado={p.estado} />
               </div>
-              <div className="flex items-center justify-between pt-3 border-t border-gray-100 gap-2">
-                <span className="text-lg font-bold text-gray-900">{p.total}</span>
+              <div className="flex items-center justify-between pt-3 border-t border-ink-100 gap-2">
+                <span className="text-lg font-bold text-ink-900">{p.total}</span>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <ControlEstado pedido={p} cargando={cargandoId === p.id} onCambiarEstado={cambiarEstado} />
                   <Link
                     href={`/pedidos/${p.id}`}
-                    className="h-10 px-4 bg-gray-50 border border-gray-200 rounded-lg text-sm font-medium text-brand hover:bg-gray-100 transition-colors flex items-center"
+                    className="h-10 px-4 bg-ink-50 border border-ink-200 rounded-lg text-sm font-medium text-brand hover:bg-ink-100 transition-colors flex items-center"
                   >
                     Ver
                   </Link>
@@ -228,46 +225,46 @@ export default function TablaPedidos({
       </div>
 
       {/* Tabla desktop */}
-      <div className="hidden lg:block bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="hidden lg:block bg-white rounded-card border border-ink-200 shadow-card overflow-hidden">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-gray-100">
-              <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
-              <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Ruta</th>
-              <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Productos</th>
-              <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-              <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-              <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Entrega</th>
+            <tr className="border-b border-ink-100">
+              <th className="text-left py-3 px-4 text-xs font-medium text-ink-600 uppercase tracking-wider">Cliente</th>
+              <th className="text-left py-3 px-4 text-xs font-medium text-ink-600 uppercase tracking-wider">Ruta</th>
+              <th className="text-left py-3 px-4 text-xs font-medium text-ink-600 uppercase tracking-wider">Productos</th>
+              <th className="text-left py-3 px-4 text-xs font-medium text-ink-600 uppercase tracking-wider">Total</th>
+              <th className="text-left py-3 px-4 text-xs font-medium text-ink-600 uppercase tracking-wider">Estado</th>
+              <th className="text-left py-3 px-4 text-xs font-medium text-ink-600 uppercase tracking-wider">Entrega</th>
               {mostrarFecha && (
-                <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Creado</th>
+                <th className="text-left py-3 px-4 text-xs font-medium text-ink-600 uppercase tracking-wider">Creado</th>
               )}
-              <th className="text-right py-3 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Acción</th>
+              <th className="text-right py-3 px-4 text-xs font-medium text-ink-600 uppercase tracking-wider">Acción</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50">
+          <tbody className="divide-y divide-ink-50">
             {pedidosFiltrados.length === 0 ? (
               <tr><td colSpan={mostrarFecha ? 8 : 7}>{estadoVacio}</td></tr>
             ) : (
               pedidosFiltrados.map((p) => (
-                <tr key={p.id} className="hover:bg-gray-50/50 transition-colors">
+                <tr key={p.id} className="hover:bg-ink-50/50 transition-colors">
                   <td className="py-3 px-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center text-xs font-semibold text-gray-600">
+                      <div className="w-9 h-9 bg-ink-100 rounded-full flex items-center justify-center text-xs font-semibold text-ink-700">
                         {p.clienteNombre.split(" ").map((w) => w[0]).join("").substring(0, 2).toUpperCase()}
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-900">{p.clienteNombre}</p>
-                        {p.clienteCodigo && <p className="text-xs text-gray-400">{p.clienteCodigo}</p>}
+                        <p className="text-sm font-medium text-ink-900">{p.clienteNombre}</p>
+                        {p.clienteCodigo && <p className="text-xs text-ink-500">{p.clienteCodigo}</p>}
                       </div>
                     </div>
                   </td>
-                  <td className="py-3 px-4 text-sm text-gray-600">{p.rutaNombre}</td>
-                  <td className="py-3 px-4 text-sm text-gray-600">{p.numProductos} productos</td>
-                  <td className="py-3 px-4 text-sm font-medium text-gray-900">{p.total}</td>
+                  <td className="py-3 px-4 text-sm text-ink-700">{p.rutaNombre}</td>
+                  <td className="py-3 px-4 text-sm text-ink-700">{p.numProductos} productos</td>
+                  <td className="py-3 px-4 text-sm font-medium text-ink-900">{p.total}</td>
                   <td className="py-3 px-4"><BadgeEstado estado={p.estado} /></td>
-                  <td className="py-3 px-4 text-sm text-gray-500 capitalize">{p.fechaEntrega}</td>
+                  <td className="py-3 px-4 text-sm text-ink-600 capitalize">{p.fechaEntrega}</td>
                   {mostrarFecha && (
-                    <td className="py-3 px-4 text-sm text-gray-500">{p.creadoEn}</td>
+                    <td className="py-3 px-4 text-sm text-ink-600">{p.creadoEn}</td>
                   )}
                   <td className="py-3 px-4">
                     <div className="flex items-center justify-end gap-3">
@@ -283,10 +280,8 @@ export default function TablaPedidos({
       </div>
 
       {toast && (
-        <div className="fixed bottom-6 right-6 bg-gray-900 text-white px-4 py-3 rounded-lg shadow-lg text-sm flex items-center gap-2 z-50 max-w-sm">
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-red-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
-          </svg>
+        <div className="fixed bottom-6 right-6 bg-ink-900 text-white px-4 py-3 rounded-lg shadow-lg text-sm flex items-center gap-2 z-50 max-w-sm">
+          <AlertCircle aria-hidden="true" className="w-4 h-4 text-danger flex-shrink-0" />
           {toast}
         </div>
       )}

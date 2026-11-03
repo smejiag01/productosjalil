@@ -18,7 +18,7 @@ export default function SelectorFecha({
           router.push(`/pedidos?fecha=${e.target.value}`);
         }
       }}
-      className="h-10 px-3 border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+      className="h-10 px-3 border border-ink-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
     />
   );
 }

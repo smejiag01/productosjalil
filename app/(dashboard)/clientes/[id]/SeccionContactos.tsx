@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import ModalContacto from "./ModalContacto";
 
+import { Plus } from "@/components/ui/icons";
+import { useConfirmar } from "@/components/ui/useConfirmar";
 interface Contacto {
   id: string;
   telefono: string;
@@ -22,6 +24,7 @@ const ORIGEN_LABELS: Record<string, string> = {
 
 export default function SeccionContactos({ clienteId, contactosIniciales }: { clienteId: string; contactosIniciales: Contacto[] }) {
   const router = useRouter();
+  const { confirmar, dialogo } = useConfirmar();
   const [modalAbierto, setModalAbierto] = useState(false);
   const [editando, setEditando] = useState<Contacto | null>(null);
   const [cargando, setCargando] = useState<string | null>(null);
@@ -50,7 +53,13 @@ export default function SeccionContactos({ clienteId, contactosIniciales }: { cl
   }
 
   async function eliminar(contacto: Contacto) {
-    if (!confirm(`¿Eliminar el contacto ${contacto.telefono}?`)) return;
+    const acepto = await confirmar({
+      title: "¿Eliminar este contacto?",
+      description: `Se quitará el número ${contacto.telefono} del cliente.`,
+      confirmLabel: "Eliminar",
+      tone: "danger",
+    });
+    if (!acepto) return;
     setCargando(contacto.id);
     setError("");
     try {
@@ -69,59 +78,57 @@ export default function SeccionContactos({ clienteId, contactosIniciales }: { cl
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-      <div className="px-4 sm:px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+    <div className="bg-white rounded-card border border-ink-200 shadow-card overflow-hidden">
+      <div className="px-4 sm:px-6 py-4 border-b border-ink-100 flex items-center justify-between">
         <div>
-          <h3 className="font-semibold text-gray-900">Contactos</h3>
-          <p className="text-xs text-gray-400 mt-0.5">Números desde los que pueden hacer pedidos por WhatsApp</p>
+          <h3 className="font-semibold text-ink-900">Contactos</h3>
+          <p className="text-xs text-ink-500 mt-0.5">Números desde los que pueden hacer pedidos por WhatsApp</p>
         </div>
         <button
           onClick={() => { setEditando(null); setModalAbierto(true); }}
           className="h-9 px-3 bg-brand text-white rounded-lg text-xs font-medium hover:bg-brand-light transition-colors flex items-center gap-1.5"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
+          <Plus aria-hidden="true" className="w-3.5 h-3.5" />
           Agregar contacto
         </button>
       </div>
 
       {error && (
-        <div className="mx-4 sm:mx-6 mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">{error}</div>
+        <div className="mx-4 sm:mx-6 mt-4 p-3 bg-danger-soft border border-danger/30 rounded-control text-danger text-sm">{error}</div>
       )}
 
       {contactosIniciales.length === 0 ? (
-        <div className="py-10 text-center text-gray-400 text-sm">Sin contactos registrados aún</div>
+        <div className="py-10 text-center text-ink-500 text-sm">Sin contactos registrados aún</div>
       ) : (
-        <div className="divide-y divide-gray-50">
+        <div className="divide-y divide-ink-50">
           {contactosIniciales.map((c) => (
             <div
               key={c.id}
-              className={`px-4 sm:px-6 py-3 flex items-start justify-between gap-3 ${!c.verificado ? "bg-amber-50" : ""}`}
+              className={`px-4 sm:px-6 py-3 flex items-start justify-between gap-3 ${!c.verificado ? "bg-warn-soft" : ""}`}
             >
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <p className="text-sm font-medium text-gray-900">{c.telefono}</p>
-                  {c.nombre && <span className="text-sm text-gray-500">· {c.nombre}</span>}
+                  <p className="text-sm font-medium text-ink-900">{c.telefono}</p>
+                  {c.nombre && <span className="text-sm text-ink-600">· {c.nombre}</span>}
                   {c.principal && (
                     <span className="text-xs px-2 py-0.5 rounded-full bg-brand/10 text-brand font-medium">Principal</span>
                   )}
                   {c.verificado ? (
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200 font-medium">Verificado</span>
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-ok-soft text-ok border border-ok/30 font-medium">Verificado</span>
                   ) : (
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 font-medium">
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-warn-soft text-warn-soft-text border border-warn/30 font-medium">
                       Número nuevo — sin verificar
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-gray-400 mt-0.5">{ORIGEN_LABELS[c.origen] ?? c.origen}</p>
+                <p className="text-xs text-ink-500 mt-0.5">{ORIGEN_LABELS[c.origen] ?? c.origen}</p>
               </div>
               <div className="flex flex-col sm:flex-row items-end sm:items-center gap-1.5 sm:gap-3 flex-shrink-0">
                 {!c.verificado && (
                   <button
                     onClick={() => actualizar(c, { verificado: true })}
                     disabled={cargando === c.id}
-                    className="text-xs font-medium text-amber-700 hover:text-amber-800 disabled:opacity-50 whitespace-nowrap"
+                    className="text-xs font-medium text-warn-soft-text hover:text-warn-soft-text disabled:opacity-50 whitespace-nowrap"
                   >
                     Verificar
                   </button>
@@ -137,14 +144,14 @@ export default function SeccionContactos({ clienteId, contactosIniciales }: { cl
                 )}
                 <button
                   onClick={() => { setEditando(c); setModalAbierto(true); }}
-                  className="text-xs font-medium text-gray-600 hover:text-gray-900 whitespace-nowrap"
+                  className="text-xs font-medium text-ink-700 hover:text-ink-900 whitespace-nowrap"
                 >
                   Editar
                 </button>
                 <button
                   onClick={() => eliminar(c)}
                   disabled={cargando === c.id}
-                  className="text-xs font-medium text-red-600 hover:text-red-700 disabled:opacity-50 whitespace-nowrap"
+                  className="text-xs font-medium text-danger hover:text-danger disabled:opacity-50 whitespace-nowrap"
                 >
                   Eliminar
                 </button>
@@ -161,6 +168,7 @@ export default function SeccionContactos({ clienteId, contactosIniciales }: { cl
           onCerrar={() => { setModalAbierto(false); setEditando(null); }}
         />
       )}
+      {dialogo}
     </div>
   );
 }

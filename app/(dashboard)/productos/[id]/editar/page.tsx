@@ -2,7 +2,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import FormularioProducto from "../../FormularioProducto";
-
+
+import { ChevronLeft } from "@/components/ui/icons";
 export const dynamic = "force-dynamic";
 
 export default async function EditarProductoPage(
@@ -26,19 +27,17 @@ export default async function EditarProductoPage(
     <div>
       <Link
         href="/productos"
-        className="text-sm text-gray-400 hover:text-gray-600 transition-colors flex items-center gap-1 mb-3"
+        className="text-sm text-ink-500 hover:text-ink-700 transition-colors flex items-center gap-1 mb-3"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="15 18 9 12 15 6" />
-        </svg>
+        <ChevronLeft aria-hidden="true" className="w-4 h-4" />
         Productos
       </Link>
 
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">
+      <h1 className="text-2xl font-bold text-ink-900 mb-6">
         Editar producto
       </h1>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
+      <div className="bg-white rounded-card border border-ink-200 shadow-card p-6">
         <FormularioProducto
           productoInicial={{
             id: producto.id,

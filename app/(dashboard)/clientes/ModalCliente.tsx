@@ -4,6 +4,10 @@ import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import UbicacionMapa from "@/components/UbicacionMapa";
 
+
+import Spinner from "@/components/ui/Spinner";
+import { buttonClass, inputClass, textareaClass } from "@/components/ui/clases";
+import Modal from "@/components/ui/Modal";
 interface Ruta {
   id: string;
   nombre: string;
@@ -112,125 +116,110 @@ export default function ModalCliente({
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-[95vw] max-w-lg max-h-[85vh] overflow-y-auto">
-        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-gray-900">
-            {esEdicion ? "Editar cliente" : "Nuevo cliente"}
-          </h2>
-          <button
-            onClick={onCerrar}
-            className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
-        </div>
+    <Modal open onClose={onCerrar} title={esEdicion ? "Editar cliente" : "Nuevo cliente"} size="md">
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           {errorGeneral && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+            <div role="alert" className="p-3 bg-danger-soft border border-danger/30 rounded-control text-danger text-sm">
               {errorGeneral}
             </div>
           )}
 
           {/* Nombre */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Nombre completo <span className="text-red-500">*</span>
+            <label className="block text-sm font-medium text-ink-800 mb-1.5">
+              Nombre completo <span className="text-danger">*</span>
             </label>
             <input
               type="text"
               value={nombre}
               onChange={(e) => setNombre(e.target.value)}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+              className={inputClass()}
               placeholder="Nombre del cliente o negocio"
             />
             {errores.nombre && (
-              <p className="text-red-500 text-xs mt-1">{errores.nombre}</p>
+              <p className="text-danger text-xs mt-1">{errores.nombre}</p>
             )}
           </div>
 
           {/* Razón social */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-ink-800 mb-1.5">
               Razón social
             </label>
             <input
               type="text"
               value={razonSocial}
               onChange={(e) => setRazonSocial(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+              className={inputClass()}
               placeholder="Razón social para facturación"
             />
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-xs text-ink-500 mt-1">
               Se usa en facturación y exportaciones; el nombre es el que se muestra en pantallas y mensajes
             </p>
             {errores.razon_social && (
-              <p className="text-red-500 text-xs mt-1">{errores.razon_social}</p>
+              <p className="text-danger text-xs mt-1">{errores.razon_social}</p>
             )}
           </div>
 
           {/* NIT */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-ink-800 mb-1.5">
               NIT
             </label>
             <input
               type="text"
               value={nit}
               onChange={(e) => setNit(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+              className={inputClass()}
               placeholder="900123456-7"
             />
             {errores.nit && (
-              <p className="text-red-500 text-xs mt-1">{errores.nit}</p>
+              <p className="text-danger text-xs mt-1">{errores.nit}</p>
             )}
           </div>
 
           {/* Teléfono */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Teléfono WhatsApp <span className="text-red-500">*</span>
+            <label className="block text-sm font-medium text-ink-800 mb-1.5">
+              Teléfono WhatsApp <span className="text-danger">*</span>
             </label>
             <input
               type="text"
               value={telefono}
               onChange={(e) => setTelefono(e.target.value)}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+              className={inputClass()}
               placeholder="573001234567"
             />
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-xs text-ink-500 mt-1">
               Formato internacional sin espacios ni guiones
             </p>
             {errores.telefono && (
-              <p className="text-red-500 text-xs mt-1">{errores.telefono}</p>
+              <p className="text-danger text-xs mt-1">{errores.telefono}</p>
             )}
           </div>
 
           {/* Código Mekano */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-ink-800 mb-1.5">
               Código Mekano
             </label>
             <input
               type="text"
               value={codigoMekano}
               onChange={(e) => setCodigoMekano(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+              className={inputClass()}
               placeholder="MK-0001"
             />
             {!codigoMekano && (
-              <p className="text-xs text-yellow-600 mt-1">
+              <p className="text-xs text-warn-soft-text mt-1">
                 Recomendado: el código Mekano se usa para la exportación de facturas
               </p>
             )}
             {errores.codigo_mekano && (
-              <p className="text-red-500 text-xs mt-1">
+              <p className="text-danger text-xs mt-1">
                 {errores.codigo_mekano}
               </p>
             )}
@@ -250,13 +239,13 @@ export default function ModalCliente({
 
           {/* Ruta */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-ink-800 mb-1.5">
               Ruta asignada
             </label>
             <select
               value={rutaId}
               onChange={(e) => setRutaId(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+              className={inputClass()}
             >
               <option value="">Sin ruta asignada</option>
               {rutas.map((r) => (
@@ -270,14 +259,14 @@ export default function ModalCliente({
           {/* Estado */}
           {esEdicion && (
             <div className="flex items-center gap-3">
-              <label className="text-sm font-medium text-gray-700">
+              <label className="text-sm font-medium text-ink-800">
                 Estado
               </label>
               <button
                 type="button"
                 onClick={() => setActivo(!activo)}
                 className={`relative w-10 h-5 rounded-full transition-colors ${
-                  activo ? "bg-green-500" : "bg-gray-300"
+                  activo ? "bg-ok" : "bg-ink-300"
                 }`}
               >
                 <span
@@ -286,7 +275,7 @@ export default function ModalCliente({
                   }`}
                 />
               </button>
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-ink-700">
                 {activo ? "Activo" : "Inactivo"}
               </span>
             </div>
@@ -294,14 +283,14 @@ export default function ModalCliente({
 
           {/* Notas */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-ink-800 mb-1.5">
               Notas
             </label>
             <textarea
               value={notas}
               onChange={(e) => setNotas(e.target.value)}
               rows={2}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand resize-none"
+              className={textareaClass({ className: "resize-none" })}
               placeholder="Notas internas sobre el cliente (opcional)"
             />
           </div>
@@ -311,23 +300,22 @@ export default function ModalCliente({
             <button
               type="button"
               onClick={onCerrar}
-              className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              className={buttonClass({ variant: "secondary" })}
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={cargando}
-              className="px-4 py-2 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-light transition-colors disabled:opacity-50 flex items-center gap-2"
+              className={buttonClass()}
             >
               {cargando ? (
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <Spinner size="sm" />
               ) : null}
               {esEdicion ? "Guardar cambios" : "Crear cliente"}
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 }

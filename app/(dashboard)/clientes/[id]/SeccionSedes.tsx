@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import ModalSede from "./ModalSede";
 
+import { Plus } from "@/components/ui/icons";
 interface Sede {
   id: string;
   nombre_sede: string;
@@ -66,44 +67,42 @@ export default function SeccionSedes({ clienteId, sedesIniciales }: { clienteId:
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-      <div className="px-4 sm:px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+    <div className="bg-white rounded-card border border-ink-200 shadow-card overflow-hidden">
+      <div className="px-4 sm:px-6 py-4 border-b border-ink-100 flex items-center justify-between">
         <div>
-          <h3 className="font-semibold text-gray-900">Sedes</h3>
-          <p className="text-xs text-gray-400 mt-0.5">Direcciones de entrega del cliente</p>
+          <h3 className="font-semibold text-ink-900">Sedes</h3>
+          <p className="text-xs text-ink-500 mt-0.5">Direcciones de entrega del cliente</p>
         </div>
         <button
           onClick={() => { setEditando(null); setModalAbierto(true); }}
           className="h-9 px-3 bg-brand text-white rounded-lg text-xs font-medium hover:bg-brand-light transition-colors flex items-center gap-1.5"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
+          <Plus aria-hidden="true" className="w-3.5 h-3.5" />
           Agregar sede
         </button>
       </div>
 
       {error && (
-        <div className="mx-4 sm:mx-6 mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">{error}</div>
+        <div className="mx-4 sm:mx-6 mt-4 p-3 bg-danger-soft border border-danger/30 rounded-control text-danger text-sm">{error}</div>
       )}
 
       {sedesIniciales.length === 0 ? (
-        <div className="py-10 text-center text-gray-400 text-sm">Sin sedes registradas aún</div>
+        <div className="py-10 text-center text-ink-500 text-sm">Sin sedes registradas aún</div>
       ) : (
-        <div className="divide-y divide-gray-50">
+        <div className="divide-y divide-ink-50">
           {sedesIniciales.map((s) => (
             <div key={s.id} className="px-4 sm:px-6 py-3 flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <p className="text-sm font-medium text-gray-900">{s.nombre_sede}</p>
+                  <p className="text-sm font-medium text-ink-900">{s.nombre_sede}</p>
                   {s.es_principal && (
                     <span className="text-xs px-2 py-0.5 rounded-full bg-brand/10 text-brand font-medium">Principal</span>
                   )}
                   {!s.activa && (
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 font-medium">Inactiva</span>
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-ink-100 text-ink-600 font-medium">Inactiva</span>
                   )}
                 </div>
-                {s.direccion && <p className="text-xs text-gray-500 mt-0.5">{s.direccion}</p>}
+                {s.direccion && <p className="text-xs text-ink-600 mt-0.5">{s.direccion}</p>}
                 {s.latitud != null && s.longitud != null && (
                   <a
                     href={`https://www.google.com/maps/search/?api=1&query=${s.latitud},${s.longitud}`}
@@ -127,14 +126,14 @@ export default function SeccionSedes({ clienteId, sedesIniciales }: { clienteId:
                 )}
                 <button
                   onClick={() => { setEditando(s); setModalAbierto(true); }}
-                  className="text-xs font-medium text-gray-600 hover:text-gray-900 whitespace-nowrap"
+                  className="text-xs font-medium text-ink-700 hover:text-ink-900 whitespace-nowrap"
                 >
                   Editar
                 </button>
                 <button
                   onClick={() => toggleActiva(s)}
                   disabled={cargando === s.id}
-                  className={`text-xs font-medium disabled:opacity-50 whitespace-nowrap ${s.activa ? "text-red-600 hover:text-red-700" : "text-green-600 hover:text-green-700"}`}
+                  className={`text-xs font-medium disabled:opacity-50 whitespace-nowrap ${s.activa ? "text-danger hover:text-danger" : "text-ok hover:text-ok"}`}
                 >
                   {s.activa ? "Desactivar" : "Activar"}
                 </button>

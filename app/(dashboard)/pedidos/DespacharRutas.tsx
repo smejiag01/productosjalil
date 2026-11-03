@@ -3,6 +3,10 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import Alert from "@/components/ui/Alert";
+import Button from "@/components/ui/Button";
+import { Route, Truck } from "@/components/ui/icons";
+import { useConfirmar } from "@/components/ui/useConfirmar";
 interface Pedido {
   rutaId: string | null;
   rutaNombre: string;
@@ -19,6 +23,7 @@ export default function DespacharRutas({
   const router = useRouter();
   const [despachando, setDespachando] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const { confirmar, dialogo } = useConfirmar();
 
   const rutas = useMemo(() => {
     const mapa = new Map<string, { nombre: string; confirmados: number }>();
@@ -33,7 +38,12 @@ export default function DespacharRutas({
   }, [pedidos]);
 
   async function despacharRuta(rutaId: string) {
-    if (!confirm("¿Despachar esta ruta? Todos los pedidos confirmados pasarán a \"En reparto\".")) return;
+    const acepto = await confirmar({
+      title: "¿Despachar esta ruta?",
+      description: 'Todos los pedidos confirmados de la ruta pasarán a "En reparto".',
+      confirmLabel: "Despachar",
+    });
+    if (!acepto) return;
     setDespachando(rutaId);
     setError("");
     try {
@@ -60,32 +70,35 @@ export default function DespacharRutas({
   return (
     <div className="mb-6">
       {error && (
-        <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">{error}</div>
+        <Alert tone="error" className="mb-3">
+          {error}
+        </Alert>
       )}
       <div className="flex flex-wrap gap-2">
         {rutas.map((r) => (
           <div
             key={r.id}
-            className="flex items-center gap-3 bg-white border border-gray-200 rounded-lg pl-3 pr-1.5 py-1.5"
+            className="flex items-center gap-3 rounded-card border border-ink-200 bg-white py-1.5 pl-3 pr-1.5 shadow-card"
           >
-            <span className="text-sm text-gray-700">
-              🗺️ <span className="font-medium">{r.nombre}</span>
-              <span className="text-gray-400"> · {r.confirmados} confirmado{r.confirmados !== 1 ? "s" : ""}</span>
+            <span className="flex items-center gap-2 text-sm text-ink-800">
+              <Route aria-hidden="true" className="h-4 w-4 text-brand-700" />
+              <span className="font-semibold">{r.nombre}</span>
+              <span className="text-ink-600">
+                · {r.confirmados} confirmado{r.confirmados !== 1 ? "s" : ""}
+              </span>
             </span>
-            <button
+            <Button
+              size="sm"
               onClick={() => despacharRuta(r.id)}
-              disabled={despachando === r.id}
-              className="h-9 px-3 bg-purple-600 text-white rounded-md text-sm font-medium hover:bg-purple-700 transition-colors disabled:opacity-50 flex items-center gap-1.5"
+              loading={despachando === r.id}
+              leftIcon={<Truck aria-hidden="true" className="h-4 w-4" />}
             >
-              {despachando === r.id ? (
-                <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                "🚚 Despachar"
-              )}
-            </button>
+              Despachar
+            </Button>
           </div>
         ))}
       </div>
+      {dialogo}
     </div>
   );
 }

@@ -4,6 +4,9 @@ import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
+import { ChevronLeft } from "@/components/ui/icons";
+import Spinner from "@/components/ui/Spinner";
+import { buttonClass, textareaClass } from "@/components/ui/clases";
 interface Item {
   id: string;
   nombre: string;
@@ -170,18 +173,18 @@ export default function NuevoReconteo({ items }: Props) {
   return (
     <div>
       <div className="mb-6">
-        <Link href="/inventarios/reconteos" className="text-sm text-gray-400 hover:text-gray-600 transition-colors flex items-center gap-1 mb-1">
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+        <Link href="/inventarios/reconteos" className="text-sm text-ink-500 hover:text-ink-700 transition-colors flex items-center gap-1 mb-1">
+          <ChevronLeft aria-hidden="true" className="w-4 h-4" />
           Reconteos
         </Link>
-        <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Nuevo reconteo</h1>
-        <p className="text-gray-500 text-sm mt-1">
+        <h1 className="font-display text-2xl font-semibold text-ink-900 lg:text-3xl">Nuevo reconteo</h1>
+        <p className="text-ink-600 text-sm mt-1">
           {paso === 1 ? "Paso 1 de 2 · Selecciona los ítems y cuenta el stock físico" : "Paso 2 de 2 · Revisa y confirma las diferencias"}
         </p>
       </div>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">{error}</div>
+        <div className="mb-4 p-3 bg-danger-soft border border-danger/30 rounded-control text-danger text-sm">{error}</div>
       )}
 
       {paso === 1 ? (
@@ -191,26 +194,26 @@ export default function NuevoReconteo({ items }: Props) {
               {FILTROS_TIPO.map((f) => (
                 <button key={f.key} onClick={() => setFiltroTipo(f.key)}
                   className={`h-10 px-3 rounded-full text-sm font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
-                    filtroTipo === f.key ? "bg-brand text-white" : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
+                    filtroTipo === f.key ? "bg-brand text-white" : "bg-white border border-ink-200 text-ink-700 hover:bg-ink-50"
                   }`}>
                   {f.label}
                 </button>
               ))}
             </div>
             <input type="text" placeholder="Buscar..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)}
-              className="px-3 py-2 border border-gray-200 rounded-lg text-sm w-full sm:w-56 outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand" />
+              className="px-3 py-2 border border-ink-200 rounded-lg text-sm w-full sm:w-56 outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand" />
           </div>
 
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-6">
-            <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-3 bg-gray-50/50">
+          <div className="bg-white rounded-card border border-ink-200 shadow-card overflow-hidden mb-6">
+            <div className="px-4 py-3 border-b border-ink-100 flex items-center gap-3 bg-ink-50/50">
               <input type="checkbox" checked={todosFiltradosSeleccionados} onChange={toggleTodos} className="w-4 h-4 accent-brand" />
-              <span className="text-sm font-medium text-gray-600">
+              <span className="text-sm font-medium text-ink-700">
                 Seleccionar todos ({filtrados.length}) · {seleccionados.size} seleccionados
               </span>
             </div>
-            <div className="divide-y divide-gray-50 max-h-[55vh] overflow-y-auto">
+            <div className="divide-y divide-ink-50 max-h-[55vh] overflow-y-auto">
               {filtrados.length === 0 ? (
-                <div className="py-12 text-center text-gray-400 text-sm">No hay ítems</div>
+                <div className="py-12 text-center text-ink-500 text-sm">No hay ítems</div>
               ) : filtrados.map((item) => {
                 const marcado = seleccionados.has(item.id);
                 const conteo = conteos[item.id];
@@ -219,8 +222,8 @@ export default function NuevoReconteo({ items }: Props) {
                     <label className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer">
                       <input type="checkbox" checked={marcado} onChange={() => toggleItem(item)} className="w-4 h-4 accent-brand flex-shrink-0" />
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">{item.nombre}</p>
-                        <p className="text-xs text-gray-400">Sistema: {item.stock_actual} {item.unidad}</p>
+                        <p className="text-sm font-medium text-ink-900 truncate">{item.nombre}</p>
+                        <p className="text-xs text-ink-500">Sistema: {item.stock_actual} {item.unidad}</p>
                       </div>
                     </label>
                     {marcado && (
@@ -231,9 +234,9 @@ export default function NuevoReconteo({ items }: Props) {
                           onChange={(e) => actualizarCantidad(item.id, e.target.value)}
                           min="0"
                           step="0.01"
-                          className="w-28 px-2 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                          className="w-28 px-2 py-1.5 border border-ink-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
                         />
-                        <span className="text-xs text-gray-400 w-14">{item.unidad}</span>
+                        <span className="text-xs text-ink-500 w-14">{item.unidad}</span>
                       </div>
                     )}
                   </div>
@@ -243,7 +246,7 @@ export default function NuevoReconteo({ items }: Props) {
           </div>
 
           <div className="flex justify-end gap-3">
-            <Link href="/inventarios/reconteos" className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+            <Link href="/inventarios/reconteos" className={buttonClass({ variant: "secondary" })}>
               Cancelar
             </Link>
             <button onClick={irAPaso2}
@@ -254,32 +257,32 @@ export default function NuevoReconteo({ items }: Props) {
         </div>
       ) : (
         <div>
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-6">
-            <div className="px-4 sm:px-6 py-4 border-b border-gray-100">
-              <h3 className="font-semibold text-gray-900">
+          <div className="bg-white rounded-card border border-ink-200 shadow-card overflow-hidden mb-6">
+            <div className="px-4 sm:px-6 py-4 border-b border-ink-100">
+              <h3 className="font-semibold text-ink-900">
                 {conDiferencia.length > 0 ? `${conDiferencia.length} ítems con diferencia` : "Sin diferencias"}
               </h3>
-              <p className="text-xs text-gray-400 mt-0.5">{itemsSeleccionados.length} ítems contados en total</p>
+              <p className="text-xs text-ink-500 mt-0.5">{itemsSeleccionados.length} ítems contados en total</p>
             </div>
 
             {conDiferencia.length === 0 ? (
-              <div className="py-10 text-center text-gray-400 text-sm">
+              <div className="py-10 text-center text-ink-500 text-sm">
                 Todos los ítems coinciden con el sistema. Puedes confirmar el reconteo igualmente.
               </div>
             ) : (
-              <div className="divide-y divide-gray-50">
+              <div className="divide-y divide-ink-50">
                 {conDiferencia.map((r) => {
                   const sobrante = r.diferencia > 0;
                   return (
                     <div key={r.item.id} className="px-4 sm:px-6 py-3">
                       <div className="flex items-center justify-between gap-3 mb-2">
                         <div className="min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">{r.item.nombre}</p>
-                          <p className="text-xs text-gray-400">
+                          <p className="text-sm font-medium text-ink-900 truncate">{r.item.nombre}</p>
+                          <p className="text-xs text-ink-500">
                             Sistema: {r.item.stock_actual} {r.item.unidad} · Físico: {r.cantidadFisica} {r.item.unidad}
                           </p>
                         </div>
-                        <span className={`text-sm font-semibold flex-shrink-0 ${sobrante ? "text-green-600" : "text-red-600"}`}>
+                        <span className={`text-sm font-semibold flex-shrink-0 ${sobrante ? "text-ok" : "text-danger"}`}>
                           {sobrante ? "+" : ""}{r.diferencia.toFixed(2)} {r.item.unidad}
                         </span>
                       </div>
@@ -289,7 +292,7 @@ export default function NuevoReconteo({ items }: Props) {
                         value={r.conteo.nota}
                         onChange={(e) => actualizarNota(r.item.id, e.target.value)}
                         className={`w-full px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 ${
-                          r.conteo.nota.trim() ? "border-gray-300 focus:border-brand" : "border-red-300"
+                          r.conteo.nota.trim() ? "border-ink-300 focus:border-brand" : "border-danger/30"
                         }`}
                       />
                     </div>
@@ -300,18 +303,18 @@ export default function NuevoReconteo({ items }: Props) {
           </div>
 
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nota general (opcional)</label>
+            <label className="block text-sm font-medium text-ink-800 mb-1.5">Nota general (opcional)</label>
             <textarea value={notaGeneral} onChange={(e) => setNotaGeneral(e.target.value)} rows={2}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand resize-none" />
+              className={textareaClass({ className: "resize-none" })} />
           </div>
 
           <div className="flex justify-end gap-3">
-            <button onClick={() => setPaso(1)} className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+            <button onClick={() => setPaso(1)} className={buttonClass({ variant: "secondary" })}>
               Volver
             </button>
             <button onClick={confirmar} disabled={cargando || !puedeConfirmar}
-              className="px-4 py-2 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-light transition-colors disabled:opacity-50 flex items-center gap-2">
-              {cargando && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+              className={buttonClass()}>
+              {cargando && <Spinner size="sm" />}
               Confirmar reconteo
             </button>
           </div>

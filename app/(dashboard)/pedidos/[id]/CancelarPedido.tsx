@@ -1,7 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+
+import Alert from "@/components/ui/Alert";
+import Button from "@/components/ui/Button";
+import Modal from "@/components/ui/Modal";
 
 interface Props {
   pedidoId: string;
@@ -27,82 +31,45 @@ function ModalConfirmarCancelacion({
   onConfirmar: () => void;
   onCerrar: () => void;
 }) {
-  const contenidoRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function alPresionarTecla(e: KeyboardEvent) {
-      if (e.key === "Escape") onCerrar();
-    }
-    document.addEventListener("keydown", alPresionarTecla);
-    return () => document.removeEventListener("keydown", alPresionarTecla);
-  }, [onCerrar]);
-
-  function alHacerClicFondo(e: React.MouseEvent<HTMLDivElement>) {
-    if (contenidoRef.current && !contenidoRef.current.contains(e.target as Node)) {
-      onCerrar();
-    }
-  }
-
   return (
-    <div
-      className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
-      onClick={alHacerClicFondo}
+    <Modal
+      open
+      onClose={onCerrar}
+      title="¿Cancelar este pedido?"
+      size="sm"
+      dismissible={!cargando}
+      footer={
+        <>
+          <Button variant="secondary" onClick={onCerrar} disabled={cargando}>
+            No, volver
+          </Button>
+          <Button variant="danger" onClick={onConfirmar} loading={cargando}>
+            Sí, cancelar pedido
+          </Button>
+        </>
+      }
     >
-      <div ref={contenidoRef} className="bg-white rounded-2xl shadow-xl w-[95vw] max-w-md">
-        <div className="px-6 py-4 border-b border-gray-100">
-          <h2 className="text-lg font-bold text-gray-900">¿Cancelar este pedido?</h2>
-        </div>
+      <div className="space-y-4">
+        {error && <Alert tone="error">{error}</Alert>}
 
-        <div className="p-6 space-y-4">
-          {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">{error}</div>
-          )}
-
-          <div className="bg-gray-50 border border-gray-100 rounded-lg p-4 space-y-1.5">
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-500">Cliente</span>
-              <span className="font-medium text-gray-900">{clienteNombre}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-500">Pedido</span>
-              <span className="font-medium text-gray-900">{numeroPedido}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-500">Total</span>
-              <span className="font-semibold text-gray-900">{total}</span>
-            </div>
+        <dl className="space-y-1.5 rounded-control border border-ink-200 bg-ink-50 p-4 text-sm">
+          <div className="flex justify-between gap-3">
+            <dt className="text-ink-700">Cliente</dt>
+            <dd className="font-medium text-ink-900">{clienteNombre}</dd>
           </div>
-
-          <div className="flex items-start gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg p-3">
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mt-0.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
-              <line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" />
-            </svg>
-            <span>Esta acción no se puede deshacer.</span>
+          <div className="flex justify-between gap-3">
+            <dt className="text-ink-700">Pedido</dt>
+            <dd className="font-medium text-ink-900">{numeroPedido}</dd>
           </div>
-
-          <div className="grid grid-cols-2 gap-3 pt-1">
-            <button
-              type="button"
-              onClick={onCerrar}
-              disabled={cargando}
-              className="h-11 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-light transition-colors disabled:opacity-50"
-            >
-              No, volver
-            </button>
-            <button
-              type="button"
-              onClick={onConfirmar}
-              disabled={cargando}
-              className="h-11 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              {cargando && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
-              Sí, cancelar pedido
-            </button>
+          <div className="flex justify-between gap-3">
+            <dt className="text-ink-700">Total</dt>
+            <dd className="font-semibold text-ink-900">{total}</dd>
           </div>
-        </div>
+        </dl>
+
+        <Alert tone="warning">Esta acción no se puede deshacer.</Alert>
       </div>
-    </div>
+    </Modal>
   );
 }
 
@@ -140,10 +107,10 @@ export default function CancelarPedido({ pedidoId, numeroPedido, clienteNombre, 
   }
 
   return (
-    <div className="mt-8 pt-6 border-t border-gray-200">
+    <div className="mt-8 pt-6 border-t border-ink-200">
       <button
         onClick={() => { setError(""); setModalAbierto(true); }}
-        className="text-sm text-red-600 hover:text-red-700 font-medium transition-colors"
+        className="min-h-11 text-sm font-medium text-danger hover:underline"
       >
         Cancelar pedido
       </button>

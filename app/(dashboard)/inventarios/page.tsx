@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Beef, Package, RotateCcw, Tag } from "@/components/ui/icons";
 import { prisma } from "@/lib/prisma";
 import { formatearPrecio } from "@/lib/formato";
 import { INVENTARIO_MATERIA_PRIMA_HABILITADO } from "@/lib/inventario-flags";
@@ -9,9 +10,9 @@ export const dynamic = "force-dynamic";
 // Insumos/materias primas quedaron fuera de alcance (ver INVENTARIO_MATERIA_PRIMA_HABILITADO).
 // Producto terminado es lo único que se muestra mientras el flag esté apagado.
 const TIPOS_CONFIG = [
-  { tipo: "insumo", label: "Insumos", href: "/inventarios/insumos", emoji: "📦" },
-  { tipo: "materia_prima", label: "Materias primas", href: "/inventarios/materias-primas", emoji: "🥩" },
-  { tipo: "producto_terminado", label: "Producto terminado", href: "/inventarios/producto-terminado", emoji: "🏷️" },
+  { tipo: "insumo", label: "Insumos", href: "/inventarios/insumos", Icono: Package },
+  { tipo: "materia_prima", label: "Materias primas", href: "/inventarios/materias-primas", Icono: Beef },
+  { tipo: "producto_terminado", label: "Producto terminado", href: "/inventarios/producto-terminado", Icono: Tag },
 ] as const;
 
 const TIPOS_VISIBLES = INVENTARIO_MATERIA_PRIMA_HABILITADO
@@ -29,11 +30,11 @@ export default async function InventariosPage() {
       : 0,
   ]);
 
-  const resumen = TIPOS_VISIBLES.map(({ tipo, label, href, emoji }) => {
+  const resumen = TIPOS_VISIBLES.map(({ tipo, label, href, Icono }) => {
     const del_tipo = items.filter((i) => i.tipo === tipo);
     const bajo_stock = del_tipo.filter((i) => Number(i.stock_actual) <= Number(i.stock_minimo));
     const valor_total = del_tipo.reduce((s, i) => s + Number(i.stock_actual) * Number(i.costo_unitario), 0);
-    return { tipo, label, href, emoji, total: del_tipo.length, bajo_stock: bajo_stock.length, valor_total };
+    return { tipo, label, href, Icono, total: del_tipo.length, bajo_stock: bajo_stock.length, valor_total };
   });
 
   // Sin el flag, solo mostramos alertas de producto terminado — insumos y
@@ -47,12 +48,12 @@ export default async function InventariosPage() {
     <div>
       <div className="flex items-start justify-between mb-6 gap-3">
         <div>
-          <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Inventarios</h1>
-          <p className="text-gray-500 text-sm mt-1">Resumen general de existencias</p>
+          <h1 className="font-display text-2xl font-semibold text-ink-900 lg:text-3xl">Inventarios</h1>
+          <p className="text-ink-600 text-sm mt-1">Resumen general de existencias</p>
         </div>
         {INVENTARIO_MATERIA_PRIMA_HABILITADO && (
           <Link href="/inventarios/movimientos"
-            className="h-11 px-3 lg:px-4 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2 flex-shrink-0">
+            className="h-11 px-3 lg:px-4 bg-white border border-ink-200 rounded-lg text-sm font-medium text-ink-800 hover:bg-ink-50 transition-colors flex items-center gap-2 flex-shrink-0">
             Historial de movimientos
           </Link>
         )}
@@ -62,25 +63,25 @@ export default async function InventariosPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {resumen.map((r) => (
           <Link key={r.tipo} href={r.href}
-            className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow group">
+            className="bg-white rounded-card border border-ink-200 shadow-card p-5 hover:shadow-md transition-shadow group">
             <div className="flex items-center gap-3 mb-4">
-              <span className="text-2xl">{r.emoji}</span>
-              <h3 className="font-semibold text-gray-900 group-hover:text-brand transition-colors">{r.label}</h3>
+              <span aria-hidden="true" className="flex h-10 w-10 items-center justify-center rounded-control bg-brand-50 text-brand-700"><r.Icono className="h-5 w-5" /></span>
+              <h3 className="font-semibold text-ink-900 group-hover:text-brand transition-colors">{r.label}</h3>
             </div>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Total ítems</span>
-                <span className="font-medium text-gray-900">{r.total}</span>
+                <span className="text-ink-600">Total ítems</span>
+                <span className="font-medium text-ink-900">{r.total}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Bajo stock</span>
-                <span className={`font-medium ${r.bajo_stock > 0 ? "text-red-600" : "text-green-600"}`}>
+                <span className="text-ink-600">Bajo stock</span>
+                <span className={`font-medium ${r.bajo_stock > 0 ? "text-danger" : "text-ok"}`}>
                   {r.bajo_stock}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Valor total</span>
-                <span className="font-medium text-gray-900">{formatearPrecio(r.valor_total)}</span>
+                <span className="text-ink-600">Valor total</span>
+                <span className="font-medium text-ink-900">{formatearPrecio(r.valor_total)}</span>
               </div>
             </div>
           </Link>
@@ -88,45 +89,45 @@ export default async function InventariosPage() {
 
         {INVENTARIO_MATERIA_PRIMA_HABILITADO && (
         <Link href="/inventarios/reconteos"
-          className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow group">
+          className="bg-white rounded-card border border-ink-200 shadow-card p-5 hover:shadow-md transition-shadow group">
           <div className="flex items-center gap-3 mb-4">
-            <span className="text-2xl">🔄</span>
-            <h3 className="font-semibold text-gray-900 group-hover:text-brand transition-colors">Reconteos</h3>
+            <span aria-hidden="true" className="flex h-10 w-10 items-center justify-center rounded-control bg-brand-50 text-brand-700"><RotateCcw className="h-5 w-5" /></span>
+            <h3 className="font-semibold text-ink-900 group-hover:text-brand transition-colors">Reconteos</h3>
           </div>
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-gray-500">Abiertos</span>
-              <span className={`font-medium ${reconteosAbiertos > 0 ? "text-red-600" : "text-green-600"}`}>
+              <span className="text-ink-600">Abiertos</span>
+              <span className={`font-medium ${reconteosAbiertos > 0 ? "text-danger" : "text-ok"}`}>
                 {reconteosAbiertos}
               </span>
             </div>
-            <p className="text-xs text-gray-400 pt-1">Registrar conteo físico y ajustar stock</p>
+            <p className="text-xs text-ink-500 pt-1">Registrar conteo físico y ajustar stock</p>
           </div>
         </Link>
         )}
       </div>
 
       {/* Alertas */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div className="px-4 sm:px-6 py-4 border-b border-gray-100">
-          <h3 className="font-semibold text-gray-900">
+      <div className="bg-white rounded-card border border-ink-200 shadow-card overflow-hidden">
+        <div className="px-4 sm:px-6 py-4 border-b border-ink-100">
+          <h3 className="font-semibold text-ink-900">
             Alertas de stock
             {alertas.length > 0 && (
-              <span className="ml-2 px-2 py-0.5 bg-red-100 text-red-700 text-xs rounded-full">{alertas.length}</span>
+              <span className="ml-2 px-2 py-0.5 bg-danger-soft text-danger text-xs rounded-full">{alertas.length}</span>
             )}
           </h3>
         </div>
         {alertas.length === 0 ? (
-          <div className="py-12 text-center text-gray-400">
+          <div className="py-12 text-center text-ink-500">
             <p className="text-sm">Todos los ítems tienen stock suficiente</p>
           </div>
         ) : (
-          <div className="divide-y divide-gray-50">
+          <div className="divide-y divide-ink-50">
             {alertas.map((a) => (
               <div key={a.id} className="px-4 sm:px-6 py-3 flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-900">{a.nombre}</p>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-sm font-medium text-ink-900">{a.nombre}</p>
+                  <p className="text-xs text-ink-500">
                     {TIPOS_CONFIG.find((t) => t.tipo === a.tipo)?.label} · {a.stock_actual} {a.unidad} (mín: {a.stock_minimo})
                   </p>
                 </div>

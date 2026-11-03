@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { formatearPrecio } from "@/lib/formato";
 
+import { Check, Pencil, Trash2, X } from "@/components/ui/icons";
 interface ProductoPrecio {
   id: string;
   nombre: string;
@@ -61,54 +62,54 @@ export default function TablaPrecios({ clienteId, productos }: Props) {
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-      <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-        <h3 className="font-semibold text-gray-900">
+    <div className="bg-white rounded-card border border-ink-200 shadow-card overflow-hidden">
+      <div className="px-6 py-4 border-b border-ink-100 flex items-center justify-between">
+        <h3 className="font-semibold text-ink-900">
           Precios personalizados
         </h3>
-        <span className="text-sm text-gray-400">
+        <span className="text-sm text-ink-500">
           {productos.filter((p) => p.precio_cliente !== null).length} de{" "}
           {productos.length} personalizados
         </span>
       </div>
       <table className="w-full">
         <thead>
-          <tr className="border-b border-gray-100">
-            <th className="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase">
+          <tr className="border-b border-ink-100">
+            <th className="text-left py-3 px-6 text-xs font-medium text-ink-600 uppercase">
               Producto
             </th>
-            <th className="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase">
+            <th className="text-left py-3 px-6 text-xs font-medium text-ink-600 uppercase">
               Unidad
             </th>
-            <th className="text-right py-3 px-6 text-xs font-medium text-gray-500 uppercase">
+            <th className="text-right py-3 px-6 text-xs font-medium text-ink-600 uppercase">
               Precio base
             </th>
-            <th className="text-right py-3 px-6 text-xs font-medium text-gray-500 uppercase">
+            <th className="text-right py-3 px-6 text-xs font-medium text-ink-600 uppercase">
               Precio cliente
             </th>
-            <th className="text-right py-3 px-6 text-xs font-medium text-gray-500 uppercase">
+            <th className="text-right py-3 px-6 text-xs font-medium text-ink-600 uppercase">
               Acciones
             </th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-50">
+        <tbody className="divide-y divide-ink-50">
           {productos.map((p) => {
             const esEditando = editando === p.id;
             const estaGuardando = guardando === p.id;
 
             return (
-              <tr key={p.id} className="hover:bg-gray-50/50">
-                <td className="py-3 px-6 text-sm font-medium text-gray-900">
+              <tr key={p.id} className="hover:bg-ink-50/50">
+                <td className="py-3 px-6 text-sm font-medium text-ink-900">
                   {p.nombre}
                 </td>
-                <td className="py-3 px-6 text-sm text-gray-500">{p.unidad}</td>
-                <td className="py-3 px-6 text-sm text-gray-500 text-right">
+                <td className="py-3 px-6 text-sm text-ink-600">{p.unidad}</td>
+                <td className="py-3 px-6 text-sm text-ink-600 text-right">
                   {formatearPrecio(p.precio_base)}
                 </td>
                 <td className="py-3 px-6 text-right">
                   {esEditando ? (
                     <div className="flex items-center justify-end gap-2">
-                      <span className="text-sm text-gray-400">$</span>
+                      <span className="text-sm text-ink-500">$</span>
                       <input
                         type="number"
                         value={valorEdicion}
@@ -123,20 +124,15 @@ export default function TablaPrecios({ clienteId, productos }: Props) {
                       <button
                         onClick={() => guardarPrecio(p.id)}
                         disabled={estaGuardando}
-                        className="p-1 text-green-600 hover:bg-green-50 rounded"
+                        className="p-1 text-ok hover:bg-ok-soft rounded"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <polyline points="20 6 9 17 4 12" />
-                        </svg>
+                        <Check aria-hidden="true" className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => setEditando(null)}
-                        className="p-1 text-gray-400 hover:bg-gray-100 rounded"
+                        className="p-1 text-ink-500 hover:bg-ink-100 rounded"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <line x1="18" y1="6" x2="6" y2="18" />
-                          <line x1="6" y1="6" x2="18" y2="18" />
-                        </svg>
+                        <X aria-hidden="true" className="w-4 h-4" />
                       </button>
                     </div>
                   ) : p.precio_cliente !== null ? (
@@ -144,7 +140,7 @@ export default function TablaPrecios({ clienteId, productos }: Props) {
                       {formatearPrecio(p.precio_cliente)}
                     </span>
                   ) : (
-                    <span className="text-xs text-gray-300 italic">
+                    <span className="text-xs text-ink-300 italic">
                       Usa precio base
                     </span>
                   )}
@@ -160,26 +156,19 @@ export default function TablaPrecios({ clienteId, productos }: Props) {
                               p.precio_base.toString()
                           );
                         }}
-                        className="p-1.5 text-gray-400 hover:text-brand hover:bg-gray-100 rounded transition-colors"
+                        className="p-1.5 text-ink-500 hover:text-brand hover:bg-ink-100 rounded transition-colors"
                         title="Editar precio"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-                          <path d="m15 5 4 4" />
-                        </svg>
+                        <Pencil aria-hidden="true" className="w-3.5 h-3.5" />
                       </button>
                       {p.precio_cliente !== null && (
                         <button
                           onClick={() => eliminarPrecio(p.id)}
                           disabled={estaGuardando}
-                          className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                          className="p-1.5 text-ink-500 hover:text-danger hover:bg-danger-soft rounded transition-colors"
                           title="Usar precio base"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M3 6h18" />
-                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                          </svg>
+                          <Trash2 aria-hidden="true" className="w-3.5 h-3.5" />
                         </button>
                       )}
                     </div>

@@ -9,6 +9,7 @@ import SelectorRango from "./SelectorRango";
 import DespacharRutas from "./DespacharRutas";
 import PanelInformes from "./PanelInformes";
 
+import { Download, FileIcon, TableIcon, Users } from "@/components/ui/icons";
 export const dynamic = "force-dynamic";
 
 function fechaBogota(): Date {
@@ -144,18 +145,16 @@ export default async function PedidosPage(
       {/* Encabezado */}
       <div className="flex items-start justify-between mb-4 gap-3">
         <div className="min-w-0">
-          <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Pedidos</h1>
+          <h1 className="font-display text-2xl font-semibold text-ink-900 lg:text-3xl">Pedidos</h1>
         </div>
         {(vistaActual === "fecha" || vistaActual === "todos") && (
           <div className="flex items-center gap-2 flex-shrink-0">
             <a
               href={`/api/pedidos/exportar-pdf?fecha=${fechaSeleccionada}`}
-              className="h-11 px-3 lg:px-4 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors flex items-center gap-2"
+              className="h-11 px-3 lg:px-4 bg-white border border-ink-200 text-ink-800 rounded-lg text-sm font-medium hover:bg-ink-50 transition-colors flex items-center gap-2"
               title="PDF simple para quien despacha la ruta"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" />
-              </svg>
+              <FileIcon aria-hidden="true" className="w-4 h-4" />
               <span className="hidden sm:inline">PDF (Despacho)</span>
             </a>
             <a
@@ -163,29 +162,23 @@ export default async function PedidosPage(
               className="h-11 px-3 lg:px-4 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-light transition-colors flex items-center gap-2"
               title="Excel detallado (una fila por producto) para Mekano"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
-              </svg>
+              <Download aria-hidden="true" className="w-4 h-4" />
               <span className="hidden sm:inline">Excel Pedidos</span>
             </a>
             <a
               href={`/api/pedidos/exportar-matriz?fecha=${fechaSeleccionada}`}
-              className="h-11 px-3 lg:px-4 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors flex items-center gap-2"
+              className="h-11 px-3 lg:px-4 bg-white border border-ink-200 text-ink-800 rounded-lg text-sm font-medium hover:bg-ink-50 transition-colors flex items-center gap-2"
               title="Excel con una hoja por ruta, cliente x producto (para saber qué preparar)"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="3" y1="15" x2="21" y2="15" /><line x1="9" y1="3" x2="9" y2="21" /><line x1="15" y1="3" x2="15" y2="21" />
-              </svg>
+              <TableIcon aria-hidden="true" className="w-4 h-4" />
               <span className="hidden sm:inline">Matriz por ruta</span>
             </a>
             <a
               href={`/api/pedidos/exportar-por-cliente?fecha=${fechaSeleccionada}`}
-              className="h-11 px-3 lg:px-4 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors flex items-center gap-2"
+              className="h-11 px-3 lg:px-4 bg-white border border-ink-200 text-ink-800 rounded-lg text-sm font-medium hover:bg-ink-50 transition-colors flex items-center gap-2"
               title="Excel con una fila por cliente y el detalle de lo que pidió"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
-              </svg>
+              <Users aria-hidden="true" className="w-4 h-4" />
               <span className="hidden sm:inline">Por cliente</span>
             </a>
           </div>
@@ -195,13 +188,13 @@ export default async function PedidosPage(
       {/* Toggle vista + date picker */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
         {/* Tabs Por fecha / Todos */}
-        <div className="flex bg-gray-100 rounded-lg p-0.5">
+        <div className="flex bg-ink-100 rounded-lg p-0.5">
           <Link
             href="/pedidos?vista=fecha"
             className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
               vistaActual === "fecha"
-                ? "bg-white shadow-sm text-gray-900"
-                : "text-gray-500 hover:text-gray-700"
+                ? "bg-white shadow-sm text-ink-900"
+                : "text-ink-600 hover:text-ink-800"
             }`}
           >
             Por fecha
@@ -210,8 +203,8 @@ export default async function PedidosPage(
             href="/pedidos?vista=todos"
             className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
               vistaActual === "todos"
-                ? "bg-white shadow-sm text-gray-900"
-                : "text-gray-500 hover:text-gray-700"
+                ? "bg-white shadow-sm text-ink-900"
+                : "text-ink-600 hover:text-ink-800"
             }`}
           >
             Todos
@@ -220,8 +213,8 @@ export default async function PedidosPage(
             href={`/pedidos?vista=rango&desde=${desdeSeleccionada}&hasta=${hastaSeleccionada}`}
             className={`px-4 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
               vistaActual === "rango"
-                ? "bg-white shadow-sm text-gray-900"
-                : "text-gray-500 hover:text-gray-700"
+                ? "bg-white shadow-sm text-ink-900"
+                : "text-ink-600 hover:text-ink-800"
             }`}
           >
             Rango
@@ -230,8 +223,8 @@ export default async function PedidosPage(
             href="/pedidos?vista=informes"
             className={`px-4 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
               vistaActual === "informes"
-                ? "bg-white shadow-sm text-gray-900"
-                : "text-gray-500 hover:text-gray-700"
+                ? "bg-white shadow-sm text-ink-900"
+                : "text-ink-600 hover:text-ink-800"
             }`}
           >
             Informes
@@ -244,7 +237,7 @@ export default async function PedidosPage(
             {!esManana && (
               <Link
                 href="/pedidos?vista=fecha"
-                className="h-10 px-3 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 flex items-center"
+                className="h-10 px-3 bg-white border border-ink-200 rounded-lg text-sm text-ink-700 hover:bg-ink-50 flex items-center"
               >
                 Mañana
               </Link>
@@ -252,7 +245,7 @@ export default async function PedidosPage(
             {!esHoy && (
               <Link
                 href={`/pedidos?fecha=${formatDateStr(hoy)}`}
-                className="h-10 px-3 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 flex items-center"
+                className="h-10 px-3 bg-white border border-ink-200 rounded-lg text-sm text-ink-700 hover:bg-ink-50 flex items-center"
               >
                 Hoy
               </Link>
@@ -266,9 +259,9 @@ export default async function PedidosPage(
 
         {vistaActual !== "informes" && (
           <div className="flex items-center gap-3 sm:ml-auto">
-            <span className="text-sm text-gray-500 capitalize">{fechaLabel}</span>
+            <span className="text-sm text-ink-600 capitalize">{fechaLabel}</span>
             {totalGeneral > 0 && (
-              <span className="text-sm font-semibold text-gray-900">
+              <span className="text-sm font-semibold text-ink-900">
                 Total: {formatearPrecio(totalGeneral)}
               </span>
             )}
@@ -298,18 +291,18 @@ export default async function PedidosPage(
           {pagina > 1 && (
             <Link
               href={`/pedidos?vista=todos&pagina=${pagina - 1}`}
-              className="h-10 px-4 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 flex items-center"
+              className="h-10 px-4 bg-white border border-ink-200 rounded-lg text-sm text-ink-700 hover:bg-ink-50 flex items-center"
             >
               Anterior
             </Link>
           )}
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-ink-600">
             Página {pagina} de {totalPaginas}
           </span>
           {pagina < totalPaginas && (
             <Link
               href={`/pedidos?vista=todos&pagina=${pagina + 1}`}
-              className="h-10 px-4 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 flex items-center"
+              className="h-10 px-4 bg-white border border-ink-200 rounded-lg text-sm text-ink-700 hover:bg-ink-50 flex items-center"
             >
               Siguiente
             </Link>

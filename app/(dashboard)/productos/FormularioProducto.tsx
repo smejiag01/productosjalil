@@ -4,6 +4,9 @@ import { useState, FormEvent, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { UNIDADES } from "@/lib/validaciones-producto";
 
+import { ImageIcon } from "@/components/ui/icons";
+import Spinner from "@/components/ui/Spinner";
+import { buttonClass, inputClass, textareaClass } from "@/components/ui/clases";
 interface DatosProducto {
   id?: string;
   nombre?: string;
@@ -181,7 +184,7 @@ export default function FormularioProducto({ productoInicial, categorias = [] }:
   return (
     <form onSubmit={handleSubmit} className="max-w-2xl space-y-6">
       {errorGeneral && (
-        <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+        <div role="alert" className="p-3 bg-danger-soft border border-danger/30 rounded-control text-danger text-sm">
           {errorGeneral}
         </div>
       )}
@@ -189,12 +192,12 @@ export default function FormularioProducto({ productoInicial, categorias = [] }:
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Columna izquierda: imagen */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-ink-800 mb-2">
             Imagen del producto
           </label>
           <div
             onClick={() => inputArchivoRef.current?.click()}
-            className="aspect-square bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl overflow-hidden cursor-pointer hover:border-brand/50 transition-colors flex items-center justify-center"
+            className="aspect-square bg-ink-50 border-2 border-dashed border-ink-200 rounded-xl overflow-hidden cursor-pointer hover:border-brand/50 transition-colors flex items-center justify-center"
           >
             {imagenMostrar ? (
               <img
@@ -203,12 +206,8 @@ export default function FormularioProducto({ productoInicial, categorias = [] }:
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="text-center text-gray-400 p-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-12 h-12 mx-auto mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                  <circle cx="9" cy="9" r="2" />
-                  <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
-                </svg>
+              <div className="text-center text-ink-500 p-4">
+                <ImageIcon aria-hidden="true" className="w-12 h-12 mx-auto mb-2" />
                 <p className="text-sm">Clic para seleccionar imagen</p>
                 <p className="text-xs mt-1">JPG, PNG o WebP</p>
               </div>
@@ -222,10 +221,10 @@ export default function FormularioProducto({ productoInicial, categorias = [] }:
             className="hidden"
           />
           {errores.imagen && (
-            <p className="text-red-500 text-xs mt-1">{errores.imagen}</p>
+            <p className="text-danger text-xs mt-1">{errores.imagen}</p>
           )}
           {previewImagen && (
-            <p className="text-xs text-green-600 mt-1">
+            <p className="text-xs text-ok mt-1">
               Imagen seleccionada — se subirá al guardar
             </p>
           )}
@@ -234,44 +233,44 @@ export default function FormularioProducto({ productoInicial, categorias = [] }:
         {/* Columna derecha: campos */}
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Nombre <span className="text-red-500">*</span>
+            <label className="block text-sm font-medium text-ink-800 mb-1.5">
+              Nombre <span className="text-danger">*</span>
             </label>
             <input
               type="text"
               value={nombre}
               onChange={(e) => setNombre(e.target.value)}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+              className={inputClass()}
               placeholder="Nombre del producto"
             />
             {errores.nombre && (
-              <p className="text-red-500 text-xs mt-1">{errores.nombre}</p>
+              <p className="text-danger text-xs mt-1">{errores.nombre}</p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-ink-800 mb-1.5">
               Descripción
             </label>
             <textarea
               value={descripcion}
               onChange={(e) => setDescripcion(e.target.value)}
               rows={2}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand resize-none"
+              className={textareaClass({ className: "resize-none" })}
               placeholder="Descripción opcional"
             />
           </div>
 
           {categorias.length > 0 && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-ink-800 mb-1.5">
                 Categoría
               </label>
               <select
                 value={categoriaId}
                 onChange={(e) => setCategoriaId(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                className={inputClass()}
               >
                 <option value="">Sin categoría</option>
                 {categorias.map((c) => (
@@ -285,13 +284,13 @@ export default function FormularioProducto({ productoInicial, categorias = [] }:
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Unidad <span className="text-red-500">*</span>
+              <label className="block text-sm font-medium text-ink-800 mb-1.5">
+                Unidad <span className="text-danger">*</span>
               </label>
               <select
                 value={unidad}
                 onChange={(e) => setUnidad(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                className={inputClass()}
               >
                 {UNIDADES.map((u) => (
                   <option key={u} value={u}>
@@ -302,11 +301,11 @@ export default function FormularioProducto({ productoInicial, categorias = [] }:
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Precio base (COP) <span className="text-red-500">*</span>
+              <label className="block text-sm font-medium text-ink-800 mb-1.5">
+                Precio base (COP) <span className="text-danger">*</span>
               </label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-500 text-sm">
                   $
                 </span>
                 <input
@@ -315,12 +314,12 @@ export default function FormularioProducto({ productoInicial, categorias = [] }:
                   onChange={(e) => setPrecioBase(e.target.value)}
                   required
                   min="1"
-                  className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                  className="w-full pl-7 pr-3 py-2 border border-ink-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
                   placeholder="0"
                 />
               </div>
               {errores.precio_base && (
-                <p className="text-red-500 text-xs mt-1">
+                <p className="text-danger text-xs mt-1">
                   {errores.precio_base}
                 </p>
               )}
@@ -329,7 +328,7 @@ export default function FormularioProducto({ productoInicial, categorias = [] }:
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-ink-800 mb-1.5">
                 Orden en menú
               </label>
               <input
@@ -337,9 +336,9 @@ export default function FormularioProducto({ productoInicial, categorias = [] }:
                 value={orden}
                 onChange={(e) => setOrden(e.target.value)}
                 min="0"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                className={inputClass()}
               />
-              <p className="text-xs text-gray-400 mt-1">
+              <p className="text-xs text-ink-500 mt-1">
                 Orden en que aparece en el catálogo (tienda en línea y WhatsApp)
               </p>
             </div>
@@ -347,14 +346,14 @@ export default function FormularioProducto({ productoInicial, categorias = [] }:
             {esEdicion && (
               <div className="flex items-end pb-2">
                 <div className="flex items-center gap-3">
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-ink-800">
                     Estado
                   </label>
                   <button
                     type="button"
                     onClick={() => setActivo(!activo)}
                     className={`relative w-10 h-5 rounded-full transition-colors ${
-                      activo ? "bg-green-500" : "bg-gray-300"
+                      activo ? "bg-ok" : "bg-ink-300"
                     }`}
                   >
                     <span
@@ -363,7 +362,7 @@ export default function FormularioProducto({ productoInicial, categorias = [] }:
                       }`}
                     />
                   </button>
-                  <span className="text-sm text-gray-600">
+                  <span className="text-sm text-ink-700">
                     {activo ? "Activo" : "Inactivo"}
                   </span>
                 </div>
@@ -374,11 +373,11 @@ export default function FormularioProducto({ productoInicial, categorias = [] }:
       </div>
 
       {/* Botones */}
-      <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+      <div className="flex justify-end gap-3 pt-4 border-t border-ink-100">
         <button
           type="button"
           onClick={() => router.push("/productos")}
-          className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          className={buttonClass({ variant: "secondary" })}
         >
           Cancelar
         </button>
@@ -388,7 +387,7 @@ export default function FormularioProducto({ productoInicial, categorias = [] }:
           className="px-6 py-2 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-light transition-colors disabled:opacity-50 flex items-center gap-2"
         >
           {(cargando || subiendoImagen) && (
-            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            <Spinner size="sm" />
           )}
           {subiendoImagen
             ? "Subiendo imagen..."

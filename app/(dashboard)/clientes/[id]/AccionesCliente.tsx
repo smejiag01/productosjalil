@@ -4,6 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import ModalCliente from "../ModalCliente";
 
+import Alert from "@/components/ui/Alert";
+import Button from "@/components/ui/Button";
+import { Gift, Pencil, RotateCcw, Trash2 } from "@/components/ui/icons";
+import { useConfirmar } from "@/components/ui/useConfirmar";
 interface Props {
   cliente: {
     id: string;
@@ -27,16 +31,24 @@ export default function AccionesCliente({ cliente, rutas, puedeEliminar }: Props
   const router = useRouter();
   const [modalAbierto, setModalAbierto] = useState(false);
   const [procesando, setProcesando] = useState(false);
+  const [errorAccion, setErrorAccion] = useState("");
+  const { confirmar, dialogo } = useConfirmar();
 
   async function alternarEstado() {
     const accion = cliente.activo ? "archivar" : "reactivar";
-    const confirmado = window.confirm(
+    const confirmado = await confirmar(
       cliente.activo
-        ? `¿Archivar a ${cliente.nombre}? Dejará de aparecer como cliente activo, pero conserva su historial de pedidos.`
-        : `¿Reactivar a ${cliente.nombre}?`
+        ? {
+            title: `¿Archivar a ${cliente.nombre}?`,
+            description: "Dejará de aparecer como cliente activo, pero conserva su historial de pedidos.",
+            confirmLabel: "Archivar",
+            tone: "danger",
+          }
+        : { title: `¿Reactivar a ${cliente.nombre}?`, confirmLabel: "Reactivar" }
     );
     if (!confirmado) return;
 
+    setErrorAccion("");
     setProcesando(true);
     try {
       const respuesta = cliente.activo
@@ -53,18 +65,23 @@ export default function AccionesCliente({ cliente, rutas, puedeEliminar }: Props
       }
       router.refresh();
     } catch (error) {
-      alert(error instanceof Error ? error.message : `Error al ${accion} el cliente`);
+      setErrorAccion(error instanceof Error ? error.message : `Error al ${accion} el cliente`);
     } finally {
       setProcesando(false);
     }
   }
 
   async function eliminarPermanente() {
-    const confirmado = window.confirm(
-      `¿Eliminar definitivamente a ${cliente.nombre}?\n\nEsto borra el cliente, sus contactos, sedes y precios personalizados sin dejar historial. No se puede deshacer.`
-    );
+    const confirmado = await confirmar({
+      title: `¿Eliminar definitivamente a ${cliente.nombre}?`,
+      description:
+        "Esto borra el cliente, sus contactos, sedes y precios personalizados sin dejar historial. No se puede deshacer.",
+      confirmLabel: "Eliminar definitivamente",
+      tone: "danger",
+    });
     if (!confirmado) return;
 
+    setErrorAccion("");
     setProcesando(true);
     try {
       const respuesta = await fetch(`/api/clientes/${cliente.id}?permanente=true`, {
@@ -77,69 +94,56 @@ export default function AccionesCliente({ cliente, rutas, puedeEliminar }: Props
       router.push("/clientes");
       router.refresh();
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Error al eliminar el cliente");
+      setErrorAccion(error instanceof Error ? error.message : "Error al eliminar el cliente");
       setProcesando(false);
     }
   }
 
   return (
     <>
-      <div className="flex items-center gap-2">
-        <button
+      <div className="flex flex-wrap items-center gap-2">
+        <Button
+          variant="secondary"
           onClick={() => setModalAbierto(true)}
-          className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2"
+          leftIcon={<Pencil aria-hidden="true" className="h-4 w-4" />}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-            <path d="m15 5 4 4" />
-          </svg>
           Editar cliente
-        </button>
-        <button
+        </Button>
+        <Button
+          variant="secondary"
           onClick={alternarEstado}
           disabled={procesando}
-          className={`px-4 py-2 border rounded-lg text-sm font-medium transition-colors flex items-center gap-2 disabled:opacity-50 ${
-            cliente.activo
-              ? "bg-white border-red-200 text-red-600 hover:bg-red-50"
-              : "bg-white border-green-200 text-green-700 hover:bg-green-50"
-          }`}
+          className={cliente.activo ? "border-danger/40 text-danger hover:bg-danger-soft" : "border-ok/40 text-ok hover:bg-ok-soft"}
+          leftIcon={
+            cliente.activo ? (
+              <Gift aria-hidden="true" className="h-4 w-4" />
+            ) : (
+              <RotateCcw aria-hidden="true" className="h-4 w-4" />
+            )
+          }
         >
-          {cliente.activo ? (
-            <>
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 8v13H3V8" />
-                <path d="M1 3h22v5H1z" />
-                <path d="M10 12h4" />
-              </svg>
-              {procesando ? "Archivando..." : "Archivar cliente"}
-            </>
-          ) : (
-            <>
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-                <path d="M3 3v5h5" />
-              </svg>
-              {procesando ? "Reactivando..." : "Reactivar cliente"}
-            </>
-          )}
-        </button>
+          {cliente.activo
+            ? procesando ? "Archivando..." : "Archivar cliente"
+            : procesando ? "Reactivando..." : "Reactivar cliente"}
+        </Button>
         {puedeEliminar && (
-          <button
+          <Button
+            variant="secondary"
             onClick={eliminarPermanente}
             disabled={procesando}
             title="No tiene pedidos ni PQRs registrados, así que se puede eliminar sin dejar historial"
-            className="px-4 py-2 bg-white border border-red-200 text-red-600 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors flex items-center gap-2 disabled:opacity-50"
+            className="border-danger/40 text-danger hover:bg-danger-soft"
+            leftIcon={<Trash2 aria-hidden="true" className="h-4 w-4" />}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="3 6 5 6 21 6" />
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-              <line x1="10" y1="11" x2="10" y2="17" />
-              <line x1="14" y1="11" x2="14" y2="17" />
-            </svg>
             Eliminar cliente
-          </button>
+          </Button>
         )}
       </div>
+      {errorAccion && (
+        <Alert tone="error" className="mt-3">
+          {errorAccion}
+        </Alert>
+      )}
       {modalAbierto && (
         <ModalCliente
           rutas={rutas}
@@ -147,6 +151,7 @@ export default function AccionesCliente({ cliente, rutas, puedeEliminar }: Props
           onCerrar={() => setModalAbierto(false)}
         />
       )}
+      {dialogo}
     </>
   );
 }

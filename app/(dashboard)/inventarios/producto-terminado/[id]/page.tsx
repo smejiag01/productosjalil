@@ -4,7 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { formatearFechaHora } from "@/lib/fechas";
 import { INVENTARIO_MATERIA_PRIMA_HABILITADO } from "@/lib/inventario-flags";
 import SeccionReceta from "./SeccionReceta";
-
+
+import { ChevronLeft } from "@/components/ui/icons";
 export const dynamic = "force-dynamic";
 
 const LABEL_MOTIVO: Record<string, string> = {
@@ -111,15 +112,13 @@ export default async function DetalleProductoTerminadoPage(
       <div className="mb-6">
         <Link
           href="/inventarios/producto-terminado"
-          className="text-sm text-gray-400 hover:text-gray-600 transition-colors flex items-center gap-1 mb-1"
+          className="text-sm text-ink-500 hover:text-ink-700 transition-colors flex items-center gap-1 mb-1"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
+          <ChevronLeft aria-hidden="true" className="w-4 h-4" />
           Producto terminado
         </Link>
-        <h1 className="text-xl lg:text-2xl font-bold text-gray-900">{item.nombre}</h1>
-        <p className="text-gray-500 text-sm mt-1">
+        <h1 className="font-display text-2xl font-semibold text-ink-900 lg:text-3xl">{item.nombre}</h1>
+        <p className="text-ink-600 text-sm mt-1">
           Stock actual: {Number(item.stock_actual)} {item.unidad}
           {item.producto ? ` · Vinculado a: ${item.producto.nombre}` : ""}
         </p>
@@ -135,45 +134,45 @@ export default async function DetalleProductoTerminadoPage(
         </div>
       )}
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div className="px-4 sm:px-6 py-4 border-b border-gray-100">
-          <h3 className="font-semibold text-gray-900">Historial de movimientos</h3>
-          <p className="text-xs text-gray-400 mt-0.5">Últimos {movimientosSerializados.length} movimientos de este producto</p>
+      <div className="bg-white rounded-card border border-ink-200 shadow-card overflow-hidden">
+        <div className="px-4 sm:px-6 py-4 border-b border-ink-100">
+          <h3 className="font-semibold text-ink-900">Historial de movimientos</h3>
+          <p className="text-xs text-ink-500 mt-0.5">Últimos {movimientosSerializados.length} movimientos de este producto</p>
         </div>
 
         {movimientosSerializados.length === 0 ? (
-          <div className="py-10 text-center text-gray-400 text-sm">Sin movimientos registrados aún</div>
+          <div className="py-10 text-center text-ink-500 text-sm">Sin movimientos registrados aún</div>
         ) : (
-          <div className="divide-y divide-gray-50">
+          <div className="divide-y divide-ink-50">
             {movimientosSerializados.map((m) => (
               <div key={m.id} className="px-4 sm:px-6 py-3 flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${
                       m.tipo === "entrada"
-                        ? "bg-green-50 border-green-200 text-green-800"
+                        ? "bg-ok-soft border-ok/30 text-ok"
                         : m.tipo === "salida"
-                          ? "bg-red-50 border-red-200 text-red-800"
-                          : "bg-gray-50 border-gray-200 text-gray-700"
+                          ? "bg-danger-soft border-danger/30 text-danger"
+                          : "bg-ink-50 border-ink-200 text-ink-800"
                     }`}>
                       {m.tipo === "entrada" ? "Entrada" : m.tipo === "salida" ? "Salida" : "Ajuste"}
                     </span>
-                    <span className="text-sm text-gray-700">{LABEL_MOTIVO[m.motivo] ?? m.motivo}</span>
+                    <span className="text-sm text-ink-800">{LABEL_MOTIVO[m.motivo] ?? m.motivo}</span>
                     {m.pedido && (
                       <Link href={`/pedidos/${m.pedido.id}`} className="text-xs text-brand hover:text-brand-light font-medium">
                         {m.pedido.numero} — {m.pedido.clienteNombre}
                       </Link>
                     )}
                   </div>
-                  <p className="text-xs text-gray-400 mt-0.5">
+                  <p className="text-xs text-ink-500 mt-0.5">
                     {m.fecha}{m.usuarioNombre ? ` · ${m.usuarioNombre}` : ""}
                   </p>
                 </div>
                 <div className="text-right flex-shrink-0">
-                  <p className={`text-sm font-medium ${m.tipo === "salida" ? "text-red-600" : "text-gray-900"}`}>
+                  <p className={`text-sm font-medium ${m.tipo === "salida" ? "text-danger" : "text-ink-900"}`}>
                     {m.tipo === "salida" ? "-" : "+"}{m.cantidad} {item.unidad}
                   </p>
-                  <p className="text-xs text-gray-400">Stock: {m.cantidadNueva}</p>
+                  <p className="text-xs text-ink-500">Stock: {m.cantidadNueva}</p>
                 </div>
               </div>
             ))}

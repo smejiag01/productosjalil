@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ESTADOS, type EstadoPedido } from "@/lib/pedidos";
 
+import { Check, Package } from "@/components/ui/icons";
+import Spinner from "@/components/ui/Spinner";
 interface Props {
   pedidoId: string;
   transiciones: EstadoPedido[];
@@ -14,29 +16,21 @@ const ESTILOS_BOTON: Record<
   { clase: string; icono: React.ReactNode }
 > = {
   en_proceso: {
-    clase: "bg-blue-600 text-white hover:bg-blue-700",
+    clase: "bg-info text-white hover:bg-[#184B6E]",
     icono: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="20 6 9 17 4 12" />
-      </svg>
+      <Check aria-hidden="true" className="w-4 h-4" />
     ),
   },
   confirmado: {
-    clase: "bg-green-600 text-white hover:bg-green-700",
+    clase: "bg-ok text-white hover:bg-[#245A34]",
     icono: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="20 6 9 17 4 12" />
-      </svg>
+      <Check aria-hidden="true" className="w-4 h-4" />
     ),
   },
   entregado: {
-    clase: "bg-gray-700 text-white hover:bg-gray-800",
+    clase: "bg-ink-800 text-white hover:bg-ink-800",
     icono: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-        <polyline points="3.29 7 12 12 20.71 7" />
-        <line x1="12" y1="22" x2="12" y2="12" />
-      </svg>
+      <Package aria-hidden="true" className="w-4 h-4" />
     ),
   },
 };
@@ -92,7 +86,7 @@ export default function BotonesEstado({
   return (
     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
       {error && (
-        <span className="text-red-500 text-xs">{error}</span>
+        <span className="text-danger text-xs">{error}</span>
       )}
       {positivas.map((t) => {
         const estilo = ESTILOS_BOTON[t] ?? ESTILOS_BOTON.confirmado;
@@ -112,7 +106,7 @@ export default function BotonesEstado({
             className={`h-11 px-4 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50 ${estilo.clase}`}
           >
             {cargando === t ? (
-              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <Spinner size="sm" />
             ) : (
               estilo.icono
             )}

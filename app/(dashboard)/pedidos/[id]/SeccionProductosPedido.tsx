@@ -6,6 +6,8 @@ import { formatearPrecio } from "@/lib/formato";
 import SelectorBusqueda, { type OpcionSelector } from "@/components/SelectorBusqueda";
 import { useEdicionPedido } from "./EdicionPedidoContext";
 
+import { Plus, Trash2 } from "@/components/ui/icons";
+import Spinner from "@/components/ui/Spinner";
 interface FilaItem {
   key: string;
   id?: string;
@@ -174,44 +176,40 @@ export default function SeccionProductosPedido({
   }));
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-      <div className="px-4 sm:px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-        <h3 className="font-semibold text-gray-900">Productos del pedido</h3>
+    <div className="bg-white rounded-card border border-ink-200 shadow-card overflow-hidden">
+      <div className="px-4 sm:px-6 py-4 border-b border-ink-100 flex items-center justify-between">
+        <h3 className="font-semibold text-ink-900">Productos del pedido</h3>
         {editando ? (
           <button
             onClick={abrirSelectorProductos}
             disabled={cargandoProductos}
             className="h-9 px-3 bg-brand text-white rounded-lg text-xs font-medium hover:bg-brand-light transition-colors flex items-center gap-1.5 disabled:opacity-50"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
+            <Plus aria-hidden="true" className="w-3.5 h-3.5" />
             {cargandoProductos ? "Cargando..." : "Agregar producto"}
           </button>
         ) : (
-          <span className="text-sm text-gray-400">{filas.length} productos</span>
+          <span className="text-sm text-ink-500">{filas.length} productos</span>
         )}
       </div>
 
       {error && (
-        <div className="mx-4 sm:mx-6 mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">{error}</div>
+        <div className="mx-4 sm:mx-6 mt-4 p-3 bg-danger-soft border border-danger/30 rounded-control text-danger text-sm">{error}</div>
       )}
 
       {/* Cards móvil */}
-      <div className="md:hidden divide-y divide-gray-50">
+      <div className="md:hidden divide-y divide-ink-50">
         {filas.map((item) => (
           <div key={item.key} className="p-4">
             <div className="flex items-start justify-between gap-2 mb-2">
-              <p className="text-sm font-medium text-gray-900">{item.producto_nombre}</p>
+              <p className="text-sm font-medium text-ink-900">{item.producto_nombre}</p>
               {editando && (
-                <button onClick={() => eliminarFila(item.key)} className="text-red-500 hover:text-red-700 flex-shrink-0">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                  </svg>
+                <button onClick={() => eliminarFila(item.key)} className="text-danger hover:text-danger flex-shrink-0">
+                  <Trash2 aria-hidden="true" className="w-4 h-4" />
                 </button>
               )}
             </div>
-            <div className="flex justify-between items-center text-xs text-gray-500">
+            <div className="flex justify-between items-center text-xs text-ink-600">
               {editando ? (
                 <input
                   type="number"
@@ -219,7 +217,7 @@ export default function SeccionProductosPedido({
                   step="any"
                   value={item.cantidad}
                   onChange={(e) => cambiarCantidad(item.key, e.target.value)}
-                  className="w-20 px-2 py-1 border border-gray-300 rounded text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                  className="w-20 px-2 py-1 border border-ink-300 rounded text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
                 />
               ) : (
                 <span>{item.cantidad} {item.unidad}</span>
@@ -227,12 +225,12 @@ export default function SeccionProductosPedido({
               <span>{formatearPrecio(item.precio_unitario)}/{item.unidad}</span>
             </div>
             <div className="flex justify-end mt-1">
-              <span className="text-sm font-medium text-gray-900">{formatearPrecio(item.cantidad * item.precio_unitario)}</span>
+              <span className="text-sm font-medium text-ink-900">{formatearPrecio(item.cantidad * item.precio_unitario)}</span>
             </div>
           </div>
         ))}
-        <div className="p-4 flex justify-between items-center border-t-2 border-gray-200">
-          <span className="text-sm font-medium text-gray-500">Total</span>
+        <div className="p-4 flex justify-between items-center border-t-2 border-ink-200">
+          <span className="text-sm font-medium text-ink-600">Total</span>
           <span className="text-xl font-bold text-brand">{formatearPrecio(total)}</span>
         </div>
       </div>
@@ -240,19 +238,19 @@ export default function SeccionProductosPedido({
       {/* Tabla desktop */}
       <table className="w-full hidden md:table">
         <thead>
-          <tr className="border-b border-gray-100">
-            <th className="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
-            <th className="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Cantidad</th>
-            <th className="text-right py-3 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Precio unitario</th>
-            <th className="text-right py-3 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Subtotal</th>
-            {editando && <th className="text-right py-3 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider"></th>}
+          <tr className="border-b border-ink-100">
+            <th className="text-left py-3 px-6 text-xs font-medium text-ink-600 uppercase tracking-wider">Producto</th>
+            <th className="text-left py-3 px-6 text-xs font-medium text-ink-600 uppercase tracking-wider">Cantidad</th>
+            <th className="text-right py-3 px-6 text-xs font-medium text-ink-600 uppercase tracking-wider">Precio unitario</th>
+            <th className="text-right py-3 px-6 text-xs font-medium text-ink-600 uppercase tracking-wider">Subtotal</th>
+            {editando && <th className="text-right py-3 px-6 text-xs font-medium text-ink-600 uppercase tracking-wider"></th>}
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-50">
+        <tbody className="divide-y divide-ink-50">
           {filas.map((item) => (
             <tr key={item.key}>
-              <td className="py-3 px-6"><div className="flex items-center gap-2"><span className="text-gray-400">•</span><span className="text-sm font-medium text-gray-900">{item.producto_nombre}</span></div></td>
-              <td className="py-3 px-6 text-sm text-gray-600">
+              <td className="py-3 px-6"><div className="flex items-center gap-2"><span className="text-ink-500">•</span><span className="text-sm font-medium text-ink-900">{item.producto_nombre}</span></div></td>
+              <td className="py-3 px-6 text-sm text-ink-700">
                 {editando ? (
                   <input
                     type="number"
@@ -260,20 +258,18 @@ export default function SeccionProductosPedido({
                     step="any"
                     value={item.cantidad}
                     onChange={(e) => cambiarCantidad(item.key, e.target.value)}
-                    className="w-20 px-2 py-1 border border-gray-300 rounded text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                    className="w-20 px-2 py-1 border border-ink-300 rounded text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
                   />
                 ) : (
                   <>{item.cantidad} {item.unidad}</>
                 )}
               </td>
-              <td className="py-3 px-6 text-sm text-gray-600 text-right">{formatearPrecio(item.precio_unitario)}{item.unidad ? `/${item.unidad}` : ""}</td>
-              <td className="py-3 px-6 text-sm font-medium text-gray-900 text-right">{formatearPrecio(item.cantidad * item.precio_unitario)}</td>
+              <td className="py-3 px-6 text-sm text-ink-700 text-right">{formatearPrecio(item.precio_unitario)}{item.unidad ? `/${item.unidad}` : ""}</td>
+              <td className="py-3 px-6 text-sm font-medium text-ink-900 text-right">{formatearPrecio(item.cantidad * item.precio_unitario)}</td>
               {editando && (
                 <td className="py-3 px-6 text-right">
-                  <button onClick={() => eliminarFila(item.key)} className="text-red-500 hover:text-red-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                    </svg>
+                  <button onClick={() => eliminarFila(item.key)} className="text-danger hover:text-danger">
+                    <Trash2 aria-hidden="true" className="w-4 h-4" />
                   </button>
                 </td>
               )}
@@ -281,8 +277,8 @@ export default function SeccionProductosPedido({
           ))}
         </tbody>
         <tfoot>
-          <tr className="border-t-2 border-gray-200">
-            <td colSpan={3} className="py-4 px-6 text-right text-sm font-medium text-gray-500">Total</td>
+          <tr className="border-t-2 border-ink-200">
+            <td colSpan={3} className="py-4 px-6 text-right text-sm font-medium text-ink-600">Total</td>
             <td className="py-4 px-6 text-right text-xl font-bold text-brand">{formatearPrecio(total)}</td>
             {editando && <td />}
           </tr>
@@ -290,11 +286,11 @@ export default function SeccionProductosPedido({
       </table>
 
       {editando && (
-        <div className="px-4 sm:px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
+        <div className="px-4 sm:px-6 py-4 border-t border-ink-100 flex justify-end gap-3">
           <button
             onClick={descartar}
             disabled={guardando}
-            className="h-11 px-4 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+            className="h-11 px-4 bg-white border border-ink-200 rounded-lg text-sm font-medium text-ink-800 hover:bg-ink-50 transition-colors disabled:opacity-50"
           >
             Descartar
           </button>
@@ -303,7 +299,7 @@ export default function SeccionProductosPedido({
             disabled={guardando}
             className="h-11 px-4 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-light transition-colors disabled:opacity-50 flex items-center gap-2"
           >
-            {guardando && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+            {guardando && <Spinner size="sm" />}
             Guardar cambios
           </button>
         </div>

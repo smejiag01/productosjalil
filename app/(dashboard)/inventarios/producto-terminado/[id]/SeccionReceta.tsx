@@ -4,6 +4,8 @@ import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import SelectorBusqueda from "@/components/SelectorBusqueda";
 
+import { Search } from "@/components/ui/icons";
+import { useConfirmar } from "@/components/ui/useConfirmar";
 interface Insumo {
   id: string;
   nombre: string;
@@ -31,6 +33,7 @@ const LABEL_TIPO: Record<string, string> = {
 
 export default function SeccionReceta({ productoTerminadoId, recetaInicial, disponibles }: Props) {
   const router = useRouter();
+  const { confirmar, dialogo } = useConfirmar();
   const [insumoSeleccionado, setInsumoSeleccionado] = useState<Insumo | null>(null);
   const [mostrarSelector, setMostrarSelector] = useState(false);
   const [cantidadNueva, setCantidadNueva] = useState("");
@@ -130,7 +133,12 @@ export default function SeccionReceta({ productoTerminadoId, recetaInicial, disp
   }
 
   async function quitarLinea(id: string) {
-    if (!confirm("¿Quitar este insumo de la receta?")) return;
+    const acepto = await confirmar({
+      title: "¿Quitar este insumo de la receta?",
+      confirmLabel: "Quitar",
+      tone: "danger",
+    });
+    if (!acepto) return;
     setCargando(true);
     try {
       const res = await fetch(`/api/inventarios/recetas/${id}`, { method: "DELETE" });
@@ -149,27 +157,27 @@ export default function SeccionReceta({ productoTerminadoId, recetaInicial, disp
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-      <div className="px-4 sm:px-6 py-4 border-b border-gray-100">
-        <h3 className="font-semibold text-gray-900">Receta (BOM)</h3>
-        <p className="text-xs text-gray-400 mt-0.5">Insumos requeridos por cada unidad producida</p>
+    <div className="bg-white rounded-card border border-ink-200 shadow-card overflow-hidden">
+      <div className="px-4 sm:px-6 py-4 border-b border-ink-100">
+        <h3 className="font-semibold text-ink-900">Receta (BOM)</h3>
+        <p className="text-xs text-ink-500 mt-0.5">Insumos requeridos por cada unidad producida</p>
       </div>
 
       {error && (
-        <div className="mx-4 sm:mx-6 mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+        <div className="mx-4 sm:mx-6 mt-4 p-3 bg-danger-soft border border-danger/30 rounded-control text-danger text-sm">
           {error}
         </div>
       )}
 
-      <div className="divide-y divide-gray-50">
+      <div className="divide-y divide-ink-50">
         {recetaInicial.length === 0 ? (
-          <div className="py-10 text-center text-gray-400 text-sm">Sin insumos asignados aún</div>
+          <div className="py-10 text-center text-ink-500 text-sm">Sin insumos asignados aún</div>
         ) : (
           recetaInicial.map((linea) => (
             <div key={linea.id} className="px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">{linea.insumo.nombre}</p>
-                <p className="text-xs text-gray-400">{LABEL_TIPO[linea.insumo.tipo] ?? linea.insumo.tipo}</p>
+                <p className="text-sm font-medium text-ink-900 truncate">{linea.insumo.nombre}</p>
+                <p className="text-xs text-ink-500">{LABEL_TIPO[linea.insumo.tipo] ?? linea.insumo.tipo}</p>
               </div>
 
               {editandoId === linea.id ? (
@@ -181,9 +189,9 @@ export default function SeccionReceta({ productoTerminadoId, recetaInicial, disp
                     onChange={(e) => setCantidadEditada(e.target.value)}
                     min="0"
                     step="0.0001"
-                    className="w-24 px-2 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                    className="w-24 px-2 py-1.5 border border-ink-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
                   />
-                  <span className="text-xs text-gray-400">{linea.insumo.unidad}</span>
+                  <span className="text-xs text-ink-500">{linea.insumo.unidad}</span>
                   <button
                     onClick={() => guardarEdicion(linea.id)}
                     disabled={cargando}
@@ -193,14 +201,14 @@ export default function SeccionReceta({ productoTerminadoId, recetaInicial, disp
                   </button>
                   <button
                     onClick={() => setEditandoId(null)}
-                    className="text-xs font-medium text-gray-400 hover:text-gray-600"
+                    className="text-xs font-medium text-ink-500 hover:text-ink-700"
                   >
                     Cancelar
                   </button>
                 </div>
               ) : (
                 <div className="flex items-center gap-3 flex-shrink-0">
-                  <span className="text-sm text-gray-700 font-medium">
+                  <span className="text-sm text-ink-800 font-medium">
                     {linea.cantidad_requerida} {linea.insumo.unidad}
                   </span>
                   <button
@@ -215,7 +223,7 @@ export default function SeccionReceta({ productoTerminadoId, recetaInicial, disp
                   <button
                     onClick={() => quitarLinea(linea.id)}
                     disabled={cargando}
-                    className="text-xs font-medium text-red-600 hover:text-red-700 disabled:opacity-50"
+                    className="text-xs font-medium text-danger hover:text-danger disabled:opacity-50"
                   >
                     Quitar
                   </button>
@@ -227,20 +235,18 @@ export default function SeccionReceta({ productoTerminadoId, recetaInicial, disp
       </div>
 
       {/* Agregar insumo */}
-      <div className="px-4 sm:px-6 py-4 border-t border-gray-100 bg-gray-50/50">
-        <p className="text-xs font-medium text-gray-500 uppercase mb-2">Agregar insumo</p>
+      <div className="px-4 sm:px-6 py-4 border-t border-ink-100 bg-ink-50/50">
+        <p className="text-xs font-medium text-ink-600 uppercase mb-2">Agregar insumo</p>
         <div className="flex flex-col sm:flex-row gap-2">
           <button
             type="button"
             onClick={() => setMostrarSelector(true)}
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm text-left bg-white outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand hover:bg-gray-50 transition-colors flex items-center justify-between"
+            className="flex-1 px-3 py-2 border border-ink-300 rounded-lg text-sm text-left bg-white outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand hover:bg-ink-50 transition-colors flex items-center justify-between"
           >
-            <span className={insumoSeleccionado ? "text-gray-900" : "text-gray-400"}>
+            <span className={insumoSeleccionado ? "text-ink-900" : "text-ink-500"}>
               {insumoSeleccionado ? insumoSeleccionado.nombre : "Buscar insumo o materia prima..."}
             </span>
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-gray-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
+            <Search aria-hidden="true" className="w-4 h-4 text-ink-500 flex-shrink-0" />
           </button>
           <input
             type="number"
@@ -249,7 +255,7 @@ export default function SeccionReceta({ productoTerminadoId, recetaInicial, disp
             onChange={(e) => setCantidadNueva(e.target.value)}
             min="0"
             step="0.0001"
-            className="w-full sm:w-40 px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+            className="w-full sm:w-40 px-3 py-2 border border-ink-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
           />
           <button
             onClick={agregarLinea}
@@ -270,6 +276,7 @@ export default function SeccionReceta({ productoTerminadoId, recetaInicial, disp
           onCerrar={() => setMostrarSelector(false)}
         />
       )}
+      {dialogo}
     </div>
   );
 }
