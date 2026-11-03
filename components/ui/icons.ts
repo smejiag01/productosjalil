@@ -28,6 +28,7 @@ export {
   PackageCheck,
   Phone,
   Plus,
+  Route,
   RotateCcw,
   Search,
   ShoppingBag,

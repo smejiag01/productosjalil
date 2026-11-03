@@ -6,7 +6,7 @@ import Button from "@/components/ui/Button";
 import { buttonClass, inputClass } from "@/components/ui/clases";
 import { ChevronLeft, ChevronRight } from "@/components/ui/icons";
 import { addDias } from "@/lib/analiticas/periodos";
-import { etiquetaDia, textoFechaLarga } from "@/lib/repartidor-fechas";
+import { capitalizar, etiquetaDia, textoFechaLarga } from "@/lib/repartidor-fechas";
 
 /**
  * Navegación de días del repartidor: "Por día" (con anterior, siguiente, selector
@@ -22,8 +22,8 @@ export default function NavegadorDias({
   hoy: string;
 }) {
   const router = useRouter();
-  const etiqueta = etiquetaDia(fecha, hoy);
-  const larga = textoFechaLarga(fecha, hoy);
+  const etiqueta = capitalizar(etiquetaDia(fecha, hoy));
+  const larga = capitalizar(textoFechaLarga(fecha, hoy));
 
   return (
     <div className="mb-4 space-y-3">
@@ -52,7 +52,7 @@ export default function NavegadorDias({
             <Link
               href={`/repartidor?fecha=${addDias(fecha, -1)}`}
               aria-label="Día anterior"
-              className={buttonClass({ variant: "secondary", size: "lg", className: "w-12 px-0" })}
+              className={buttonClass({ variant: "secondary", size: "lg", className: "w-12 !px-0" })}
             >
               <ChevronLeft aria-hidden="true" className="h-5 w-5" />
             </Link>
@@ -72,14 +72,14 @@ export default function NavegadorDias({
             <Link
               href={`/repartidor?fecha=${addDias(fecha, 1)}`}
               aria-label="Día siguiente"
-              className={buttonClass({ variant: "secondary", size: "lg", className: "w-12 px-0" })}
+              className={buttonClass({ variant: "secondary", size: "lg", className: "w-12 !px-0" })}
             >
               <ChevronRight aria-hidden="true" className="h-5 w-5" />
             </Link>
           </div>
 
           <div className="flex items-center justify-between gap-3">
-            <p className="text-base font-semibold capitalize text-ink-900">
+            <p className="text-base font-semibold text-ink-900">
               {etiqueta}
               {etiqueta !== larga && <span className="font-normal text-ink-700"> · {larga}</span>}
             </p>

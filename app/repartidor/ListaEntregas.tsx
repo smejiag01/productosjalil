@@ -2,9 +2,33 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import BadgeEstado from "@/components/BadgeEstado";
+import Alert from "@/components/ui/Alert";
+import Button from "@/components/ui/Button";
+import Chip from "@/components/ui/Chip";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import EmptyState from "@/components/ui/EmptyState";
+import StatusBadge from "@/components/ui/StatusBadge";
+import {
+  Check,
+  CheckCircle2,
+  MapPin,
+  Navigation,
+  PackageCheck,
+  Phone,
+  Route,
+  Truck,
+  Undo2,
+} from "@/components/ui/icons";
+import { cn } from "@/lib/cn";
 import { formatearPrecio } from "@/lib/formato";
-import { etiquetaDia, textoFechaLarga } from "@/lib/repartidor-fechas";
+import { capitalizar, etiquetaDia, textoFechaLarga } from "@/lib/repartidor-fechas";
+import {
+  calcularProgreso,
+  estaListaParaEntrega,
+  estaResuelta,
+  numerarParadas,
+  siguienteParada,
+} from "@/lib/repartidor-progreso";
 import ModalDevolucion from "./ModalDevolucion";
 
 interface Entrega {
@@ -58,6 +82,24 @@ function urlRutaCompleta(entregasRuta: Entrega[]): string {
     : base;
 }
 
+function BarraProgreso({ resueltas, total, porcentaje }: { resueltas: number; total: number; porcentaje: number }) {
+  return (
+    <div
+      role="progressbar"
+      aria-valuemin={0}
+      aria-valuemax={total}
+      aria-valuenow={resueltas}
+      aria-label={`${resueltas} de ${total} entregas resueltas`}
+      className="h-3 w-full overflow-hidden rounded-full bg-ink-200"
+    >
+      <div
+        className="h-full rounded-full bg-ok transition-[width] duration-300"
+        style={{ width: `${porcentaje}%` }}
+      />
+    </div>
+  );
+}
+
 export default function ListaEntregas({
   entregas,
   modo,
@@ -75,10 +117,11 @@ export default function ListaEntregas({
   const [cargando, setCargando] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [devolucionPedidoId, setDevolucionPedidoId] = useState<string | null>(null);
+  const [entregaPorConfirmar, setEntregaPorConfirmar] = useState<Entrega | null>(null);
 
   const contadores: Record<string, number> = {
     todos: entregas.length,
-    pendientes: entregas.filter((e) => e.estado !== "entregado" && e.estado !== "devuelto").length,
+    pendientes: entregas.filter((e) => !estaResuelta(e.estado)).length,
     entregados: entregas.filter((e) => e.estado === "entregado").length,
     devueltos: entregas.filter((e) => e.estado === "devuelto").length,
   };
@@ -94,8 +137,16 @@ export default function ListaEntregas({
     return Array.from(mapa.values());
   }, [entregas]);
 
+  // Número de parada dentro de su ruta y día (no cambia al filtrar)
+  const paradas = useMemo(
+    () => numerarParadas(entregas.map((e) => ({ id: e.id, estado: e.estado, rutaId: `${e.fecha}|${e.rutaId}` }))),
+    [entregas]
+  );
+  // La "siguiente" solo tiene sentido en la jornada de un día concreto
+  const idSiguiente = modo === "dia" ? siguienteParada(entregas) : null;
+
   const filtradas = entregas.filter((e) => {
-    if (filtro === "pendientes") return e.estado !== "entregado" && e.estado !== "devuelto";
+    if (filtro === "pendientes") return !estaResuelta(e.estado);
     if (filtro === "entregados") return e.estado === "entregado";
     if (filtro === "devueltos") return e.estado === "devuelto";
     return true;
@@ -113,7 +164,6 @@ export default function ListaEntregas({
   }, [entregas, filtro]);
 
   async function marcarEntregado(id: string) {
-    if (!confirm("¿Confirmas que este pedido fue entregado?")) return;
     setCargando(id);
     setError("");
     try {
@@ -132,6 +182,7 @@ export default function ListaEntregas({
       setError("Error de conexión. Intenta de nuevo.");
     } finally {
       setCargando(null);
+      setEntregaPorConfirmar(null);
     }
   }
 
@@ -159,80 +210,142 @@ export default function ListaEntregas({
   }
 
   function tarjeta(e: Entrega) {
-    // Solo confirmado/en_reparto pueden pasar a entregado o devuelto
-    // (ver TRANSICIONES_VALIDAS en lib/pedidos.ts); pendiente/en_proceso
-    // todavía no están listos para reparto y el PATCH los rechazaría.
-    const puedeActuar = e.estado === "confirmado" || e.estado === "en_reparto";
+    const puedeActuar = estaListaParaEntrega(e.estado);
+    const esSiguiente = e.id === idSiguiente;
+    const numero = paradas.get(e.id);
+    const resuelta = estaResuelta(e.estado);
+
     return (
-      <div key={e.id} className="bg-white rounded-xl border border-gray-200 p-4">
-        <div className="flex items-start justify-between gap-3 mb-3">
-          <div className="min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <p className="text-base font-semibold text-gray-900 truncate">{e.cliente.nombre}</p>
-              {e.cliente.sedeNombre && (
-                <span className="text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 flex-shrink-0">{e.cliente.sedeNombre}</span>
-              )}
-            </div>
-            <a href={`tel:${e.cliente.telefono}`} className="text-sm text-brand font-medium flex items-center gap-1.5 mt-0.5">
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
-              {e.cliente.telefono}
-            </a>
-            {e.cliente.direccion && (
-              <p className="text-xs text-gray-500 mt-1">{e.cliente.direccion}</p>
-            )}
-            {rutas.length > 1 && (
-              <p className="text-xs text-gray-400 mt-1">Ruta: {e.rutaNombre}</p>
-            )}
-          </div>
-          <BadgeEstado estado={e.estado} />
-        </div>
-
-        <div className="border-t border-gray-100 pt-3 mb-3">
-          <ul className="space-y-1">
-            {e.items.map((it) => (
-              <li key={it.id} className="text-sm text-gray-600 flex justify-between">
-                <span>{it.cantidad} × {it.nombre}</span>
-              </li>
-            ))}
-          </ul>
-          <div className="flex justify-between items-center mt-2 pt-2 border-t border-gray-50">
-            <span className="text-xs text-gray-400">Total</span>
-            <span className="text-base font-bold text-gray-900">{formatearPrecio(e.total)}</span>
-          </div>
-        </div>
-
-        <a
-          href={urlComoLlegar(e.cliente)}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="w-full h-11 flex items-center justify-center gap-2 bg-blue-50 border border-blue-200 text-blue-700 rounded-lg text-sm font-medium mb-2"
-        >
-          📍 Cómo llegar
-        </a>
-
-        {puedeActuar && (
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              onClick={() => marcarEntregado(e.id)}
-              disabled={cargando === e.id}
-              className="h-11 flex items-center justify-center gap-1.5 bg-green-600 text-white rounded-lg text-sm font-medium disabled:opacity-50"
-            >
-              {cargando === e.id ? (
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                <>✅ Entregado</>
-              )}
-            </button>
-            <button
-              onClick={() => setDevolucionPedidoId(e.id)}
-              disabled={cargando === e.id}
-              className="h-11 flex items-center justify-center gap-1.5 bg-white border border-orange-300 text-orange-700 rounded-lg text-sm font-medium disabled:opacity-50"
-            >
-              ↩️ Devolución
-            </button>
-          </div>
+      <article
+        key={e.id}
+        aria-label={`Parada ${numero}: ${e.cliente.nombre}`}
+        className={cn(
+          "overflow-hidden rounded-card border bg-white shadow-card",
+          esSiguiente ? "border-accent ring-2 ring-accent" : "border-ink-300"
         )}
-      </div>
+      >
+        {esSiguiente && (
+          <p className="flex items-center gap-2 bg-accent px-4 py-1.5 text-sm font-bold uppercase tracking-wide text-ink-900">
+            <Navigation aria-hidden="true" className="h-4 w-4" />
+            Siguiente parada
+          </p>
+        )}
+
+        <div className="space-y-4 p-4">
+          <div className="flex items-start gap-3">
+            <span
+              aria-hidden="true"
+              className={cn(
+                "flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full font-display text-xl font-semibold",
+                e.estado === "entregado"
+                  ? "bg-ok text-white"
+                  : e.estado === "devuelto"
+                    ? "bg-estado-devuelto text-white"
+                    : "bg-espresso text-white"
+              )}
+            >
+              {e.estado === "entregado" ? (
+                <Check className="h-6 w-6" />
+              ) : e.estado === "devuelto" ? (
+                <Undo2 className="h-5 w-5" />
+              ) : (
+                numero
+              )}
+            </span>
+            <div className="min-w-0 flex-1">
+              <h3 className="font-display text-xl font-semibold leading-tight text-ink-900">
+                {e.cliente.nombre}
+              </h3>
+              <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                <StatusBadge estado={e.estado} variant="solid" size="lg" />
+                {e.cliente.sedeNombre && (
+                  <span className="rounded-full bg-ink-100 px-2.5 py-1 text-sm font-medium text-ink-800">
+                    {e.cliente.sedeNombre}
+                  </span>
+                )}
+              </div>
+              {rutas.length > 1 && <p className="mt-1.5 text-sm text-ink-700">Ruta: {e.rutaNombre}</p>}
+            </div>
+          </div>
+
+          {e.cliente.direccion && (
+            <p className="flex items-start gap-2 text-lg font-medium leading-snug text-ink-900">
+              <MapPin aria-hidden="true" className="mt-0.5 h-5 w-5 flex-shrink-0 text-brand-700" />
+              {e.cliente.direccion}
+            </p>
+          )}
+
+          <a
+            href={`tel:${e.cliente.telefono}`}
+            className="flex min-h-11 items-center gap-2 text-base font-semibold text-brand-700 underline-offset-2 hover:underline"
+          >
+            <Phone aria-hidden="true" className="h-5 w-5" />
+            {e.cliente.telefono}
+          </a>
+
+          <div className="rounded-control bg-ink-50 p-3">
+            <ul className="space-y-1">
+              {e.items.map((it) => (
+                <li key={it.id} className="text-base text-ink-900">
+                  <span className="font-semibold tabular-nums">{it.cantidad}</span> × {it.nombre}
+                </li>
+              ))}
+            </ul>
+            <div className="mt-2 flex items-center justify-between border-t border-ink-200 pt-2">
+              <span className="text-sm font-medium text-ink-700">Total</span>
+              <span className="font-display text-xl font-semibold tabular-nums text-ink-900">
+                {formatearPrecio(e.total)}
+              </span>
+            </div>
+          </div>
+
+          {e.notas && (
+            <p className="rounded-control border border-warn/60 bg-warn-soft p-3 text-base text-ink-900">
+              <span className="font-semibold">Nota: </span>
+              {e.notas}
+            </p>
+          )}
+
+          <div className="space-y-2">
+            {!resuelta && (
+              <Button
+                href={urlComoLlegar(e.cliente)}
+                target="_blank"
+                rel="noopener noreferrer"
+                variant={esSiguiente ? "primary" : "secondary"}
+                size="xl"
+                fullWidth
+                leftIcon={<Navigation aria-hidden="true" className="h-5 w-5" />}
+              >
+                Cómo llegar
+              </Button>
+            )}
+
+            {puedeActuar && (
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  variant="success"
+                  size="xl"
+                  onClick={() => setEntregaPorConfirmar(e)}
+                  disabled={cargando === e.id}
+                  leftIcon={<CheckCircle2 aria-hidden="true" className="h-5 w-5" />}
+                >
+                  Entregado
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="xl"
+                  onClick={() => setDevolucionPedidoId(e.id)}
+                  disabled={cargando === e.id}
+                  leftIcon={<Undo2 aria-hidden="true" className="h-5 w-5" />}
+                >
+                  Devolución
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      </article>
     );
   }
 
@@ -240,106 +353,141 @@ export default function ListaEntregas({
     <div>
       {/* Resumen de ruta(s) del día — siempre visible, independiente del filtro activo.
           Solo en la vista "Por día": "Ver ruta completa" arma el recorrido de un día. */}
-      {modo === "dia" && (
-        <div className="space-y-2 mb-4">
+      {modo === "dia" && entregas.length > 0 && (
+        <div className="mb-4 space-y-3">
           {rutas.map((r) => {
-            const pendientesRuta = r.entregas.filter((e) => e.estado !== "entregado" && e.estado !== "devuelto");
+            const pendientesRuta = r.entregas.filter((e) => !estaResuelta(e.estado));
+            const progreso = calcularProgreso(r.entregas);
             return (
-              <div key={r.nombre} className="bg-white rounded-xl border border-gray-200 p-4">
-                <div className="flex items-center justify-between gap-3 mb-2">
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-gray-900 truncate">🗺️ Ruta {r.nombre}</p>
-                    <p className="text-xs text-gray-400">
-                      {pendientesRuta.length} de {r.entregas.length} paradas pendientes
-                    </p>
-                  </div>
+              <section
+                key={r.nombre}
+                aria-label={`Ruta ${r.nombre}`}
+                className="rounded-card border border-ink-300 bg-white p-4 shadow-card"
+              >
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <h2 className="flex min-w-0 items-center gap-2 font-display text-lg font-semibold text-ink-900">
+                    <Route aria-hidden="true" className="h-5 w-5 flex-shrink-0 text-brand-700" />
+                    <span className="truncate">Ruta {r.nombre}</span>
+                  </h2>
+                  <p className="flex-shrink-0 text-base font-semibold tabular-nums text-ink-900">
+                    {progreso.resueltas} de {progreso.total}
+                  </p>
                 </div>
+                <BarraProgreso {...progreso} />
+                <p className="mb-3 mt-2 text-sm text-ink-700">
+                  {progreso.pendientes === 0
+                    ? "¡Ruta terminada!"
+                    : `${progreso.pendientes} ${progreso.pendientes === 1 ? "parada pendiente" : "paradas pendientes"}`}
+                </p>
                 {pendientesRuta.length > 0 && (
-                  <a
+                  <Button
                     href={urlRutaCompleta(pendientesRuta)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full h-11 flex items-center justify-center gap-2 bg-brand text-white rounded-lg text-sm font-medium"
+                    size="xl"
+                    fullWidth
+                    leftIcon={<Route aria-hidden="true" className="h-5 w-5" />}
                   >
-                    🗺️ Ver ruta completa
-                  </a>
+                    Ver ruta completa
+                  </Button>
                 )}
-              </div>
+              </section>
             );
           })}
         </div>
       )}
 
       {entregas.length > 0 && (
-        <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-none">
-          {FILTROS.map((f) => {
-            const activo = filtro === f.key;
-            return (
-              <button
-                key={f.key}
-                onClick={() => setFiltro(f.key)}
-                className={`h-10 px-3 rounded-full text-sm font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap flex-shrink-0 ${
-                  activo ? "bg-brand text-white" : "bg-white border border-gray-200 text-gray-600"
-                }`}
-              >
-                {f.label}
-                <span className={`text-xs px-1.5 py-0.5 rounded-full ${activo ? "bg-white/20" : "bg-gray-100 text-gray-500"}`}>
-                  {contadores[f.key] ?? 0}
-                </span>
-              </button>
-            );
-          })}
+        <div
+          role="group"
+          aria-label="Filtrar entregas"
+          className="-mx-1 mb-4 flex items-center gap-2 overflow-x-auto px-1 pb-1 scrollbar-none"
+        >
+          {FILTROS.map((f) => (
+            <Chip
+              key={f.key}
+              selected={filtro === f.key}
+              count={contadores[f.key] ?? 0}
+              onClick={() => setFiltro(f.key)}
+              className="h-11"
+            >
+              {f.label}
+            </Chip>
+          ))}
         </div>
       )}
 
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">{error}</div>
+        <Alert tone="error" className="mb-4">
+          {error}
+        </Alert>
       )}
 
       {entregas.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-200 py-16 px-4 text-center">
-          <p className="text-sm text-ink-800 font-medium">
-            {modo === "dia" ? "No tienes entregas para este día" : "Aún no tienes entregas"}
-          </p>
-          {modo === "dia" && (
-            <p className="text-xs text-ink-600 mt-1">
-              Cambia de día con las flechas o el calendario, o mira &quot;Todos los días&quot;.
-            </p>
-          )}
+        <div className="rounded-card border border-ink-300 bg-white">
+          <EmptyState
+            icon={<Truck className="h-7 w-7" />}
+            title={modo === "dia" ? "No tienes entregas para este día" : "Aún no tienes entregas"}
+            description={
+              modo === "dia"
+                ? 'Cambia de día con las flechas o el calendario, o mira "Todos los días".'
+                : undefined
+            }
+          />
         </div>
       ) : filtradas.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-200 py-16 text-center text-gray-400">
-          <p className="text-sm">No hay entregas en esta categoría</p>
+        <div className="rounded-card border border-ink-300 bg-white">
+          <EmptyState
+            icon={<PackageCheck className="h-7 w-7" />}
+            title="No hay entregas en esta categoría"
+          />
         </div>
       ) : modo === "dia" ? (
-        <div className="space-y-3">{filtradas.map(tarjeta)}</div>
+        <div className="space-y-4">{filtradas.map(tarjeta)}</div>
       ) : (
         <div className="space-y-6">
           {porFecha.map(([fecha, lista]) => {
-            const etiqueta = etiquetaDia(fecha, hoy);
-            const larga = textoFechaLarga(fecha, hoy);
+            const etiqueta = capitalizar(etiquetaDia(fecha, hoy));
+            const larga = capitalizar(textoFechaLarga(fecha, hoy));
             return (
               <section key={fecha}>
-                <h2 className="mb-2 flex items-baseline gap-2 font-display text-lg font-semibold capitalize text-ink-900">
+                <h2 className="mb-2 flex items-baseline gap-2 font-display text-lg font-semibold text-ink-900">
                   {etiqueta}
                   {etiqueta !== larga && (
                     <span className="font-sans text-sm font-normal text-ink-700">{larga}</span>
                   )}
-                  <span className="ml-auto font-sans text-xs font-medium text-ink-600">
+                  <span className="ml-auto font-sans text-sm font-medium text-ink-700">
                     {lista.length} {lista.length === 1 ? "entrega" : "entregas"}
                   </span>
                 </h2>
-                <div className="space-y-3">{lista.map(tarjeta)}</div>
+                <div className="space-y-4">{lista.map(tarjeta)}</div>
               </section>
             );
           })}
           {truncado && (
-            <p className="text-center text-xs text-ink-600">
+            <p className="text-center text-sm text-ink-700">
               Se muestran las {entregas.length} entregas más recientes.
             </p>
           )}
         </div>
       )}
+
+      <ConfirmDialog
+        open={entregaPorConfirmar !== null}
+        title="¿Entregaste este pedido?"
+        description={
+          entregaPorConfirmar
+            ? `${entregaPorConfirmar.cliente.nombre} · ${formatearPrecio(entregaPorConfirmar.total)}`
+            : undefined
+        }
+        confirmLabel="Sí, entregado"
+        cancelLabel="Todavía no"
+        tone="success"
+        size="xl"
+        loading={cargando !== null && cargando === entregaPorConfirmar?.id}
+        onConfirm={() => entregaPorConfirmar && marcarEntregado(entregaPorConfirmar.id)}
+        onCancel={() => setEntregaPorConfirmar(null)}
+      />
 
       {devolucionPedidoId && (
         <ModalDevolucion

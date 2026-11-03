@@ -32,3 +32,8 @@ export function etiquetaDia(fecha: string, hoy: string): string {
   if (fecha === addDias(hoy, -1)) return "Ayer";
   return textoFechaLarga(fecha, hoy);
 }
+
+/** Primera letra en mayúscula (el resto igual): "martes, 10 de noviembre" → "Martes, 10 de noviembre". */
+export function capitalizar(texto: string): string {
+  return texto.charAt(0).toUpperCase() + texto.slice(1);
+}
