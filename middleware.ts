@@ -57,6 +57,7 @@ export const config = {
     "/repartidores/:path*",
     "/usuarios/:path*",
     "/contactos-pendientes/:path*",
+    "/visitas/:path*",
     "/configuracion/:path*",
     "/repartidor/:path*",
     "/vendedor/:path*",

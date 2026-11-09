@@ -20,12 +20,14 @@ const MOTIVO_LABELS: Record<string, string> = {
   cliente_nuevo: "Cliente nuevo",
   no_pedir_bot: "Prefiere que lo llamen",
   pedido_mismo_dia: "Pedido para hoy",
+  visita_vendedor: "Visita de vendedor",
 };
 
 const MOTIVO_COLORES: Record<string, string> = {
   cliente_nuevo: "bg-info-soft border-info/30 text-info",
   no_pedir_bot: "bg-info-soft border-info/30 text-info",
   pedido_mismo_dia: "bg-warn-soft border-warn/30 text-warn-soft-text",
+  visita_vendedor: "bg-ok-soft border-ok/30 text-ok",
 };
 
 const FILTROS: { key: string; label: string }[] = [

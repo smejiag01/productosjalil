@@ -20,6 +20,7 @@ import {
   Route,
   Settings,
   ShoppingBag,
+  Store,
   Tag,
   Truck,
   UserRound,
@@ -59,6 +60,7 @@ const GRUPOS: { titulo: string; items: ItemMenu[] }[] = [
     titulo: "Clientes",
     items: [
       { nombre: "Clientes", href: "/clientes", Icono: Users },
+      { nombre: "Visitas", href: "/visitas", Icono: Store },
       { nombre: "Por contactar", href: "/contactos-pendientes", Icono: PhoneCall },
       { nombre: "PQR's", href: "/pqrs", Icono: MessageSquareWarning },
     ],

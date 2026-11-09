@@ -32,12 +32,15 @@ interface Props {
   rutas: Ruta[];
   clienteInicial?: DatosCliente;
   onCerrar: () => void;
+  /** Se llama con el cliente guardado, antes de cerrar el modal. */
+  onGuardado?: (cliente: { id: string }) => void | Promise<void>;
 }
 
 export default function ModalCliente({
   rutas,
   clienteInicial,
   onCerrar,
+  onGuardado,
 }: Props) {
   const router = useRouter();
   const esEdicion = !!clienteInicial?.id;
@@ -107,6 +110,7 @@ export default function ModalCliente({
         return;
       }
 
+      if (onGuardado) await onGuardado(data.data);
       router.refresh();
       onCerrar();
     } catch {

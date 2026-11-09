@@ -1,4 +1,4 @@
-import { esquemaOperacion, fechaBogota, instanteValido } from "@/lib/visitas";
+import { esquemaOperacion, fechaBogota, instanteValido, notasContactoDesdeVisita, resolverRangoVisitas } from "@/lib/visitas";
 
 const AHORA = new Date("2026-11-09T15:00:00Z");
 const ID = "3f6c1d2a-9b4e-4c1a-8f2d-1a2b3c4d5e6f";
@@ -62,5 +62,28 @@ describe("esquemaOperacion", () => {
 
   it("rechaza coordenadas fuera de rango", () => {
     expect(esquemaOperacion.safeParse({ tipo: "finalizar_jornada", id: JORNADA, fin_at: ahoraIso, lat: 120, lng: 0 }).success).toBe(false);
+  });
+});
+
+describe("resolverRangoVisitas", () => {
+  it("por defecto toma los últimos 7 días hasta hoy", () => {
+    expect(resolverRangoVisitas(undefined, undefined, "2026-11-09")).toEqual({ desde: "2026-11-03", hasta: "2026-11-09" });
+  });
+  it("respeta un rango válido y ordena uno invertido", () => {
+    expect(resolverRangoVisitas("2026-11-01", "2026-11-05", "2026-11-09")).toEqual({ desde: "2026-11-01", hasta: "2026-11-05" });
+    expect(resolverRangoVisitas("2026-11-05", "2026-11-01", "2026-11-09")).toEqual({ desde: "2026-11-01", hasta: "2026-11-05" });
+  });
+  it("ignora fechas inválidas y limita a unos 3 meses", () => {
+    expect(resolverRangoVisitas("ayer", "x", "2026-11-09")).toEqual({ desde: "2026-11-03", hasta: "2026-11-09" });
+    expect(resolverRangoVisitas("2025-01-01", "2026-11-09", "2026-11-09").desde).toBe("2026-08-09");
+  });
+});
+
+describe("notasContactoDesdeVisita", () => {
+  it("arma las notas solo con los datos que hay", () => {
+    expect(
+      notasContactoDesdeVisita({ nicho: "Pizzería", contacto: "Andrés", direccion: null, observaciones: "Quiere precios", vendedor: "Juan" })
+    ).toBe("Visita de vendedor (Juan) · Pizzería\nContacto: Andrés\nObservaciones: Quiere precios");
+    expect(notasContactoDesdeVisita({ nicho: "Asadero" })).toBe("Visita de vendedor · Asadero");
   });
 });

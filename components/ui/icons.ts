@@ -59,6 +59,8 @@ export {
   SquarePen,
   StickyNote,
   Store,
+  UserPlus,
+  Map as MapIcon,
   Tag,
   Trash2,
   TriangleAlert,

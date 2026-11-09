@@ -96,3 +96,46 @@ export type OperacionVisitas = z.infer<typeof esquemaOperacion>;
 export const esquemaSincronizacion = z.object({
   operaciones: z.array(z.unknown()).min(1).max(100),
 });
+
+const DIAS_MAXIMOS_RANGO = 93;
+const esFecha = (v: string | null | undefined): v is string => !!v && /^\d{4}-\d{2}-\d{2}$/.test(v) && !Number.isNaN(Date.parse(v));
+
+/**
+ * Rango de días para ver o exportar visitas. Por defecto, los últimos 7 días
+ * hasta hoy; si vienen invertidas se ordenan y se limita a ~3 meses.
+ */
+export function resolverRangoVisitas(
+  desde: string | null | undefined,
+  hasta: string | null | undefined,
+  hoy: string
+): { desde: string; hasta: string } {
+  const sumar = (s: string, dias: number) => {
+    const d = new Date(`${s}T00:00:00Z`);
+    d.setUTCDate(d.getUTCDate() + dias);
+    return d.toISOString().slice(0, 10);
+  };
+  let fin = esFecha(hasta) ? hasta : hoy;
+  let inicio = esFecha(desde) ? desde : sumar(fin, -6);
+  if (inicio > fin) [inicio, fin] = [fin, inicio];
+  const minimo = sumar(fin, -(DIAS_MAXIMOS_RANGO - 1));
+  if (inicio < minimo) inicio = minimo;
+  return { desde: inicio, hasta: fin };
+}
+
+/** Notas para "Por contactar" (o para el cliente nuevo) armadas con los datos de la visita. */
+export function notasContactoDesdeVisita(v: {
+  nicho: string;
+  contacto?: string | null;
+  direccion?: string | null;
+  observaciones?: string | null;
+  vendedor?: string | null;
+}): string {
+  return [
+    `Visita de vendedor${v.vendedor ? ` (${v.vendedor})` : ""} · ${v.nicho}`,
+    v.contacto && `Contacto: ${v.contacto}`,
+    v.direccion && `Dirección: ${v.direccion}`,
+    v.observaciones && `Observaciones: ${v.observaciones}`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
