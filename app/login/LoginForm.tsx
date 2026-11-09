@@ -1,6 +1,7 @@
 "use client";
 
 import { signIn, getSession } from "next-auth/react";
+import { rutaInicioPorRol } from "@/lib/rutas-acceso";
 import { useSearchParams } from "next/navigation";
 import { FormEvent, useState } from "react";
 import Alert from "@/components/ui/Alert";
@@ -40,8 +41,8 @@ export default function LoginForm() {
         setCargando(false);
       } else {
         const session = await getSession();
-        const esRepartidor = (session?.user as { rol?: string } | undefined)?.rol === "repartidor";
-        window.location.href = esRepartidor ? "/repartidor" : callbackUrl;
+        const rol = (session?.user as { rol?: string } | undefined)?.rol;
+        window.location.href = rol === "repartidor" || rol === "vendedor" ? rutaInicioPorRol(rol) : callbackUrl;
       }
     } catch {
       setError("Error de conexión. Intenta de nuevo.");

@@ -65,3 +65,21 @@ export function secretosIguales(
 export function esApiKeyValida(request: Request, envVar: string): boolean {
   return secretosIguales(request.headers.get("x-api-key"), process.env[envVar]);
 }
+
+/** Exige una sesión con rol='vendedor' (app de visitas). */
+export async function requireVendedor(): Promise<ResultadoGuardia> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    return {
+      session: null,
+      error: NextResponse.json({ success: false, error: "No autenticado" }, { status: 401 }),
+    };
+  }
+  if (session.user.rol !== "vendedor") {
+    return {
+      session: null,
+      error: NextResponse.json({ success: false, error: "No autorizado" }, { status: 403 }),
+    };
+  }
+  return { session, error: null };
+}

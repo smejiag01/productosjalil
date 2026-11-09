@@ -17,6 +17,7 @@ interface Usuario {
 const ROL_LABELS: Record<string, string> = {
   admin: "Administrador",
   repartidor: "Repartidor",
+  vendedor: "Vendedor",
 };
 
 export default function TablaUsuarios({
@@ -70,7 +71,7 @@ export default function TablaUsuarios({
             <h1 className="font-display text-2xl font-semibold text-ink-900 lg:text-3xl">Usuarios</h1>
             <span className="text-sm text-ink-500 font-medium">{usuarios.length} usuarios</span>
           </div>
-          <p className="text-ink-600 text-sm mt-1">Cuentas de acceso al dashboard (administradores y repartidores)</p>
+          <p className="text-ink-600 text-sm mt-1">Cuentas de acceso al dashboard (administradores, repartidores y vendedores)</p>
         </div>
         <button
           onClick={() => { setEditando(null); setModalAbierto(true); }}

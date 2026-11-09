@@ -106,6 +106,7 @@ export default function ModalUsuario({ usuarioInicial, esUnoMismo, onCerrar }: P
             >
               <option value="admin">Administrador</option>
               <option value="repartidor">Repartidor</option>
+                <option value="vendedor">Vendedor</option>
             </select>
             {esUnoMismo && (
               <p className="text-xs text-ink-500 mt-1">No puedes cambiar tu propio rol</p>

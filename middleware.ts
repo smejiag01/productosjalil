@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { COOKIE_SESION_TIENDA, leerTokenSesion } from "@/lib/tienda-session";
-import { esRutaRepartidor } from "@/lib/rutas-acceso";
+import { redireccionPorRol } from "@/lib/rutas-acceso";
 
 export default async function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
@@ -32,14 +32,10 @@ export default async function middleware(req: NextRequest) {
 
   const rol = (token as { rol?: string }).rol;
 
-  // El repartidor solo puede ver su propio mini-dashboard
-  if (rol === "repartidor" && !esRutaRepartidor(pathname)) {
-    return NextResponse.redirect(new URL("/repartidor", req.url));
-  }
-
-  // El admin no debe quedar "atrapado" en la vista de repartidor
-  if (rol === "admin" && esRutaRepartidor(pathname)) {
-    return NextResponse.redirect(new URL("/", req.url));
+  // Repartidor y vendedor solo ven su propia app; el admin no entra a ellas
+  const destino = redireccionPorRol(rol, pathname);
+  if (destino) {
+    return NextResponse.redirect(new URL(destino, req.url));
   }
 
   return NextResponse.next();
@@ -63,6 +59,7 @@ export const config = {
     "/contactos-pendientes/:path*",
     "/configuracion/:path*",
     "/repartidor/:path*",
+    "/vendedor/:path*",
     "/tienda/:path*",
   ],
 };

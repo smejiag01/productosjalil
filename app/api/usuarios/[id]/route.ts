@@ -4,7 +4,7 @@ import { hash } from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth-guard";
 
-const ROLES_VALIDOS = ["admin", "repartidor"] as const;
+const ROLES_VALIDOS = ["admin", "repartidor", "vendedor"] as const;
 
 const esquemaActualizar = z.object({
   nombre: z.string().min(2).max(120).optional(),

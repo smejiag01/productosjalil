@@ -149,6 +149,13 @@ Los clientes hacen su pedido en la web (reemplaza el flujo de pedidos por WhatsA
 - `POST /api/ubicacion/resolver` (solo admin) convierte enlaces de Google Maps, incluidos los cortos `maps.app.goo.gl`, en coordenadas; solo sigue redirecciones hacia dominios de Google (`lib/ubicacion.ts`, con tests).
 - El repartidor navega con las coordenadas de la sede; si no hay sede o es la principal, usa las del cliente.
 
+## App del vendedor (`/vendedor`)
+
+- Rol `vendedor` (se crea en Usuarios). `lib/rutas-acceso.ts` (`redireccionPorRol`) deja a repartidor y vendedor solo en su app y saca al admin de ellas.
+- Reemplaza el "Informe diario de visitas" en papel: **Iniciar día de visitas** (ciudad, hora y ubicación de ingreso) → **Registrar visita** (nicho, negocio, dirección, teléfono, contacto, observaciones; hora y ubicación automáticas) → **Finalizar día**.
+- Funciona sin señal: el estado y una cola de operaciones viven en `localStorage` (`lib/vendedor-local.ts`) y se envían en orden a `POST /api/vendedor/sincronizar`, idempotente porque los ids los genera el celular. Tablas `jornadas_visita` y `visitas` (`prisma/sql/20261109_visitas_vendedores.sql`). Validación en `lib/visitas.ts` (con tests).
+- `Permissions-Policy` permite `geolocation=(self)` para la ubicación.
+
 ## Pruebas, base de datos y dependencias
 
 - `npm test` (Jest, funciones puras en `lib/__tests__/`) y `npm run build` (corre ESLint y tipos como Vercel) antes de subir.
