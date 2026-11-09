@@ -20,10 +20,16 @@ export async function notificarDespachoWhatsApp(
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
+  // Mismo secreto que el aviso de pedido creado: n8n rechaza llamadas sin él,
+  // así nadie más puede disparar mensajes a números arbitrarios.
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  const secreto = process.env.N8N_PEDIDO_WEBHOOK_SECRET;
+  if (secreto) headers["x-internal-secret"] = secreto;
+
   try {
     await fetch(WEBHOOK_DESPACHO_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify({
         pedidos: pedidos.map((p) => ({
           telefono: p.telefono,
