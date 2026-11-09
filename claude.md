@@ -155,6 +155,7 @@ Los clientes hacen su pedido en la web (reemplaza el flujo de pedidos por WhatsA
 - Reemplaza el "Informe diario de visitas" en papel: **Iniciar día de visitas** (ciudad, hora y ubicación de ingreso) → **Registrar visita** (nicho, negocio, dirección, teléfono, contacto, observaciones; hora y ubicación automáticas) → **Finalizar día**.
 - Funciona sin señal: el estado y una cola de operaciones viven en `localStorage` (`lib/vendedor-local.ts`) y se envían en orden a `POST /api/vendedor/sincronizar`, idempotente porque los ids los genera el celular. Tablas `jornadas_visita` y `visitas` (`prisma/sql/20261109_visitas_vendedores.sql`). Validación en `lib/visitas.ts` (con tests).
 - `Permissions-Policy` permite `geolocation=(self)` para la ubicación.
+- Panel admin **Visitas** (`/visitas`): filtros por rango y vendedor (`resolverRangoVisitas`, máx. ~3 meses), mapa Leaflet con mosaicos de OpenStreetMap, Excel (`GET /api/visitas/exportar`, `lib/exportaciones/visitas-excel.ts`), **Pasar a cliente** (abre `ModalCliente` precargado y enlaza `visitas.cliente_id` con `PATCH /api/visitas/:id`) y **Por contactar** (`POST /api/visitas/:id/por-contactar`, motivo `visita_vendedor`, no duplica).
 
 ## Pruebas, base de datos y dependencias
 
