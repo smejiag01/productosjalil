@@ -3,61 +3,58 @@
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
-import { AlertCircle } from "@/components/ui/icons";
-import Spinner from "@/components/ui/Spinner";
-import { buttonClass, inputClass } from "@/components/ui/clases";
+import Alert from "@/components/ui/Alert";
+import Button from "@/components/ui/Button";
+import Field from "@/components/ui/Field";
+import { Input } from "@/components/ui/campos";
+import { Clock } from "@/components/ui/icons";
+import {
+  HORA_MAXIMA,
+  HORA_MINIMA,
+  HORAS_ESPERA_MAX,
+  horaLegible,
+  validarHorarioMensajes,
+} from "@/lib/mensajes-programados";
+
 interface Props {
   config: {
     hora_recordatorio: string;
     horas_espera_followup: number;
-    mensaje_recordatorio: string;
-    mensaje_followup: string;
   };
   onGuardado: (msg: string) => void;
-}
-
-function PreviewMensaje({ texto }: { texto: string }) {
-  const interpolado = texto.replace(/\{nombre\}/g, "Cliente de prueba");
-  return (
-    <div className="bg-[#DCF8C6] rounded-control rounded-tl-none px-3 py-2 text-sm text-ink-800 max-w-[280px] shadow-sm mx-auto">
-      {interpolado}
-      <div className="text-[10px] text-ink-600 text-right mt-1">
-        {new Date().toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })}
-      </div>
-    </div>
-  );
 }
 
 export default function SeccionWhatsApp({ config, onGuardado }: Props) {
   const router = useRouter();
   const [hora, setHora] = useState(config.hora_recordatorio);
   const [horasEspera, setHorasEspera] = useState(config.horas_espera_followup.toString());
-  const [mensajeRecordatorio, setMensajeRecordatorio] = useState(config.mensaje_recordatorio);
-  const [mensajeFollowup, setMensajeFollowup] = useState(config.mensaje_followup);
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState("");
+
+  const horario = validarHorarioMensajes(hora, Number(horasEspera));
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
+    if (!horario.ok) {
+      setError(horario.error);
+      return;
+    }
     setCargando(true);
-
     try {
       const res = await fetch("/api/configuracion", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           hora_recordatorio: `1970-01-01T${hora}:00.000Z`,
-          horas_espera_followup: parseInt(horasEspera) || 3,
-          mensaje_recordatorio: mensajeRecordatorio,
-          mensaje_followup: mensajeFollowup,
+          horas_espera_followup: Number(horasEspera),
         }),
       });
       const data = await res.json();
       if (!data.success) {
         setError(data.error);
       } else {
-        onGuardado("Configuración de mensajes actualizada");
+        onGuardado("Horario de mensajes actualizado");
         router.refresh();
       }
     } catch {
@@ -68,94 +65,82 @@ export default function SeccionWhatsApp({ config, onGuardado }: Props) {
   }
 
   return (
-    <div className="bg-white rounded-card border border-ink-200 shadow-card p-4 sm:p-6 max-w-3xl">
-      <h2 className="text-lg font-semibold text-ink-900 mb-1">
-        Mensajes de WhatsApp
-      </h2>
-      <p className="text-sm text-ink-600 mb-6">
-        Configura los mensajes automáticos que se envían a los clientes
+    <div className="max-w-3xl rounded-card border border-ink-200 bg-white p-4 shadow-card sm:p-6">
+      <h2 className="mb-1 text-lg font-semibold text-ink-900">Mensajes automáticos de WhatsApp</h2>
+      <p className="mb-6 text-sm text-ink-600">
+        A los clientes cuya ruta sale al día siguiente y que todavía no han hecho su pedido se les envía
+        un recordatorio y, si siguen sin pedir, un mensaje de seguimiento.
       </p>
 
-      <div className="mb-4 p-3 bg-info-soft border border-info/30 rounded-control text-info text-xs flex items-start gap-2">
-        <AlertCircle aria-hidden="true" className="w-4 h-4 mt-0.5 flex-shrink-0" />
-        Los cambios aquí se aplicarán automáticamente en el próximo envío programado
-      </div>
-
       {error && (
-        <div className="mb-4 p-3 bg-danger-soft border border-danger/30 rounded-control text-danger text-sm">{error}</div>
+        <Alert tone="error" className="mb-4">
+          {error}
+        </Alert>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Horarios */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-ink-800 mb-1.5">
-              Hora de envío del recordatorio
-            </label>
-            <input type="time" value={hora} onChange={(e) => setHora(e.target.value)}
-              className={inputClass()} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-ink-800 mb-1.5">
-              Horas de espera antes del seguimiento
-            </label>
-            <div className="flex items-center gap-2">
-              <input type="number" value={horasEspera} onChange={(e) => setHorasEspera(e.target.value)}
-                min="1" max="24"
-                className="w-20 px-3 py-2 border border-ink-300 rounded-control text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand" />
-              <span className="text-sm text-ink-600">horas</span>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Field
+            label="Hora del recordatorio"
+            hint={`Entre las ${horaLegible(HORA_MINIMA)} y las ${horaLegible(HORA_MAXIMA)}`}
+          >
+            {(p) => (
+              <Input
+                {...p}
+                type="time"
+                step={900}
+                min={HORA_MINIMA}
+                max={HORA_MAXIMA}
+                value={hora}
+                onChange={(e) => setHora(e.target.value)}
+                required
+              />
+            )}
+          </Field>
+          <Field label="Horas de espera antes del seguimiento" hint={`De 1 a ${HORAS_ESPERA_MAX} horas`}>
+            {(p) => (
+              <Input
+                {...p}
+                type="number"
+                inputMode="numeric"
+                min={1}
+                max={HORAS_ESPERA_MAX}
+                step={1}
+                value={horasEspera}
+                onChange={(e) => setHorasEspera(e.target.value)}
+                required
+              />
+            )}
+          </Field>
+        </div>
+
+        {horario.ok ? (
+          <div className="flex items-start gap-3 rounded-control border border-ink-200 bg-ink-50 p-4 text-sm text-ink-800">
+            <Clock aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0 text-brand" />
+            <div className="space-y-1">
+              <p>
+                <strong>Recordatorio:</strong> todos los días a las {horaLegible(horario.horaRecordatorio)}.
+              </p>
+              <p>
+                <strong>Seguimiento:</strong> a las {horaLegible(horario.horaSeguimiento)}, solo a quienes
+                aún no han pedido.
+              </p>
             </div>
           </div>
-        </div>
+        ) : (
+          <Alert tone="warning">{horario.error}</Alert>
+        )}
 
-        {/* Mensaje recordatorio */}
-        <div>
-          <label className="block text-sm font-medium text-ink-800 mb-1.5">
-            Mensaje de recordatorio
-          </label>
-          <textarea value={mensajeRecordatorio} onChange={(e) => setMensajeRecordatorio(e.target.value)}
-            rows={3}
-            className="w-full px-3 py-2 border border-ink-300 rounded-control text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand resize-y min-h-[120px]"
-            placeholder="Usa {nombre} para insertar el nombre del cliente" />
-          <div className="flex items-center justify-between mt-1">
-            <p className="text-xs text-ink-500">
-              Usa <code className="bg-ink-100 px-1 rounded">{"{nombre}"}</code> para el nombre del cliente
-            </p>
-            <p className="text-xs text-ink-500">{mensajeRecordatorio.length} caracteres</p>
-          </div>
-          <div className="mt-3 p-3 bg-ink-50 rounded-control">
-            <p className="text-xs text-ink-600 mb-2">Vista previa:</p>
-            <PreviewMensaje texto={mensajeRecordatorio} />
-          </div>
-        </div>
-
-        {/* Mensaje seguimiento */}
-        <div>
-          <label className="block text-sm font-medium text-ink-800 mb-1.5">
-            Mensaje de seguimiento
-          </label>
-          <textarea value={mensajeFollowup} onChange={(e) => setMensajeFollowup(e.target.value)}
-            rows={3}
-            className="w-full px-3 py-2 border border-ink-300 rounded-control text-sm outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand resize-y min-h-[120px]"
-            placeholder="Usa {nombre} para insertar el nombre del cliente" />
-          <div className="flex items-center justify-between mt-1">
-            <p className="text-xs text-ink-500">
-              Se envía si no responden después de {horasEspera || "N"} horas
-            </p>
-            <p className="text-xs text-ink-500">{mensajeFollowup.length} caracteres</p>
-          </div>
-          <div className="mt-3 p-3 bg-ink-50 rounded-control">
-            <p className="text-xs text-ink-600 mb-2">Vista previa:</p>
-            <PreviewMensaje texto={mensajeFollowup} />
-          </div>
-        </div>
+        <Alert tone="info">
+          El texto de los mensajes lo fijan las plantillas aprobadas por Meta (recordatorio_pedido y
+          seguimiento_pedido). Para cambiar el texto hay que crear y aprobar una plantilla nueva. Si
+          cambias la hora el mismo día, el mensaje puede volver a salir hoy a la nueva hora.
+        </Alert>
 
         <div className="pt-2">
-          <button type="submit" disabled={cargando}
-            className={buttonClass()}>
-            {cargando && <Spinner size="sm" />}
-            Guardar cambios
-          </button>
+          <Button type="submit" loading={cargando} disabled={!horario.ok}>
+            Guardar horario
+          </Button>
         </div>
       </form>
     </div>

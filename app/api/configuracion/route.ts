@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin, esApiKeyValida } from "@/lib/auth-guard";
 import { normalizarWhatsapp } from "@/lib/validaciones-tienda";
+import { validarHorarioMensajes } from "@/lib/mensajes-programados";
 
 // n8n consume la configuración (horarios/mensajes de recordatorio) sin sesión
 // de dashboard; si no trae la API key válida, exigimos sesión de admin.
@@ -99,6 +100,22 @@ export async function PATCH(request: NextRequest) {
         }
         camposPermitidos.whatsapp_atencion = normalizado;
       }
+    }
+
+    // Horario de mensajes automáticos: debe caer en la franja en que n8n revisa.
+    if ("hora_recordatorio" in camposPermitidos || "horas_espera_followup" in camposPermitidos) {
+      const horaCruda = camposPermitidos.hora_recordatorio ?? config.hora_recordatorio?.toISOString();
+      const hora =
+        typeof horaCruda === "string"
+          ? (horaCruda.match(/(?:T|^)(d{2}:d{2})/)?.[1] ?? "")
+          : "";
+      const horas = Number(camposPermitidos.horas_espera_followup ?? config.horas_espera_followup);
+      const horario = validarHorarioMensajes(hora, horas);
+      if (!horario.ok) {
+        return NextResponse.json({ success: false, error: horario.error }, { status: 400 });
+      }
+      camposPermitidos.hora_recordatorio = new Date(`1970-01-01T${horario.horaRecordatorio}:00.000Z`);
+      camposPermitidos.horas_espera_followup = horas;
     }
 
     if (Object.keys(camposPermitidos).length === 0) {
