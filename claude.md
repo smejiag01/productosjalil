@@ -114,7 +114,7 @@ Estados de pedido: `pendiente`, `en_proceso`, `confirmado`, `en_reparto`, `entre
 - Route Handlers en `app/api/` para los endpoints que consume n8n.
 - Validar inputs con Zod en los endpoints.
 - Respuestas de API consistentes: `{ success, data, error }`.
-- Variables sensibles en `.env` (nunca commitear): `DATABASE_URL`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, `BLOB_READ_WRITE_TOKEN`, `API_SECRET_KEY`, `N8N_UPLOAD_SECRET`, `TIENDA_SESSION_SECRET`, `N8N_PEDIDO_WEBHOOK_URL`, `N8N_PEDIDO_WEBHOOK_SECRET`, `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` (opcional, pública).
+- Variables sensibles en `.env` (nunca commitear): `DATABASE_URL`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, `BLOB_READ_WRITE_TOKEN`, `API_SECRET_KEY`, `N8N_UPLOAD_SECRET`, `TIENDA_SESSION_SECRET`, `N8N_PEDIDO_WEBHOOK_URL`, `N8N_PEDIDO_WEBHOOK_SECRET`, `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` (opcional, pública), `TWA_PACKAGE_NAME` y `TWA_SHA256_FINGERPRINTS` (públicas, para la APK).
 - Nombres de variables y comentarios en español (es el idioma del equipo y del cliente).
 
 ---
@@ -156,6 +156,13 @@ Los clientes hacen su pedido en la web (reemplaza el flujo de pedidos por WhatsA
 - Funciona sin señal: el estado y una cola de operaciones viven en `localStorage` (`lib/vendedor-local.ts`) y se envían en orden a `POST /api/vendedor/sincronizar`, idempotente porque los ids los genera el celular. Tablas `jornadas_visita` y `visitas` (`prisma/sql/20261109_visitas_vendedores.sql`). Validación en `lib/visitas.ts` (con tests).
 - `Permissions-Policy` permite `geolocation=(self)` para la ubicación.
 - Panel admin **Visitas** (`/visitas`): filtros por rango y vendedor (`resolverRangoVisitas`, máx. ~3 meses), mapa Leaflet con mosaicos de OpenStreetMap, Excel (`GET /api/visitas/exportar`, `lib/exportaciones/visitas-excel.ts`), **Pasar a cliente** (abre `ModalCliente` precargado y enlaza `visitas.cliente_id` con `PATCH /api/visitas/:id`) y **Por contactar** (`POST /api/visitas/:id/por-contactar`, motivo `visita_vendedor`, no duplica).
+
+## App instalable / APK (repartidor y vendedor)
+
+- Una sola APK para ambos roles: es una Trusted Web Activity que abre `/` y el middleware lleva a cada rol a su app. Se genera en PWABuilder (pwabuilder.com) con el id de paquete `co.productosjalil.app`.
+- `app/manifest.ts` (manifiesto), íconos en `public/iconos/` (se regeneran con `node scripts/generar-iconos-app.mjs`).
+- `public/sw.js` (registrado por `components/RegistroServiceWorker.tsx`, solo en producción): caché de `/_next/static` y copia de las pantallas `/vendedor` y `/repartidor` para abrir sin señal; nunca guarda `/api` ni datos RSC. Al cerrar sesión se borra con `borrarCacheApp()` (`lib/pwa.ts`). Si cambia la estrategia, subir `VERSION` en `sw.js`.
+- `/.well-known/assetlinks.json` sale de las variables públicas de Vercel `TWA_PACKAGE_NAME` y `TWA_SHA256_FINGERPRINTS` (huella SHA-256 de la llave de firma que entrega PWABuilder). Sin ellas la APK funciona pero muestra la barra de dirección.
 
 ## Pruebas, base de datos y dependencias
 

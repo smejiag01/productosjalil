@@ -15,6 +15,14 @@ const nextConfig = {
   async headers() {
     return [
       {
+        // El service worker siempre se revisa en la red para que las versiones nuevas lleguen.
+        source: "/sw.js",
+        headers: [
+          { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
+          { key: "Content-Type", value: "application/javascript; charset=utf-8" },
+        ],
+      },
+      {
         source: "/(.*)",
         headers: [
           { key: "X-Content-Type-Options", value: "nosniff" },

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Fraunces, Public_Sans } from "next/font/google";
 import "./globals.css";
 import SessionProvider from "@/components/SessionProvider";
+import RegistroServiceWorker from "@/components/RegistroServiceWorker";
 
 // Texto: Public Sans (muy legible, acentos en español, números tabulares).
 const textoFuente = Public_Sans({
@@ -22,6 +23,7 @@ export const metadata: Metadata = {
   title: "Productos Jalil — Panel Administrativo",
   description:
     "Sistema de gestión de pedidos y clientes para Productos Jalil",
+  appleWebApp: { capable: true, title: "Jalil", statusBarStyle: "default" },
 };
 
 export const viewport: Viewport = {
@@ -37,6 +39,7 @@ export default function RootLayout({
     <html lang="es" className={`${textoFuente.variable} ${displayFuente.variable}`}>
       <body className="font-sans antialiased">
         <SessionProvider>{children}</SessionProvider>
+        <RegistroServiceWorker />
       </body>
     </html>
   );

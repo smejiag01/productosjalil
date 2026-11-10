@@ -1,6 +1,7 @@
 "use client";
 
 import { signOut, useSession } from "next-auth/react";
+import { borrarCacheApp } from "@/lib/pwa";
 import IconButton from "@/components/ui/IconButton";
 import { LogOut } from "@/components/ui/icons";
 import { MarcaPJ } from "@/components/ui/Logo";
@@ -24,7 +25,10 @@ export default function RepartidorLayout({ children }: { children: React.ReactNo
           variant="inverse"
           size="lg"
           aria-label="Cerrar sesión"
-          onClick={() => signOut({ callbackUrl: "/login" })}
+          onClick={async () => {
+            await borrarCacheApp();
+            signOut({ callbackUrl: "/login" });
+          }}
           className="-mr-2"
         >
           <LogOut aria-hidden="true" className="h-6 w-6" />
