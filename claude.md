@@ -160,10 +160,12 @@ Los clientes hacen su pedido en la web (reemplaza el flujo de pedidos por WhatsA
 
 ## App instalable / APK (repartidor y vendedor)
 
-- Una sola APK para ambos roles: es una Trusted Web Activity que abre `/` y el middleware lleva a cada rol a su app. Se genera en PWABuilder (pwabuilder.com) con el id de paquete `co.productosjalil.app`.
+- Una sola APK para ambos roles, hecha con **Capacitor** en este repo (`capacitor.config.ts`, carpeta `android/`, id `co.productosjalil.app`): un WebView nativo que abre `https://productosjalil.vercel.app` y el middleware lleva a cada rol a su app. Sin señal y sin copia guardada muestra `capacitor-www/sin-senal.html`. Pide permiso de ubicación (declarado en `AndroidManifest.xml`).
+- **Compilar:** `npm run apk` (scripts/apk.mjs) → `apk/productos-jalil.apk` (ignorada por git). Requiere JDK 21 (`winget install Microsoft.OpenJDK.21`) y el SDK de Android (Android Studio). Para publicar una versión nueva de la APK subir `versionCode`/`versionName` en `android/app/build.gradle`; los cambios de la web NO requieren nueva APK.
+- **Firma:** `android/keystore/jalil-release.jks` + `android/keystore/clave.txt` + `android/keystore.properties`, solo en el equipo de desarrollo e ignorados por git. Hay que respaldarlos: sin esa llave no se puede actualizar la APK instalada. Ícono y pantalla de carga: `node scripts/generar-recursos-android.mjs`.
 - `app/manifest.ts` (manifiesto), íconos en `public/iconos/` (se regeneran con `node scripts/generar-iconos-app.mjs`).
 - `public/sw.js` (registrado por `components/RegistroServiceWorker.tsx`, solo en producción): caché de `/_next/static` y copia de las pantallas `/vendedor` y `/repartidor` para abrir sin señal; nunca guarda `/api` ni datos RSC. Al cerrar sesión se borra con `borrarCacheApp()` (`lib/pwa.ts`). Si cambia la estrategia, subir `VERSION` en `sw.js`.
-- `/.well-known/assetlinks.json` sale de las variables públicas de Vercel `TWA_PACKAGE_NAME` y `TWA_SHA256_FINGERPRINTS` (huella SHA-256 de la llave de firma que entrega PWABuilder). Sin ellas la APK funciona pero muestra la barra de dirección.
+- `/.well-known/assetlinks.json` (variables `TWA_PACKAGE_NAME` y `TWA_SHA256_FINGERPRINTS`) solo sirve si algún día se usa una TWA; la APK de Capacitor no lo necesita.
 
 ## Pruebas, base de datos y dependencias
 
