@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { obtenerClienteSesion } from "@/lib/tienda-auth";
 import { precioEfectivo } from "@/lib/precios";
+import { calcularHabituales, PEDIDOS_PARA_HABITUALES } from "@/lib/destacados";
 import CatalogoTienda, { type ProductoTienda } from "./CatalogoTienda";
 
 export const dynamic = "force-dynamic";
@@ -10,7 +11,7 @@ export default async function TiendaPage() {
   const cliente = await obtenerClienteSesion();
   if (!cliente) redirect("/tienda/login");
 
-  const [categorias, productos, precios] = await Promise.all([
+  const [categorias, productos, precios, pedidosRecientes] = await Promise.all([
     prisma.categorias.findMany({
       where: { activa: true },
       orderBy: { orden: "asc" },
@@ -21,6 +22,13 @@ export default async function TiendaPage() {
     }),
     prisma.precios_cliente.findMany({
       where: { cliente_id: cliente.id },
+    }),
+    // Últimos pedidos del cliente para la franja "Tus habituales".
+    prisma.pedidos.findMany({
+      where: { cliente_id: cliente.id, estado: { not: "cancelado" } },
+      orderBy: { created_at: "desc" },
+      take: PEDIDOS_PARA_HABITUALES,
+      select: { id: true, created_at: true, items: { select: { producto_id: true } } },
     }),
   ]);
 
@@ -36,6 +44,19 @@ export default async function TiendaPage() {
     precio: precioEfectivo(Number(p.precio_base), preciosMap.get(p.id)),
   }));
 
+  // Destacados elegidos en el panel (solo activos), en su orden.
+  const destacadosIds = productos
+    .filter((p) => p.destacado)
+    .sort((a, b) => (a.orden_destacado ?? 0) - (b.orden_destacado ?? 0))
+    .map((p) => p.id);
+
+  const habitualesIds = calcularHabituales(
+    pedidosRecientes.flatMap((pedido) =>
+      pedido.items.map((it) => ({ pedido_id: pedido.id, producto_id: it.producto_id, fecha: pedido.created_at }))
+    ),
+    new Set(productos.map((p) => p.id))
+  );
+
   const categoriasTienda = categorias.map((c) => ({
     id: c.id,
     nombre: c.nombre,
@@ -47,6 +68,8 @@ export default async function TiendaPage() {
       nombreCliente={cliente.nombre}
       categorias={categoriasTienda}
       productos={productosTienda}
+      destacadosIds={destacadosIds}
+      habitualesIds={habitualesIds}
     />
   );
 }

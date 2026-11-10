@@ -7,12 +7,13 @@ import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import EmptyState from "@/components/ui/EmptyState";
 import SearchInput from "@/components/ui/SearchInput";
-import { RotateCcw, Search } from "@/components/ui/icons";
+import { History, RotateCcw, Search, Star } from "@/components/ui/icons";
 import { elegirCategoriaActiva } from "@/lib/tienda-ui";
 import { useCarrito } from "./CartContext";
 import BarraCarrito, { type LineaCarrito } from "./_componentes/BarraCarrito";
 import ChipsCategorias, { type CategoriaChip } from "./_componentes/ChipsCategorias";
 import EncabezadoTienda from "./_componentes/EncabezadoTienda";
+import FranjaProductos from "./_componentes/FranjaProductos";
 import TarjetaProducto, { type ProductoTienda } from "./_componentes/TarjetaProducto";
 
 export type { ProductoTienda } from "./_componentes/TarjetaProducto";
@@ -27,6 +28,10 @@ interface Props {
   nombreCliente: string;
   categorias: CategoriaTienda[];
   productos: ProductoTienda[];
+  /** Ids elegidos en el panel, en orden. */
+  destacadosIds: string[];
+  /** Lo que este cliente pide más seguido. */
+  habitualesIds: string[];
 }
 
 interface Aviso {
@@ -36,7 +41,13 @@ interface Aviso {
 
 const ID_OTROS = "otros";
 
-export default function CatalogoTienda({ nombreCliente, categorias, productos }: Props) {
+export default function CatalogoTienda({
+  nombreCliente,
+  categorias,
+  productos,
+  destacadosIds,
+  habitualesIds,
+}: Props) {
   const router = useRouter();
   const {
     items,
@@ -64,6 +75,15 @@ export default function CatalogoTienda({ nombreCliente, categorias, productos }:
   const ignorarScrollHasta = useRef(0);
 
   const productosPorId = useMemo(() => new Map(productos.map((p) => [p.id, p])), [productos]);
+
+  const destacados = useMemo(
+    () => destacadosIds.map((id) => productosPorId.get(id)).filter((p): p is ProductoTienda => !!p),
+    [destacadosIds, productosPorId]
+  );
+  const habituales = useMemo(
+    () => habitualesIds.map((id) => productosPorId.get(id)).filter((p): p is ProductoTienda => !!p),
+    [habitualesIds, productosPorId]
+  );
 
   const lineasCarrito: LineaCarrito[] = useMemo(
     () =>
@@ -240,6 +260,30 @@ export default function CatalogoTienda({ nombreCliente, categorias, productos }:
           <Alert tone={aviso.tono} className="mb-5">
             {aviso.texto}
           </Alert>
+        )}
+
+        {!buscando && (
+          <>
+            <FranjaProductos
+              id="destacados"
+              titulo="Destacados"
+              icono={<Star aria-hidden="true" className="h-5 w-5 fill-accent text-accent" />}
+              productos={destacados}
+              cantidadDe={cantidadDe}
+              onAgregar={incrementar}
+              onQuitar={decrementar}
+            />
+            <FranjaProductos
+              id="habituales"
+              titulo="Tus habituales"
+              icono={<History aria-hidden="true" className="h-5 w-5 text-brand" />}
+              descripcion="Lo que más pides"
+              productos={habituales}
+              cantidadDe={cantidadDe}
+              onAgregar={incrementar}
+              onQuitar={decrementar}
+            />
+          </>
         )}
 
         {buscando && (

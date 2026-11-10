@@ -115,6 +115,8 @@ model productos {
   updated_at      DateTime          @default(now()) @updatedAt @db.Timestamptz(6)
   categoria_id    String?           @db.Uuid
   nombre_corto    String?           @db.VarChar(24)
+  destacado       Boolean           @default(false)
+  orden_destacado Int?
   inventario      inventario?
   inventario_item inventario_items?
   pedido_items    pedido_items[]
@@ -122,6 +124,7 @@ model productos {
   categoria       categorias?       @relation(fields: [categoria_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([categoria_id], map: "idx_productos_categoria")
+  @@index([orden_destacado], map: "idx_productos_destacado")
 }
 
 model precios_cliente {

@@ -58,6 +58,8 @@ export {
   ShoppingCart,
   SquarePen,
   StickyNote,
+  Star,
+  History,
   Store,
   UserPlus,
   Map as MapIcon,

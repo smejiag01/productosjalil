@@ -19,6 +19,8 @@ export default async function ProductosPage() {
     precio_base_formateado: formatearPrecio(Number(p.precio_base)),
     activo: p.activo,
     orden: p.orden,
+    destacado: p.destacado,
+    orden_destacado: p.orden_destacado,
   }));
 
   return <ListaProductos productos={productosSerializados} />;

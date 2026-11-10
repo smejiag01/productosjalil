@@ -1,11 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { ChevronDown, ChevronUp, ImageIcon, LayoutGrid, ListIcon, Package, Plus, Search } from "@/components/ui/icons";
+import { ChevronDown, ChevronUp, ImageIcon, LayoutGrid, ListIcon, Package, Plus, Search, Star } from "@/components/ui/icons";
 import { buttonClass } from "@/components/ui/clases";
+import { cn } from "@/lib/cn";
+import { MAX_DESTACADOS } from "@/lib/destacados";
+import PanelDestacados, { type ProductoDestacable } from "./PanelDestacados";
 interface Producto {
   id: string;
   nombre: string;
@@ -16,6 +19,8 @@ interface Producto {
   precio_base_formateado: string;
   activo: boolean;
   orden: number;
+  destacado: boolean;
+  orden_destacado: number | null;
 }
 
 type Vista = "grilla" | "tabla";
@@ -30,6 +35,72 @@ export default function ListaProductos({
   const [filtroEstado, setFiltroEstado] = useState("todos");
   const [busqueda, setBusqueda] = useState("");
   const [reordenando, setReordenando] = useState(false);
+  const [destacados, setDestacados] = useState<string[]>(() =>
+    productosInicial
+      .filter((p) => p.destacado)
+      .sort((a, b) => (a.orden_destacado ?? 0) - (b.orden_destacado ?? 0))
+      .map((p) => p.id)
+  );
+  const [guardandoDestacados, setGuardandoDestacados] = useState(false);
+  const [errorDestacados, setErrorDestacados] = useState("");
+
+  const productosPorId = useMemo(
+    () => new Map<string, ProductoDestacable>(productosInicial.map((p) => [p.id, p])),
+    [productosInicial]
+  );
+
+  async function guardarDestacados(ids: string[]) {
+    const anteriores = destacados;
+    setDestacados(ids);
+    setErrorDestacados("");
+    setGuardandoDestacados(true);
+    try {
+      const res = await fetch("/api/productos/destacados", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || "No se pudo guardar");
+      router.refresh();
+    } catch (e) {
+      setDestacados(anteriores);
+      setErrorDestacados(e instanceof Error ? e.message : "No se pudo guardar");
+    } finally {
+      setGuardandoDestacados(false);
+    }
+  }
+
+  function alternarDestacado(id: string) {
+    if (destacados.includes(id)) {
+      guardarDestacados(destacados.filter((d) => d !== id));
+    } else if (destacados.length >= MAX_DESTACADOS) {
+      setErrorDestacados(`Ya hay ${MAX_DESTACADOS} destacados. Quita uno antes de agregar otro.`);
+    } else {
+      guardarDestacados([...destacados, id]);
+    }
+  }
+
+  function botonEstrella(p: Producto, className?: string) {
+    const marcado = destacados.includes(p.id);
+    return (
+      <button
+        type="button"
+        onClick={() => alternarDestacado(p.id)}
+        disabled={guardandoDestacados}
+        aria-pressed={marcado}
+        aria-label={marcado ? `Quitar ${p.nombre} de destacados` : `Destacar ${p.nombre} en la tienda`}
+        title={marcado ? "Quitar de destacados" : "Destacar en la tienda"}
+        className={cn(
+          "inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors disabled:opacity-50",
+          marcado ? "bg-accent text-ink-900" : "bg-white/90 text-ink-600 hover:text-ink-900",
+          className
+        )}
+      >
+        <Star aria-hidden="true" className={cn("h-5 w-5", marcado && "fill-current")} />
+      </button>
+    );
+  }
 
   const productosFiltrados = productosInicial.filter((p) => {
     if (filtroEstado === "activos" && !p.activo) return false;
@@ -88,6 +159,14 @@ export default function ListaProductos({
           Agregar producto
         </Link>
       </div>
+
+      <PanelDestacados
+        ids={destacados}
+        productos={productosPorId}
+        guardando={guardandoDestacados}
+        error={errorDestacados}
+        onCambiar={guardarDestacados}
+      />
 
       {/* Filtros + toggle vista */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 gap-3">
@@ -171,10 +250,11 @@ export default function ListaProductos({
       ) : vista === "grilla" ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {productosFiltrados.map((p) => (
+            <div key={p.id} className="relative">
+            {botonEstrella(p, "absolute left-2 top-2 z-10 shadow-sm")}
             <Link
-              key={p.id}
               href={`/productos/${p.id}/editar`}
-              className="bg-white rounded-card border border-ink-200 shadow-card overflow-hidden hover:shadow-md transition-shadow group"
+              className="block bg-white rounded-card border border-ink-200 shadow-card overflow-hidden hover:shadow-md transition-shadow group"
             >
               <div className="aspect-square bg-ink-100 relative">
                 {p.imagen_url ? (
@@ -211,6 +291,7 @@ export default function ListaProductos({
                 </p>
               </div>
             </Link>
+            </div>
           ))}
         </div>
       ) : (
@@ -220,6 +301,9 @@ export default function ListaProductos({
               <tr className="border-b border-ink-100">
                 <th className="text-left py-3 px-4 text-xs font-medium text-ink-600 uppercase w-10">
                   #
+                </th>
+                <th className="py-3 px-2 w-12">
+                  <span className="sr-only">Destacado</span>
                 </th>
                 <th className="text-left py-3 px-4 text-xs font-medium text-ink-600 uppercase">
                   Producto
@@ -246,6 +330,9 @@ export default function ListaProductos({
                 <tr key={p.id} className="hover:bg-ink-50/50">
                   <td className="py-3 px-4 text-sm text-ink-500">
                     {idx + 1}
+                  </td>
+                  <td className="py-3 px-2">
+                    {botonEstrella(p, "border border-ink-200")}
                   </td>
                   <td className="py-3 px-4">
                     <div className="flex items-center gap-3">
