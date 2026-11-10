@@ -11,6 +11,8 @@ model usuarios {
   id                     String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   nombre                 String                   @db.VarChar(120)
   correo                 String                   @unique @db.VarChar(160)
+  /// Número de documento para ingresar (normalizado; índice único parcial en BD)
+  documento              String?                  @db.VarChar(20)
   password_hash          String                   @db.VarChar(255)
   rol                    String                   @default("admin") @db.VarChar(40)
   activo                 Boolean                  @default(true)

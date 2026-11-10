@@ -10,6 +10,7 @@ interface Usuario {
   id: string;
   nombre: string;
   correo: string;
+  documento: string | null;
   rol: string;
   activo: boolean;
 }
@@ -37,7 +38,8 @@ export default function TablaUsuarios({
   const filtrados = usuarios.filter((u) =>
     busqueda
       ? u.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-        u.correo.toLowerCase().includes(busqueda.toLowerCase())
+        u.correo.toLowerCase().includes(busqueda.toLowerCase()) ||
+        (u.documento ?? "").includes(busqueda.replace(/[\s.\-]/g, "").toUpperCase())
       : true
   );
 
@@ -88,7 +90,7 @@ export default function TablaUsuarios({
           <Search aria-hidden="true" className="w-4 h-4 text-ink-500 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Buscar por nombre o correo..."
+            placeholder="Buscar por nombre, documento o correo..."
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
             className="pl-9 pr-4 py-2 border border-ink-200 rounded-control text-sm w-full outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
@@ -124,6 +126,9 @@ export default function TablaUsuarios({
                         {u.activo ? "Activo" : "Inactivo"}
                       </span>
                     </div>
+                    <p className="text-xs text-ink-700 mt-0.5">
+                      {u.documento ? `Doc. ${u.documento}` : <span className="font-medium text-warn-soft-text">Sin documento</span>}
+                    </p>
                     <p className="text-xs text-ink-500 mt-0.5">{u.correo}</p>
                     <p className="text-xs text-ink-500 mt-0.5">{ROL_LABELS[u.rol] ?? u.rol}</p>
                   </div>
@@ -151,6 +156,7 @@ export default function TablaUsuarios({
           <thead>
             <tr className="border-b border-ink-100">
               <th className="text-left py-3 px-4 text-xs font-medium text-ink-600 uppercase tracking-wider">Nombre</th>
+              <th className="text-left py-3 px-4 text-xs font-medium text-ink-600 uppercase tracking-wider">Documento</th>
               <th className="text-left py-3 px-4 text-xs font-medium text-ink-600 uppercase tracking-wider">Correo</th>
               <th className="text-left py-3 px-4 text-xs font-medium text-ink-600 uppercase tracking-wider">Rol</th>
               <th className="text-left py-3 px-4 text-xs font-medium text-ink-600 uppercase tracking-wider">Estado</th>
@@ -160,7 +166,7 @@ export default function TablaUsuarios({
           <tbody className="divide-y divide-ink-50">
             {filtrados.length === 0 ? (
               <tr>
-                <td colSpan={5} className="py-16 text-center text-ink-500">
+                <td colSpan={6} className="py-16 text-center text-ink-500">
                   <p className="text-sm">{busqueda ? "No se encontraron usuarios" : "No hay usuarios registrados"}</p>
                 </td>
               </tr>
@@ -171,6 +177,9 @@ export default function TablaUsuarios({
                   <tr key={u.id} className="hover:bg-ink-50/50 transition-colors">
                     <td className="py-3 px-4 text-sm font-medium text-ink-900">
                       {u.nombre} {esUnoMismo && <span className="text-ink-500 font-normal">(tú)</span>}
+                    </td>
+                    <td className="py-3 px-4 text-sm tabular-nums text-ink-900">
+                      {u.documento ?? <span className="font-medium text-warn-soft-text">Sin documento</span>}
                     </td>
                     <td className="py-3 px-4 text-sm text-ink-700">{u.correo}</td>
                     <td className="py-3 px-4 text-sm text-ink-700">{ROL_LABELS[u.rol] ?? u.rol}</td>

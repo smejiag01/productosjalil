@@ -12,6 +12,7 @@ interface Props {
     id: string;
     nombre: string;
     correo: string;
+    documento: string | null;
     rol: string;
     activo: boolean;
   } | null;
@@ -24,6 +25,7 @@ export default function ModalUsuario({ usuarioInicial, esUnoMismo, onCerrar }: P
   const esEdicion = !!usuarioInicial;
 
   const [nombre, setNombre] = useState(usuarioInicial?.nombre ?? "");
+  const [documento, setDocumento] = useState(usuarioInicial?.documento ?? "");
   const [correo, setCorreo] = useState(usuarioInicial?.correo ?? "");
   const [password, setPassword] = useState("");
   const [rol, setRol] = useState(usuarioInicial?.rol ?? "admin");
@@ -40,9 +42,15 @@ export default function ModalUsuario({ usuarioInicial, esUnoMismo, onCerrar }: P
       return;
     }
 
+    if (!documento.trim() && (!esEdicion || usuarioInicial?.documento)) {
+      setErrorGeneral("El número de documento es obligatorio: con él se ingresa a la plataforma");
+      return;
+    }
+
     setCargando(true);
 
     const body: Record<string, unknown> = { nombre, correo, rol, activo };
+    if (documento.trim()) body.documento = documento;
     if (!esEdicion) body.password = password;
     else if (password) body.password = password;
 
@@ -79,6 +87,16 @@ export default function ModalUsuario({ usuarioInicial, esUnoMismo, onCerrar }: P
             <label className="block text-sm font-medium text-ink-800 mb-1.5">Nombre completo <span className="text-danger">*</span></label>
             <input type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} required
               className={inputClass()} placeholder="Nombre del usuario" />
+          </div>
+
+          <div>
+            <label htmlFor="usuario-documento" className="block text-sm font-medium text-ink-800 mb-1.5">
+              Número de documento <span className="text-danger">*</span>
+            </label>
+            <input id="usuario-documento" type="text" inputMode="numeric" value={documento}
+              onChange={(e) => setDocumento(e.target.value)} required={!esEdicion || !!usuarioInicial?.documento}
+              className={inputClass()} placeholder="Ej: 1088123456" autoComplete="off" />
+            <p className="text-xs text-ink-500 mt-1">Con este número y la contraseña se ingresa a la plataforma.</p>
           </div>
 
           <div>

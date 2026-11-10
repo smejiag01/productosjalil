@@ -13,7 +13,7 @@ import { ArrowRight, Eye, EyeOff } from "@/components/ui/icons";
 
 export default function LoginForm() {
   const searchParams = useSearchParams();
-  const [correo, setCorreo] = useState("");
+  const [usuario, setUsuario] = useState("");
   const [password, setPassword] = useState("");
   const [mostrarPassword, setMostrarPassword] = useState(false);
   const [error, setError] = useState("");
@@ -31,13 +31,13 @@ export default function LoginForm() {
 
     try {
       const resultado = await signIn("credentials", {
-        correo,
+        usuario,
         password,
         redirect: false,
       });
 
       if (resultado?.error) {
-        setError("Correo o contraseña incorrectos");
+        setError("Documento o contraseña incorrectos");
         setCargando(false);
       } else {
         const session = await getSession();
@@ -59,15 +59,18 @@ export default function LoginForm() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <Field label="Correo electrónico" required>
+        <Field label="Número de documento" hint="Sin puntos ni espacios" required>
           {(p) => (
             <Input
               {...p}
-              type="email"
+              type="text"
+              inputMode="numeric"
               autoComplete="username"
-              value={correo}
-              onChange={(e) => setCorreo(e.target.value)}
-              placeholder="tucorreo@ejemplo.com"
+              autoCapitalize="characters"
+              spellCheck={false}
+              value={usuario}
+              onChange={(e) => setUsuario(e.target.value)}
+              placeholder="Ej: 1088123456"
               required
               className="h-12"
             />

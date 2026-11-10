@@ -2,22 +2,32 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
 import { prisma } from "./prisma";
+import { identificarIngreso } from "./documento";
 
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Credenciales",
       credentials: {
-        correo: { label: "Correo electrónico", type: "email" },
+        usuario: { label: "Número de documento", type: "text" },
         password: { label: "Contraseña", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.correo || !credentials?.password) {
-          throw new Error("Correo y contraseña son requeridos");
+        if (!credentials?.usuario || !credentials?.password) {
+          throw new Error("Documento y contraseña son requeridos");
         }
 
-        const usuario = await prisma.usuarios.findUnique({
-          where: { correo: credentials.correo },
+        // Se ingresa con el número de documento; un correo también sirve
+        // mientras se completan los documentos de todos los usuarios.
+        const ingreso = identificarIngreso(credentials.usuario);
+        if (!ingreso) {
+          throw new Error("Credenciales inválidas");
+        }
+        const usuario = await prisma.usuarios.findFirst({
+          where:
+            ingreso.tipo === "documento"
+              ? { documento: ingreso.documento }
+              : { correo: { equals: ingreso.correo, mode: "insensitive" } },
         });
 
         if (!usuario || !usuario.activo) {

@@ -12,6 +12,7 @@ export default async function UsuariosPage() {
         id: true,
         nombre: true,
         correo: true,
+        documento: true,
         rol: true,
         activo: true,
       },
