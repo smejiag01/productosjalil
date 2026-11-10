@@ -10,6 +10,9 @@ export const metadata: Metadata = {
     template: "%s — Productos Jalil",
   },
   description: "Haz tu pedido de Productos Jalil en línea: precios para tu negocio, entrega según tu ruta.",
+  // App instalable propia de los clientes: abre en /tienda (no en el login del personal).
+  manifest: "/manifest-tienda.webmanifest",
+  appleWebApp: { capable: true, title: "Jalil Pedidos", statusBarStyle: "default" },
 };
 
 export default async function TiendaLayout({
