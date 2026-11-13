@@ -46,3 +46,6 @@ n8n-pedido-secret-prod.txt
 android/keystore/
 android/keystore.properties
 /apk/
+/revision-precios-*.xlsx
+/respaldo-precios-cliente-antes.json
+/respaldo-datos-prueba-borrados.json
